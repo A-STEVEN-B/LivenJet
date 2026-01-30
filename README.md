@@ -1,23 +1,46 @@
-# ⚡ LIVENJET CORE: Mind Stone
-**Project Status:** Active | **Region:** Nigeria | **Pillars:** 4/4
+# 💎 Livenjet 2026: The Mind Stone Architecture
+> **Lagos-Alpha Node | iPhone 16 Pro Max Terminal**
 
-## 🚀 CEO Command Center
-* **Wallet Ledger:** [Active] - Dual-currency support enabled.
-* **Utility Fulfillment:** [Active] - 11/11 Nigerian DISCOs integrated.
-* **Guardian AI:** [Monitoring] - Fraud Sentinel and Support Bot active.
-* **Growth Engine:** [Ready] - Referral loops and 100k user scale model.
+![Guardian Check Status](https://github.com/Livenjet/verbose-octo-eureka/actions/workflows/guardian-check.yml/badge.svg)
+![Environment](https://img.shields.io/badge/Environment-Lagos%2C%20Nigeria-00FFC3?style=flat-square&logo=googlemaps)
+![Platform](https://img.shields.io/badge/Platform-iOS%20Mobile%20Terminal-blue?style=flat-square&logo=apple)
 
-## 🛠️ Repository Quick-Start
-1. Click **'Add file'** -> **'Upload files'**.
-2. Drag and drop your `.js` and `.json` pillar files.
-3. Commit changes to activate the Mind Stone.# 1. Go to your Livenjet project folder
-cd your-project-folder
+Livenjet 2026 is a mobile-first, AI-driven infrastructure designed for real-time grid monitoring and automated utility switching in Lagos. This repository houses the 6-pillar core logic and the Guardian AI monitoring system.
 
-# 2. Add your GitHub as the destination
-git remote add origin https://github.com/livenjet-core/verbose-octo-eureka.git
+---
 
-# 3. Pull the "Mind Stone" files I built overnight
-git pull https://github.com/livenjet-source/pillars.git main
+## 🛡️ The 6-Pillar Core
+This architecture is synchronized across the following modules:
 
-# 4. Push everything to your GitHub so it shows up on your screen
-git push -u origin main
+1. **Guardian AI (`guardian_ai.js`)**: Real-time system health and security auditor.
+2. **Utility Switch (`utility_switch.js`)**: Logic for automated grid-to-backup migration.
+3. **Lagos Grid Core (`lagos_grid_core.js`)**: National grid frequency and stability analysis.
+4. **Security Protocols (`security_protocols.js`)**: Hardware-bound auth via iPhone Secure Enclave.
+5. **UI Controller (`ui_controller.js`)**: Dark Neon dashboard logic for mobile visualization.
+6. **Analytics Engine (`analytics_engine.js`)**: Event logging and achievement tracking.
+
+---
+
+## 🚀 Automation & CI/CD
+The **Guardian Check** is integrated via GitHub Actions. Every push from the Lagos-Alpha node triggers an automated Linux container to:
+* Validate JavaScript syntax across all 6 pillars.
+* Verify security handshake logic.
+* Ensure architectural integrity.
+
+---
+
+## 📡 Live Telemetry
+The system is currently configured to ingest live data from:
+* **OpenWeather API**: Hyperlocal Lagos temperature and humidity.
+* **Electricity Maps**: Carbon intensity and grid health for the Nigeria zone.
+
+---
+
+## 🛠️ Deployment
+To run the Livenjet simulation on iOS:
+1. Clone this repo in **Working Copy**.
+2. Run `node --check <filename>.js` to verify syntax.
+3. Use the **Scriptable** widget for Home Screen visualization.
+
+---
+*© 2026 Livenjet. Verified for deployment in Lagos State.*
