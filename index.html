@@ -5,47 +5,180 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LivenJet | Utility Pillar</title>
     <style>
+        /* --- THE DESIGN (BLACK & GOLD) --- */
         body {
             background-color: #000000;
             color: #FFD700;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             text-align: center;
+            margin: 0;
             padding: 20px;
         }
-        .balance-card {
+
+        /* The Gold AP Logo Area */
+        .logo-container {
+            margin-top: 20px;
+            font-size: 60px; /* Big Icon */
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 24px;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .pillar-badge {
             background: #111;
             border: 1px solid #FFD700;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #FFD700;
+        }
+
+        /* The Wallet Card */
+        .balance-card {
+            background: linear-gradient(145deg, #1a1a1a, #000);
+            border: 1px solid #333;
             border-radius: 15px;
             padding: 20px;
-            margin: 20px auto;
-            max-width: 300px;
+            margin: 30px auto;
+            max-width: 320px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.1);
         }
+
+        .balance-amount {
+            font-size: 36px;
+            margin: 10px 0;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* The Utility Buttons */
+        .utility-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
         .btn {
-            display: block;
-            width: 80%;
-            margin: 15px auto;
-            padding: 15px;
+            background: #111;
+            border: 1px solid #FFD700;
+            color: #FFD700;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #FFD700;
+            color: #000; /* Turns black on hover */
+        }
+
+        .btn.active {
             background: #FFD700;
             color: #000;
             font-weight: bold;
+        }
+
+        /* The Input Form (Hidden by default) */
+        .form-section {
+            margin-top: 30px;
+            display: none; /* Hidden until clicked */
+            animation: fadeIn 0.5s;
+        }
+
+        input {
+            width: 80%;
+            padding: 15px;
+            margin: 10px 0;
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .pay-btn {
+            width: 90%;
+            padding: 15px;
+            background: linear-gradient(to right, #FFD700, #E5C100);
             border: none;
-            border-radius: 10px;
+            color: #000;
+            font-weight: bold;
+            font-size: 18px;
+            border-radius: 8px;
             cursor: pointer;
+            margin-top: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
-    <div style="font-size: 50px;">🦅</div> 
-    <h1>LIVENJET</h1>
-    <p>Pillar 1: Utility</p>
+
+    <div class="logo-container">🦅</div>
+    <h1>LivenJet</h1>
+    <span class="pillar-badge">Pillar 1: Utility</span>
 
     <div class="balance-card">
-        <p style="color: #888;">ADEWOLE PAY WALLET</p>
-        <h2>₦ 0.00</h2>
-        <p style="color: #00ff00;">● System Online</p>
+        <p style="color: #888; font-size: 12px; margin:0;">ADEWOLE PAY BALANCE</p>
+        <div class="balance-amount">₦ 50,000.00</div>
+        <p style="color: #00ff00; font-size: 12px; margin:0;">● Secure Connection</p>
     </div>
 
-    <button class="btn">⚡ Buy Electricity</button>
-    <button class="btn">📱 Buy Airtime</button>
+    <div class="utility-grid">
+        <button class="btn" onclick="showForm('electricity')">⚡ Electricity</button>
+        <button class="btn" onclick="showForm('airtime')">📱 Airtime</button>
+    </div>
+
+    <div id="utility-form" class="form-section">
+        <h3 id="form-title" style="color:#fff;">Pay Bill</h3>
+        <input type="text" id="meter-input" placeholder="Enter Meter / Phone Number">
+        <input type="number" id="amount-input" placeholder="Enter Amount (₦)">
+        <button class="pay-btn" onclick="processPayment()">PAY NOW</button>
+    </div>
+
+    <script>
+        function showForm(type) {
+            const form = document.getElementById('utility-form');
+            const title = document.getElementById('form-title');
+            const input = document.getElementById('meter-input');
+
+            // Show the form
+            form.style.display = 'block';
+
+            // Change text based on button click
+            if (type === 'electricity') {
+                title.innerText = "⚡ Buy Electricity";
+                input.placeholder = "Enter Meter Number";
+            } else {
+                title.innerText = "📱 Buy Airtime";
+                input.placeholder = "Enter Phone Number";
+            }
+        }
+
+        function processPayment() {
+            const amount = document.getElementById('amount-input').value;
+            if(amount) {
+                alert(`Processing Payment of ₦${amount}... \n(Simulation Mode)`);
+            } else {
+                alert("Please enter an amount!");
+            }
+        }
+    </script>
+
 </body>
 </html>
