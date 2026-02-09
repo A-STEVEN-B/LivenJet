@@ -5,83 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LivenJet | Utility Pillar</title>
     <style>
-        /* --- DESIGN SECTION (Black & Gold) --- */
-        body {
-            background-color: #000000; /* Deep Black */
-            color: #FFD700; /* Gold */
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        .logo {
-            font-size: 60px; /* Big Eagle Logo */
-            margin-bottom: 10px;
-        }
-        .balance-card {
-            background: #111;
-            border: 2px solid #FFD700;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 300px;
-        }
-        .btn {
-            background: #FFD700;
-            color: #000;
-            font-weight: bold;
-            padding: 15px;
-            width: 80%;
-            border: none;
-            border-radius: 10px;
-            margin: 10px 0;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .btn:hover { background: #e6c200; }
+        body { background-color: #000; color: #FFD700; font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .logo { font-size: 50px; margin-bottom: 10px; }
+        .balance-card { background: #111; border: 2px solid #FFD700; border-radius: 15px; padding: 20px; margin: 20px auto; max-width: 320px; }
+        .btn { background: #FFD700; color: #000; font-weight: bold; padding: 15px; width: 85%; border: none; border-radius: 10px; margin: 10px 0; cursor: pointer; }
+        #payment-form { display: none; margin-top: 20px; background: #111; padding: 20px; border-radius: 15px; }
+        input { padding: 12px; width: 80%; margin: 8px; border-radius: 5px; border: 1px solid #444; background: #222; color: white; }
         
-        /* Hidden Form Section */
-        #payment-form { display: none; margin-top: 20px; border-top: 1px solid #333; padding-top: 20px; }
-        input { padding: 10px; width: 70%; margin: 5px; border-radius: 5px; border: 1px solid #555; background: #222; color: white; }
+        /* New History Section */
+        .history-section { margin-top: 30px; text-align: left; max-width: 320px; margin-left: auto; margin-right: auto; }
+        .history-item { border-bottom: 1px solid #222; padding: 10px 0; font-size: 14px; display: flex; justify-content: space-between; }
+        .success-text { color: #00ff00; font-size: 12px; }
     </style>
 </head>
 <body>
 
     <div class="logo">🦅</div>
     <h1>LIVENJET</h1>
-    <p>Pillar 1: Utility & Power</p>
-
+    
     <div class="balance-card">
-        <p style="font-size: 12px; color: #888;">ADEWOLE PAY WALLET</p>
-        <h2 style="font-size: 32px; margin: 10px 0;">₦ 50,000.00</h2>
-        <p style="color: #00ff00; font-size: 12px;">● System Online</p>
+        <p style="color: #888; font-size: 12px;">AVAILABLE BALANCE</p>
+        <h2 id="balance-display">₦ 50,000.00</h2>
     </div>
 
     <button class="btn" onclick="openService('Electricity')">⚡ Buy Electricity</button>
     <button class="btn" onclick="openService('Airtime')">📱 Buy Airtime</button>
 
     <div id="payment-form">
-        <h3 id="form-title">Pay Bill</h3>
-        <input type="text" id="input-field" placeholder="Enter Number">
-        <br>
-        <button class="btn" style="background: green; color: white;" onclick="payNow()">PAY NOW</button>
+        <h3 id="form-title">Payment</h3>
+        <input type="number" id="amount-input" placeholder="Enter Amount (₦)">
+        <input type="text" id="id-input" placeholder="Meter/Phone Number">
+        <button class="btn" style="background: #00ff00;" onclick="executeTransaction()">CONFIRM PAYMENT</button>
+    </div>
+
+    <div class="history-section">
+        <p style="color: #888; border-bottom: 1px solid #FFD700;">RECENT TRANSACTIONS</p>
+        <div id="history-list">
+            </div>
     </div>
 
     <script>
-        function openService(serviceName) {
+        let balance = 50000;
+        let activeService = "";
+
+        function openService(service) {
+            activeService = service;
             document.getElementById('payment-form').style.display = 'block';
-            document.getElementById('form-title').innerText = "Pay for " + serviceName;
-            
-            if(serviceName === 'Electricity') {
-                document.getElementById('input-field').placeholder = "Enter Meter Number";
-            } else {
-                document.getElementById('input-field').placeholder = "Enter Phone Number";
-            }
+            document.getElementById('form-title').innerText = "Pay for " + service;
+            document.getElementById('id-input').placeholder = (service === 'Electricity') ? "Enter Meter Number" : "Enter Phone Number";
         }
 
-        function payNow() {
-            alert("Payment Successful! (Simulation)");
+        function executeTransaction() {
+            const amount = parseInt(document.getElementById('amount-input').value);
+            const idNumber = document.getElementById('id-input').value;
+
+            if (!amount || !idNumber) {
+                alert("Please fill all fields!");
+                return;
+            }
+
+            if (amount > balance) {
+                alert("Insufficient Balance!");
+                return;
+            }
+
+            // Deduct Balance
+            balance -= amount;
+            document.getElementById('balance-display').innerText = "₦ " + balance.toLocaleString();
+
+            // Add to History
+            const list = document.getElementById('history-list');
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `<span>${activeService} (${idNumber})</span> <span>-₦${amount}</span>`;
+            list.prepend(item);
+
+            // Hide form and clear
+            document.getElementById('payment-form').style.display = 'none';
+            document.getElementById('amount-input').value = "";
+            document.getElementById('id-input').value = "";
+            
+            alert("Payment for " + activeService + " was successful!");
         }
     </script>
-
 </body>
 </html>
