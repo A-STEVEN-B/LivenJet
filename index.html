@@ -4,21 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>LivenJet | Evolution OS</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>LivenJet | Singularity OS</title>
     <style>
         /* --- CORE VISUALS --- */
         :root { 
             --gold: #FFD700; --dark: #050505; --accent: #FFD700; 
             --green: #00ff00; --red: #ff4444; --ice: #00f2ff; --purple: #d000ff; 
+            --glass: rgba(20, 20, 20, 0.95);
         }
         
         ::-webkit-scrollbar { display: none; }
         * { -ms-overflow-style: none; scrollbar-width: none; touch-action: manipulation; user-select: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
         body { 
-            background-color: #050505; color: var(--accent); font-family: 'Segoe UI', Roboto, monospace; 
+            background-color: #000; color: var(--accent); font-family: 'Segoe UI', Roboto, monospace; 
             text-align: center; margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; 
-            height: 100vh; background-image: radial-gradient(#151515 1px, transparent 1px); background-size: 30px 30px;
+            height: 100vh; background-image: radial-gradient(#1a1a1a 1px, transparent 1px); background-size: 30px 30px;
             transition: color 0.5s;
         }
 
@@ -33,6 +35,7 @@
 
         /* --- FX --- */
         .scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 3px; pointer-events: none; z-index: 9000; opacity: 0.4; }
+        #device-frame.singularity { --accent: var(--purple); --green: var(--ice); border-color: var(--purple); box-shadow: 0 0 50px var(--purple); }
         @keyframes pulseFast { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
         @keyframes blinkRed { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
         @keyframes floatAnim { 0% { top: 100%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: -10%; opacity: 0; } }
@@ -99,7 +102,6 @@
         .tech-node.unlocked { border-color: var(--green); opacity: 1; background: rgba(0,255,0,0.05); }
         .tech-name { font-weight: bold; font-size: 12px; color: #fff; }
         .tech-desc { font-size: 10px; color: #888; }
-        .tech-cost { font-size: 10px; color: var(--accent); font-weight: bold; }
 
         /* SUPPLY DROP */
         #supply-crate { position: absolute; width: 60px; height: 60px; font-size: 40px; cursor: pointer; z-index: 5000; animation: floatAnim 10s linear; display: none; }
@@ -112,9 +114,6 @@
         /* MODALS */
         .modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-card { background: #111; border: 1px solid var(--accent); color: #fff; width: 88%; padding: 30px 20px; border-radius: 25px; text-align: center; max-height: 85vh; overflow-y: auto; box-shadow: 0 0 50px rgba(0,0,0,0.8); transition: border-color 0.5s; }
-        
-        /* ALERTS */
-        #red-alert { display:none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.2); z-index: 7000; pointer-events: none; mix-blend-mode: overlay; animation: blinkRed 1s infinite; }
         
         /* CHAT */
         .fab-chat { position: absolute; bottom: 120px; right: 20px; width: 55px; height: 55px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 4000; cursor: pointer; box-shadow: 0 0 20px rgba(255,215,0,0.3); color: #000; transition: background 0.5s; }
@@ -139,6 +138,30 @@
         .nexus-map { width: 100%; height: 300px; background: #001; border: 1px solid #333; border-radius: 10px; position: relative; overflow: hidden; background-image: radial-gradient(#222 1px, transparent 1px); background-size: 20px 20px; }
         .map-node { width: 8px; height: 8px; background: var(--green); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--green); animation: pulse 1s infinite; }
         .map-node.red { background: var(--red); box-shadow: 0 0 10px var(--red); }
+
+        /* ITEMS */
+        .venture-card { background: #151515; border: 1px solid #333; padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: left; position: relative; }
+        .venture-bar-bg { height: 4px; background: #333; margin: 8px 0; border-radius: 2px; }
+        .venture-bar { height: 100%; background: var(--green); width: 0%; border-radius: 2px; transition: width 1s linear; }
+        .auto-badge { position: absolute; top: 15px; right: 15px; font-size: 9px; background: var(--ice); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .asset-item { background: #151515; border: 1px solid #333; border-radius: 12px; padding: 15px; opacity: 0.5; }
+        .asset-item.owned { opacity: 1; border-color: var(--gold); box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.1); }
+
+        /* ALERTS */
+        #red-alert { display:none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.2); z-index: 7000; pointer-events: none; mix-blend-mode: overlay; animation: blinkRed 1s infinite; }
+        #breach-overlay, #call-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; }
+        .breach-box { border: 2px solid var(--red); padding: 30px; border-radius: 20px; width: 85%; background: #100; text-align: center; box-shadow: 0 0 50px var(--red); }
+        .defend-bar-bg { width: 100%; height: 20px; background: #300; margin: 25px 0; border: 1px solid var(--red); border-radius: 10px; overflow: hidden; }
+        .defend-bar-fill { width: 0%; height: 100%; background: var(--red); transition: width 0.1s; }
+        .defend-btn { background: var(--red); color: #fff; font-size: 18px; font-weight: bold; border: none; padding: 15px; width: 100%; border-radius: 12px; cursor: pointer; animation: pulse 0.5s infinite; }
+        
+        .caller-icon { width: 100px; height: 100px; background: #222; border-radius: 50%; border: 3px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; animation: pulse 1s infinite; }
+        .call-actions { display: flex; gap: 40px; margin-top: 40px; }
+        .call-btn { width: 65px; height: 65px; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+
+        /* DATA BOX */
+        .data-box { background: #080808; border: 1px dashed #444; color: var(--green); padding: 15px; font-family: monospace; font-size: 11px; word-break: break-all; margin: 15px 0; max-height: 80px; overflow-y: auto; user-select: text; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -172,10 +195,11 @@
         <div id="app-interface">
             <div class="ticker-wrap">
                 <span style="font-weight:bold; color:var(--ice);" id="influence-score">INF: 0%</span> | 
+                <span id="lp-score" style="color:var(--purple); display:none;">LP: 0</span> |
                 <span id="clock">00:00</span>
             </div>
             
-            <div class="neural-core" onclick="godMode()"><div class="core-inner"></div></div>
+            <div class="neural-core" onclick="handleCoreClick()" id="neural-core"><div class="core-inner"></div></div>
             <div style="font-family: monospace; font-size: 10px; color: #888; height: 20px; letter-spacing: 1px;" id="ai-msg">SYSTEM ONLINE.</div>
 
             <div id="home" class="pillar active">
@@ -201,8 +225,8 @@
                         <div class="grid-status-text" id="grid-text">STABLE</div>
                     </div>
                     <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                        <button class="btn-outline" style="margin:0;" onclick="buyInfra('solar', 200000)">SOLAR<br><span style="color:var(--green)">₦200k</span></button>
-                        <button class="btn-outline" style="margin:0;" onclick="buyInfra('nuke', 500000)">NUCLEAR<br><span style="color:var(--green)">₦500k</span></button>
+                        <button class="btn-outline" style="margin:0; font-size:12px;" onclick="buyInfra('solar', 200000)">SOLAR<br><span style="color:var(--green)">₦200k</span></button>
+                        <button class="btn-outline" style="margin:0; font-size:12px;" onclick="buyInfra('nuke', 500000)">NUCLEAR<br><span style="color:var(--green)">₦500k</span></button>
                     </div>
                     <button class="btn-full" style="background:var(--red); display:none;" id="inject-btn" onclick="injectPower()">⚡ INJECT POWER</button>
                 </div>
@@ -210,11 +234,17 @@
 
             <div id="logi" class="pillar">
                 <div class="intel-card">
-                    <h3>WAR ROOM</h3>
-                    <button class="btn" style="width:auto; margin:10px 0;" onclick="toggleModal('agent-overlay')">+ DEPLOY AGENT</button>
-                    <button class="btn-outline" style="color:var(--red); border-color:var(--red);" onclick="openHack()">OVERRIDE SATELLITE</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3>WAR ROOM</h3>
+                        <button class="btn" style="width:auto; margin:0; padding:5px 10px; font-size:10px; background:#333; color:#fff;" onclick="toggleModal('agent-overlay')">+ DEPLOY</button>
+                    </div>
+                    <div id="agent-display" style="margin:15px 0;"></div>
                 </div>
-                <button class="btn-outline" onclick="openMap()">OPEN NEXUS MAP</button>
+                <button class="btn-outline" style="color:var(--red); border-color:var(--red);" onclick="openHack()">OVERRIDE SATELLITE</button>
+                <div class="intel-card" style="margin-top:10px;">
+                    <h3>COMMODITIES</h3>
+                    <div id="commodity-list"></div>
+                </div>
             </div>
 
             <div id="fina" class="pillar">
@@ -222,12 +252,12 @@
                     <div style="display:flex; justify-content:space-between;"><h3>PORTFOLIO</h3><span style="color:#0f0;">+12%</span></div>
                     <div class="crypto-chart-container"><canvas id="priceChart"></canvas></div>
                     <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
-                        <div><div style="font-weight:bold;">BTC</div><div style="font-size:11px; color:#666;" id="btc-price">$98,000</div></div>
-                        <button class="btn" style="width:auto;" onclick="pay(5000, 'BTC Inv')">BUY</button>
+                        <div><div style="font-weight:bold; font-size:16px;">BTC</div><div style="font-size:11px; color:#666;" id="btc-price">$98,000</div></div>
+                        <button class="btn" style="width:auto; padding:8px 15px; background:#222; color:#fff;" onclick="pay(5000, 'BTC Inv')">BUY</button>
                     </div>
                     <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
-                        <div><div style="font-weight:bold;">LJN</div><div style="font-size:11px; color:var(--accent);" id="ljn-bal">0.00</div></div>
-                        <button class="btn" style="width:auto;" onclick="startMining()" id="mine-btn">MINE</button>
+                        <div><div style="font-weight:bold; font-size:16px;">LJN</div><div style="font-size:11px; color:var(--accent);" id="ljn-bal">0.00</div></div>
+                        <button class="btn" style="width:auto; padding:8px 15px; background:#222; color:#fff;" onclick="startMining()" id="mine-btn">MINE</button>
                     </div>
                     <button class="btn-outline" style="margin-top:15px; color:var(--accent); border-color:var(--accent);" onclick="rigNews()">RIG MARKET (₦50k)</button>
                 </div>
@@ -243,32 +273,37 @@
             <div class="fab-chat" onclick="toggleModal('chat-overlay')">💬</div>
         </div>
 
-        <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>SYSTEM</h2><input type="text" class="app-input" id="set-name" placeholder="Name"><button class="btn-full" onclick="saveSettings()">SAVE</button><div style="margin-top:20px; text-align:left;"><p style="color:#888; font-size:10px;">THEME</p><div class="theme-grid"><div class="theme-btn" style="background:#FFD700;" onclick="setTheme('#FFD700')"></div><div class="theme-btn" style="background:#00ff00;" onclick="setTheme('#00ff00')"></div><div class="theme-btn" style="background:#ff4444;" onclick="setTheme('#ff4444')"></div><div class="theme-btn" style="background:#00f2ff;" onclick="setTheme('#00f2ff')"></div><div class="theme-btn" style="background:#d000ff;" onclick="setTheme('#d000ff')"></div></div></div><button class="btn-outline" onclick="hardReset()" style="color:red; border-color:red; margin-top:20px;">RESET</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
+        <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>SYSTEM CONFIG</h2><input type="text" class="app-input" id="set-name" placeholder="User Alias"><button class="btn-full" onclick="saveSettings()">SAVE PROFILE</button><div style="margin-top:20px; text-align:left;"><p style="color:#888; font-size:10px;">THEME</p><div class="theme-grid"><div class="theme-btn" style="background:#FFD700;" onclick="setTheme('#FFD700')"></div><div class="theme-btn" style="background:#00ff00;" onclick="setTheme('#00ff00')"></div><div class="theme-btn" style="background:#ff4444;" onclick="setTheme('#ff4444')"></div><div class="theme-btn" style="background:#00f2ff;" onclick="setTheme('#00f2ff')"></div><div class="theme-btn" style="background:#d000ff;" onclick="setTheme('#d000ff')"></div></div></div><div style="margin-top:30px; border-top:1px dashed #333; padding-top:15px;"><button class="btn-outline" onclick="exportData()">EXPORT SAVE</button><input type="text" class="app-input" id="import-code" placeholder="Paste Code" style="margin-top:10px;"><button class="btn-full" onclick="importData()">RESTORE DATA</button></div><button class="btn-outline" onclick="hardReset()" style="color:var(--red); border-color:var(--red); margin-top:30px;">FACTORY RESET</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
         
         <div id="cortex-overlay" class="modal-overlay"><div class="modal-card"><h2>CORTEX</h2><p style="font-size:10px; color:#888; margin-bottom:20px;">SPEND INFLUENCE TO EVOLVE</p><div id="tech-tree"></div><button class="btn-outline" onclick="toggleModal('cortex-overlay')">CLOSE</button></div></div>
 
         <div id="hack-overlay" class="modal-overlay"><div class="modal-card" style="border-color:red;"><h2 style="color:red;">ACTIVE UPLINK</h2><div class="hack-bar-container"><div class="hack-zone"></div><div class="hack-cursor cursor-moving" id="hack-cursor"></div></div><p id="hack-log" style="font-family:monospace; font-size:12px;">TARGETING...</p><button class="btn-full" style="background:red;" onclick="lockSignal()">LOCK SIGNAL</button><button class="btn-outline" onclick="toggleModal('hack-overlay')">ABORT</button></div></div>
 
-        <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2>BUSINESS</h2><div id="active-ventures"></div><button class="btn-full" onclick="createBusiness()">NEW (₦100k)</button><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
-        <div id="assets-overlay" class="modal-overlay"><div class="modal-card"><h2>ASSETS</h2><div class="asset-grid" id="asset-list"></div><button class="btn-outline" onclick="toggleModal('assets-overlay')">CLOSE</button></div></div>
-        <div id="agent-overlay" class="modal-overlay"><div class="modal-card"><h2>DEPLOY</h2><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>Tokyo</option></select><button class="btn-full" onclick="deployAgent()">CONFIRM (₦50k)</button><button class="btn-outline" onclick="toggleModal('agent-overlay')">CANCEL</button></div></div>
-        <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>SEND</h2><input type="number" class="app-input" id="send-amt" placeholder="Amount"><button class="btn-full" onclick="processTransfer()">SEND</button><button class="btn-outline" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
-        <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:15px;">TERMINAL <span onclick="toggleModal('chat-overlay')" style="float:right;">✕</span></div><div class="chat-body" id="chat-box"></div><div class="chat-input-area" style="padding:15px; display:flex; gap:10px;"><input type="text" class="app-input" id="user-input" style="padding:10px; margin:0;"><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div></div></div>
-        <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2>ID</h2><div style="font-size:40px;">👤</div><h3 id="pass-name-display">USER</h3><button class="btn-outline" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
-        <div id="receipt-overlay" class="modal-overlay"><div class="modal-card"><h2>SUCCESS</h2><h1 id="rec-amt" style="color:var(--green);"></h1><button class="btn-full" onclick="toggleModal('receipt-overlay')">OK</button></div></div>
-        <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>NEXUS</h2><div class="nexus-map" id="nexus-map"></div><button class="btn-outline" onclick="toggleModal('map-overlay')">CLOSE</button></div></div>
+        <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2>BUSINESS EMPIRE</h2><div id="active-ventures"></div><button class="btn-full" onclick="createBusiness()">NEW VENTURE (₦100k)</button><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
+        <div id="assets-overlay" class="modal-overlay"><div class="modal-card"><h2>ASSET VAULT</h2><div class="asset-grid" id="asset-list"></div><button class="btn-outline" onclick="toggleModal('assets-overlay')">CLOSE</button></div></div>
+        <div id="agent-overlay" class="modal-overlay"><div class="modal-card"><h2>DEPLOY AGENT</h2><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>New York</option><option>Tokyo</option><option>Lagos</option></select><button class="btn-full" onclick="deployAgent()">CONFIRM (₦50k)</button><button class="btn-outline" onclick="toggleModal('agent-overlay')">CANCEL</button></div></div>
+        <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>TRANSFER FUNDS</h2><input type="number" class="app-input" id="send-amt" placeholder="Enter Amount"><button class="btn-full" onclick="processTransfer()">SEND SECURELY</button><button class="btn-outline" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
+        <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:15px;">SECURE TERMINAL <span onclick="toggleModal('chat-overlay')" style="float:right; cursor:pointer;">✕</span></div><div class="chat-body" id="chat-box"></div><div class="chat-input-area" style="padding:15px; display:flex; gap:10px;"><input type="text" class="app-input" id="user-input" style="padding:10px; margin:0;"><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div></div></div>
+        <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2>OPERATIVE ID</h2><div style="width:80px; height:80px; background:#222; border-radius:50%; margin:20px auto; display:flex; align-items:center; justify-content:center; font-size:30px; border:2px solid var(--accent);" id="pass-avatar">SA</div><h3 id="pass-name-display" style="color:var(--accent);">USER</h3><p style="color:#666;">SECURITY LEVEL 5</p><button class="btn-outline" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
+        <div id="receipt-overlay" class="modal-overlay"><div class="modal-card"><h2>TRANSACTION</h2><div style="border-bottom:1px dashed #444; margin:15px 0;"></div><h1 id="rec-amt" style="color:var(--green); margin:30px 0;"></h1><button class="btn-full" onclick="toggleModal('receipt-overlay')">CONFIRM</button></div></div>
+        <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>GLOBAL NEXUS</h2><div class="nexus-map" id="nexus-map"></div><button class="btn-outline" onclick="toggleModal('map-overlay')">CLOSE LINK</button></div></div>
+        <div id="transfer-modal" class="modal-overlay"><div class="modal-card"><h2>BACKUP CODE</h2><div class="data-box" id="export-text"></div><button class="btn-full" onclick="toggleModal('transfer-modal')">DONE</button></div></div>
+        <div id="ascend-modal" class="modal-overlay"><div class="modal-card" style="border-color:var(--purple);"><h2>ASCENSION</h2><p style="color:#ccc; font-size:12px; margin:20px 0;">Reset simulation to gain LEGACY POINTS.</p><h1 id="lp-gain" style="color:var(--purple); font-size:40px;">+1 LP</h1><button class="btn-full" style="background:var(--purple); color:#fff;" onclick="confirmAscend()">TRANSCEND</button><button class="btn-outline" onclick="toggleModal('ascend-modal')">CANCEL</button></div></div>
 
-        <div id="red-alert"></div>
-        <div id="breach-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:8000; flex-direction:column; align-items:center; justify-content:center;"><div class="breach-box" style="border:2px solid var(--red); padding:30px; border-radius:20px; width:85%; background:#100; text-align:center;"><h1 style="color:var(--red); font-size:28px;">⚠️ BREACH</h1><div style="width:100%; height:20px; background:#300; margin:20px 0; border:1px solid var(--red);"><div id="defend-bar" style="width:0%; height:100%; background:var(--red);"></div></div><button class="btn-full" style="background:var(--red);" onclick="chargeFirewall()">FIREWALL</button></div></div>
+        <div id="call-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:8000; flex-direction:column; align-items:center; justify-content:center;"><div class="caller-icon">👤</div><div style="font-size:24px; font-weight:bold; margin-bottom:10px;">UNKNOWN</div><div style="font-size:14px; color:#888;">INCOMING ENCRYPTED CALL...</div><div class="call-actions"><button class="call-btn" style="background:#f00; color:#fff;" onclick="endCall()">✕</button><button class="call-btn" style="background:#0f0; color:#fff;" onclick="answerCall()">📞</button></div></div>
+        <div id="breach-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:8000; flex-direction:column; align-items:center; justify-content:center;"><div class="breach-box" style="border:2px solid var(--red); padding:30px; border-radius:20px; width:85%; background:#100; text-align:center;"><h1 style="color:var(--red); font-size:28px;">⚠️ BREACH</h1><div style="width:100%; height:20px; background:#300; margin:20px 0; border:1px solid var(--red); border-radius:10px; overflow:hidden;"><div id="defend-bar" style="width:0%; height:100%; background:var(--red);"></div></div><button class="btn-full" style="background:var(--red);" onclick="chargeFirewall()">DEPLOY COUNTERMEASURES</button></div></div>
 
     </div>
 
     <script>
-        // --- DATA ---
+        // --- DATA & ENGINE ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let balance=50000, ljnCrypto=0.00, userName="STEVEN", agents=[], ventures=[], transactions=[], ownedAssets={}, influence=0, detection=0;
         let pin="8820", inputPin="", currency="NGN", rate=1500, userColor="#FFD700";
-        let tech = { mining:false, ghost:false, titan:false, insider:false }; // New Tech State
+        let tech = { mining:false, ghost:false, titan:false, insider:false }; 
+        let inventory={gold:0, oil:0}, infra={solar:0, nuke:0}, legacyPoints=0;
+        let godModeCount=0, isMining=false, defensePower=0, gridHealth=100;
+        let commodities={gold:{price:85000, trend:1}, oil:{price:12000, trend:-1}};
 
         // --- SOUND ---
         function sfx(type) {
@@ -281,24 +316,42 @@
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime+0.1);
         }
+        function speak(text) { if('speechSynthesis' in window){ const u=new SpeechSynthesisUtterance(text); u.rate=1.1; u.pitch=0.8; window.speechSynthesis.speak(u); } }
 
         // --- INIT ---
         window.onload = function() {
-            if(localStorage.getItem('livenjet_evolution')) {
-                let d = JSON.parse(localStorage.getItem('livenjet_evolution'));
-                balance=d.b; ljnCrypto=d.c; userName=d.u; agents=d.a; ventures=d.v; transactions=d.t; ownedAssets=d.o; influence=d.i; userColor=d.col||"#FFD700"; tech=d.tech||tech;
+            if(localStorage.getItem('livenjet_final_v1')) {
+                let d = JSON.parse(localStorage.getItem('livenjet_final_v1'));
+                balance=d.b; ljnCrypto=d.c; userName=d.u; agents=d.a; ventures=d.v; transactions=d.t; ownedAssets=d.o; influence=d.i; userColor=d.col||"#FFD700"; tech=d.tech||tech; inventory=d.inv||inventory; infra=d.inf||infra; legacyPoints=d.lp||0;
             }
             setTheme(userColor); renderUI();
-            document.getElementById('boot-screen').style.display='none'; 
             requestAnimationFrame(drawChart);
+            const boot = document.getElementById('boot-screen');
+            let i=0; const lines=["INITIALIZING KERNEL...", "LOADING ASSETS...", "SECURE."];
+            const int = setInterval(()=>{
+                if(i<lines.length){ boot.innerHTML+=`<div class='boot-line'>${lines[i]}</div>`; i++; }
+                else{ clearInterval(int); setTimeout(()=>{ boot.style.display='none'; },500); }
+            }, 300);
         };
 
         // --- SAVE ---
         function saveData() {
-            let data = { b:balance, c:ljnCrypto, u:userName, a:agents, v:ventures, t:transactions, o:ownedAssets, i:influence, col:userColor, tech:tech };
-            localStorage.setItem('livenjet_evolution', JSON.stringify(data));
+            let data = { b:balance, c:ljnCrypto, u:userName, a:agents, v:ventures, t:transactions, o:ownedAssets, i:influence, col:userColor, tech:tech, inv:inventory, inf:infra, lp:legacyPoints };
+            localStorage.setItem('livenjet_final_v1', JSON.stringify(data));
         }
-        function hardReset() { if(confirm("WIPE?")) { localStorage.removeItem('livenjet_evolution'); location.reload(); } }
+        function hardReset() { if(confirm("WIPE?")) { localStorage.removeItem('livenjet_final_v1'); location.reload(); } }
+        function exportData() {
+            document.getElementById('export-text').innerText = btoa(JSON.stringify(localStorage.getItem('livenjet_final_v1')));
+            toggleModal('transfer-modal');
+        }
+        function importData() {
+            try {
+                let d = JSON.parse(atob(document.getElementById('import-code').value));
+                let p = JSON.parse(d);
+                balance=p.b; ljnCrypto=p.c; userName=p.u; agents=p.a; ventures=p.v; transactions=p.t; ownedAssets=p.o; influence=p.i; userColor=p.col; tech=p.tech; inventory=p.inv; infra=p.inf; legacyPoints=p.lp;
+                saveData(); renderUI(); msg("RESTORED"); toggleModal('settings-overlay');
+            } catch(e) { msg("INVALID CODE"); }
+        }
 
         // --- THEME ---
         function setTheme(color) { userColor = color; document.documentElement.style.setProperty('--accent', color); saveData(); }
@@ -308,7 +361,7 @@
         function clearPin() { inputPin=""; document.getElementById('pin-display').innerText="****"; sfx('click'); }
         function checkPin() {
             if(inputPin===pin) {
-                sfx('success');
+                sfx('success'); speak("Access Granted.");
                 document.getElementById('launchpad').style.opacity=0;
                 setTimeout(()=>{ 
                     document.getElementById('launchpad').style.display='none'; 
@@ -321,62 +374,101 @@
                 inputPin=""; document.getElementById('pin-display').innerText="****";
             }
         }
+        document.addEventListener('keydown', (e) => {
+            if(document.getElementById('launchpad').style.display !== 'none') {
+                if(e.key>='0' && e.key<='9') enterPin(e.key);
+                if(e.key==='Backspace') clearPin();
+                if(e.key==='Enter') checkPin();
+            }
+        });
 
-        // --- CORTEX (TECH TREE) ---
+        // --- FEATURES ---
+        function pay(amt, desc) { if(balance>=amt) { balance-=amt; transactions.unshift({desc:desc, amt:-amt}); saveData(); renderUI(); sfx('success'); } else { msg("FUNDS?"); sfx('error'); } }
+        function startMining() { const b = document.getElementById('mine-btn'); b.innerText="..."; setTimeout(()=>{ ljnCrypto+=tech.mining?1.0:0.5; b.innerText="MINE"; saveData(); renderUI(); msg("MINED"); sfx('success'); }, 1000); }
+        function createBusiness() { if(balance>=100000) { balance-=100000; ventures.push({name:"STARTUP", rev:0, prog:0, lvl:1, auto:false}); saveData(); renderUI(); toggleModal('ventures-overlay'); sfx('success'); } else msg("NEED ₦100k"); }
+        function updateVentureUI() {
+            const c = document.getElementById('active-ventures'); c.innerHTML="";
+            if(ventures.length===0) c.innerHTML="<p style='color:#666; font-size:10px;'>NO VENTURES</p>";
+            ventures.forEach((v,i)=>{
+                let autoBtn = v.auto ? '<span class="auto-badge">AI</span>' : `<button class="btn" style="padding:5px; margin-left:5px;" onclick="buyAuto(${i})">AI (₦500k)</button>`;
+                c.innerHTML+=`<div class="venture-card"><div><span style="color:#fff;">${v.name}</span> <span style="color:#0f0;">₦${v.rev.toLocaleString()}</span> ${autoBtn}</div><div class="venture-bar-bg"><div class="venture-bar" id="bar-${i}" style="width:${v.prog}%"></div></div><button class="btn" style="padding:5px;" onclick="collect(${i})">COLLECT</button></div>`;
+            });
+        }
+        function collect(i) { if(ventures[i].rev > 0) { balance+=ventures[i].rev; ventures[i].rev=0; saveData(); renderUI(); sfx('success'); } }
+        function buyAuto(i) { if(balance>=500000) { balance-=500000; ventures[i].auto=true; saveData(); renderUI(); msg("AI INSTALLED"); sfx('success'); } else msg("NEED ₦500k"); }
+        function deployAgent() { let c = document.getElementById('agent-city').value; if(balance>=50000) { balance-=50000; agents.push({city:c, status:'active'}); influence+=5; saveData(); renderUI(); toggleModal('agent-overlay'); sfx('success'); } else msg("FUNDS?"); }
+        function updateAgentList() { const l = document.getElementById('agent-display'); l.innerHTML=""; if(agents.length===0) l.innerHTML="<div style='color:#666; font-size:10px; text-align:center;'>NO AGENTS</div>"; else agents.forEach(a=>{ let s=a.status==='hostile'?'color:red':'color:#0f0'; l.innerHTML+=`<div class="agent-item ${a.status==='hostile'?'hostile':''}"><span>${a.city}</span><span style="${s}">${a.status}</span></div>`; }); }
+        function openAssets() { toggleModal('assets-overlay'); const l = document.getElementById('asset-list'); l.innerHTML=""; [{id:'island',n:'ISLAND',c:1e8},{id:'jet',n:'JET',c:5e7}].forEach(a=>{ let btn=ownedAssets[a.id]?"OWNED":`<button class="btn" onclick="buyAsset('${a.id}',${a.c})">BUY</button>`; l.innerHTML+=`<div class="asset-item"><div class="asset-name">${a.n}</div><div style="font-size:10px; color:#888;">₦${(a.c/1e6).toFixed(0)}M</div>${btn}</div>`; }); }
+        function buyAsset(id,c) { if(balance>=c){balance-=c; ownedAssets[id]=true; influence+=20; saveData(); renderUI(); openAssets(); sfx('success');} else msg("FUNDS?"); }
+        function buyInfra(t,c){ if(balance>=c){balance-=c; infra[t]++; saveData(); renderUI(); msg("ACQUIRED"); sfx('success');} else msg("FUNDS?"); }
+        function updateCommodityUI(){
+            const l=document.getElementById('commodity-list'); l.innerHTML="";
+            for(const[k,d]of Object.entries(commodities)){
+                l.innerHTML+=`<div style="background:#111; padding:10px; margin-bottom:5px; border-radius:8px; display:flex; justify-content:space-between;"><span>${k.toUpperCase()}</span><span>₦${d.price} <button class="btn" style="padding:2px 5px; width:auto; margin:0;" onclick="trade('${k}','buy')">BUY</button> <button class="btn" style="padding:2px 5px; width:auto; margin:0;" onclick="trade('${k}','sell')">SELL</button></span></div>`;
+            }
+        }
+        function trade(i,a){
+            const p=commodities[i].price;
+            if(a==='buy'){ if(balance>=p){balance-=p; inventory[i]++; msg("BOUGHT");} else msg("FUNDS?"); }
+            else { if(inventory[i]>0){balance+=p; inventory[i]--; msg("SOLD");} else msg("NONE"); }
+            saveData(); renderUI();
+        }
+        function rigNews(){ let cost=tech.insider?25000:50000; if(balance>=cost){balance-=cost; commodities.gold.price+=5000; msg("RIGGED"); saveData(); renderUI(); updateCommodityUI();} else msg("FUNDS?"); }
+        function spawnCrate() { const c = document.getElementById('supply-crate'); c.style.display = 'block'; c.style.left = '-10%'; c.style.top = Math.random()*80+10+'%'; setTimeout(() => { c.style.display='none'; }, 10000); }
+        function claimCrate() { balance += 50000; msg("+₦50k"); sfx('success'); document.getElementById('supply-crate').style.display='none'; renderUI(); }
+        setInterval(spawnCrate, 60000);
+
+        // --- CORTEX ---
         function updateCortex() {
             const t = document.getElementById('tech-tree'); t.innerHTML = "";
-            const nodes = [
-                {id:'mining', n:'QUANTUM MINING', d:'2x Crypto Yield', c:20},
-                {id:'ghost', n:'GHOST PROTOCOL', d:'Slower Detection', c:30},
-                {id:'titan', n:'TITAN GRID', d:'2x Grid Power', c:50},
-                {id:'insider', n:'INSIDER TRADING', d:'Cheap Market Rig', c:40}
-            ];
+            const nodes = [{id:'mining',n:'QUANTUM MINING',d:'2x Yield',c:20}, {id:'ghost',n:'GHOST PROTOCOL',d:'Stealth',c:30}, {id:'titan',n:'TITAN GRID',d:'2x Power',c:50}, {id:'insider',n:'INSIDER',d:'Cheap Rig',c:40}];
             nodes.forEach(n => {
                 let status = tech[n.id] ? "unlocked" : "";
                 let btn = tech[n.id] ? "ACTIVE" : `<button class="btn" onclick="unlockTech('${n.id}', ${n.c})">UNLOCK (${n.c} INF)</button>`;
-                t.innerHTML += `<div class="tech-node ${status}"><div><div class="tech-name">${n.n}</div><div class="tech-desc">${n.d}</div></div>${btn}</div>`;
+                t.innerHTML += `<div class="tech-node ${status}" style="background:#222; padding:10px; margin-bottom:5px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;"><div><div class="tech-name" style="font-weight:bold; font-size:12px;">${n.n}</div><div class="tech-desc" style="font-size:10px; color:#888;">${n.d}</div></div>${btn}</div>`;
             });
         }
-        function unlockTech(id, cost) {
-            if(influence >= cost) { influence -= cost; tech[id] = true; updateCortex(); renderUI(); msg("UPGRADE INSTALLED"); sfx('success'); }
-            else { msg("NEED INFLUENCE"); sfx('error'); }
-        }
+        function unlockTech(id, cost) { if(influence>=cost){ influence-=cost; tech[id]=true; updateCortex(); renderUI(); msg("UPGRADED"); sfx('success'); } else { msg("NEED INF"); sfx('error'); } }
 
-        // --- HACKING V2 ---
+        // --- HACKING ---
         function openHack() { toggleModal('hack-overlay'); document.getElementById('hack-log').innerText="WAITING..."; document.getElementById('hack-cursor').classList.add('cursor-moving'); }
         function lockSignal() {
             const c = document.getElementById('hack-cursor');
             const r = c.getBoundingClientRect();
             const p = ((r.left - c.parentElement.getBoundingClientRect().left) / c.parentElement.getBoundingClientRect().width) * 100;
             c.classList.remove('cursor-moving');
-            
             if(p > 40 && p < 60) {
-                document.getElementById('hack-log').innerText="SUCCESS: +₦100k";
-                document.getElementById('hack-log').style.color="#0f0";
-                balance += 100000; sfx('success');
-                setTimeout(() => toggleModal('hack-overlay'), 1000);
+                document.getElementById('hack-log').innerText="SUCCESS: +₦100k"; document.getElementById('hack-log').style.color="#0f0";
+                balance += 100000; sfx('success'); setTimeout(() => toggleModal('hack-overlay'), 1000);
             } else {
-                document.getElementById('hack-log').innerText="FAILED: DETECT +20%";
-                detection += tech.ghost ? 10 : 20; // Tech Bonus
-                updateDetection(); sfx('error');
-                setTimeout(() => c.classList.add('cursor-moving'), 1000);
+                document.getElementById('hack-log').innerText="FAILED: DETECT +20%"; detection += tech.ghost ? 10 : 20; updateDetection(); sfx('error'); setTimeout(() => c.classList.add('cursor-moving'), 1000);
             }
             renderUI(); saveData();
         }
-        
         function updateDetection() {
             document.getElementById('detect-bar').style.width = detection + "%";
             if(detection >= 100) {
-                msg("ACCOUNTS FROZEN");
-                document.body.style.pointerEvents = "none";
-                document.getElementById('red-alert').style.display = "block";
-                setTimeout(() => {
-                    detection = 0; document.getElementById('detect-bar').style.width = "0%";
-                    document.body.style.pointerEvents = "auto"; document.getElementById('red-alert').style.display = "none";
-                    msg("RESTORED");
-                }, 10000);
+                msg("FROZEN"); document.body.style.pointerEvents = "none"; document.getElementById('red-alert').style.display = "block";
+                setTimeout(() => { detection = 0; document.getElementById('detect-bar').style.width = "0%"; document.body.style.pointerEvents = "auto"; document.getElementById('red-alert').style.display = "none"; msg("RESTORED"); }, 10000);
             }
         }
+
+        // --- LOOPS ---
+        setInterval(()=>{
+            let mult = 1 + legacyPoints;
+            ventures.forEach((v,i)=>{
+                if(v.prog < 100) { v.prog+=10; const b=document.getElementById(`bar-${i}`); if(b) b.style.width=v.prog+"%"; }
+                else { v.rev += 2000*v.lvl*mult; v.prog=0; if(v.auto) { balance+=v.rev; v.rev=0; } updateVentureUI(); }
+            });
+            if(agents.length>0) { balance+=agents.length*100*mult; renderUI(); if(Math.random()>0.95) { let t = Math.floor(Math.random()*agents.length); if(agents[t].status==='active') { agents[t].status='hostile'; updateAgentList(); msg("AGENT ATTACKED"); sfx('error'); } } }
+            if(Math.random()>0.99 && gridHealth>0) triggerBlackout();
+            if(detection > 0) { detection -= 1; document.getElementById('detect-bar').style.width = detection + "%"; }
+            influence += 0.1;
+        }, 1000);
+
+        function triggerBlackout(){ gridHealth=0; document.getElementById('grid-text').innerText="FAILURE"; document.getElementById('grid-monitor-box').classList.add('critical'); document.getElementById('inject-btn').style.display="block"; sfx('error'); speak("Grid Failure."); }
+        function injectPower(){ gridHealth+=20; if(gridHealth>=100){ document.getElementById('grid-text').innerText="STABLE"; document.getElementById('grid-monitor-box').classList.remove('critical'); document.getElementById('inject-btn').style.display="none"; balance+=150000; msg("RESTORED"); saveData(); renderUI(); sfx('success'); } }
+        function chargeFirewall(){ defensePower+=20; document.getElementById('defend-bar').style.width=defensePower+"%"; if(defensePower>=100){ document.getElementById('breach-overlay').style.display='none'; defensePower=0; msg("SECURED"); sfx('success'); } }
 
         // --- UI ---
         function renderUI() {
@@ -384,47 +476,31 @@
             document.getElementById('wallet-bal').innerText = s + d.toLocaleString(undefined, {minimumFractionDigits:2});
             document.getElementById('pass-name-display').innerText = userName.toUpperCase();
             document.getElementById('main-avatar').innerText = userName.substring(0,2).toUpperCase();
-            document.getElementById('influence-score').innerText = "INF: "+influence+"%";
+            document.getElementById('influence-score').innerText = "INF: "+Math.floor(influence)+"%";
             document.getElementById('ljn-bal').innerText = ljnCrypto.toFixed(2);
+            if(legacyPoints>0) { document.getElementById('lp-score').style.display='inline'; document.getElementById('lp-score').innerText="LP: "+legacyPoints; document.getElementById('device-frame').classList.add('singularity'); }
             
             const l = document.getElementById('ledger-list'); l.innerHTML="";
             if(transactions.length===0) l.innerHTML="<div style='color:#444; font-size:10px;'>NO DATA</div>";
             else transactions.slice(0,5).forEach(t=>{ l.innerHTML+=`<div class="tx-row"><span>${t.desc}</span><span style="color:${t.amt>0?'#0f0':'#f44'}">${t.amt>0?'+':''}₦${Math.abs(t.amt).toLocaleString()}</span></div>`; });
             
-            updateCortex();
+            updateAgentList(); updateVentureUI(); updateCommodityUI(); updateCortex();
         }
+        function nav(id){ document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon')); document.getElementById(id).classList.add('active'); document.getElementById('n-'+id).classList.add('active-icon'); sfx('click'); }
+        function toggleModal(id){ sfx('click'); const e=document.getElementById(id); e.style.display=(e.style.display==='flex')?'none':'flex'; }
+        function msg(t){ const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
+        function toggleCurrency(){ currency=currency==="NGN"?"USD":"NGN"; renderUI(); sfx('click'); }
+        function saveSettings(){ userName=document.getElementById('set-name').value; saveData(); renderUI(); toggleModal('settings-overlay'); }
+        function processTransfer(){ pay(document.getElementById('send-amt').value, 'Transfer'); toggleModal('send-overlay'); }
+        function godMode(){ balance+=10000000; renderUI(); msg("GOD MODE"); sfx('success'); }
+        function confirmAscend() { legacyPoints += Math.floor(balance/1e9); balance=50000; agents=[]; ventures=[]; influence=0; singularity=true; saveData(); location.reload(); }
+        function handleCoreClick(){ godModeCount++; if(balance>=1e9) toggleModal('ascend-modal'); else if(godModeCount===5){ balance+=10000000; renderUI(); msg("GOD MODE"); sfx('success'); godModeCount=0; } }
+        function openMap(){ toggleModal('map-overlay'); document.getElementById('nexus-map').innerHTML="<div class='nexus-grid'></div>"; agents.forEach(a=>{document.getElementById('nexus-map').innerHTML+=`<div class='map-node' style='top:${Math.random()*80+10}%; left:${Math.random()*80+10}%;'></div>`}); }
+        function endCall(){document.getElementById('call-overlay').style.display='none'; sfx('click');}
+        function answerCall(){document.getElementById('call-overlay').style.display='none';speak("Funds secured.");msg("ENCRYPTED MSG"); sfx('success');}
+        function sendMsg(){ const i=document.getElementById('user-input'); if(i.value){ document.getElementById('chat-box').innerHTML+=`<div class="msg msg-user">${i.value}</div><div class="msg msg-ai">Received.</div>`; i.value=""; sfx('click'); } }
 
-        function nav(id) {
-            document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active'));
-            document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon'));
-            document.getElementById(id).classList.add('active');
-            document.getElementById('n-'+id).classList.add('active-icon');
-            sfx('click');
-        }
-
-        // --- ACTIONS ---
-        function pay(amt, desc) { if(balance>=amt) { balance-=amt; transactions.unshift({desc:desc, amt:-amt}); saveData(); renderUI(); sfx('success'); } else msg("FUNDS?"); }
-        function startMining() { const b = document.getElementById('mine-btn'); b.innerText="..."; setTimeout(()=>{ ljnCrypto+=tech.mining ? 1.0 : 0.5; b.innerText="MINE"; saveData(); renderUI(); msg("MINED"); sfx('success'); }, 1000); }
-        function createBusiness() { if(balance>=100000) { balance-=100000; ventures.push({name:"STARTUP", rev:0}); saveData(); renderUI(); toggleModal('ventures-overlay'); sfx('success'); } else msg("NEED ₦100k"); }
-        function deployAgent() { let c = document.getElementById('agent-city').value; if(balance>=50000) { balance-=50000; agents.push({city:c}); influence+=5; saveData(); renderUI(); toggleModal('agent-overlay'); sfx('success'); } else msg("FUNDS?"); }
-        function openAssets() { toggleModal('assets-overlay'); const l = document.getElementById('asset-list'); l.innerHTML=""; [{id:'island',n:'ISLAND',c:1e8},{id:'jet',n:'JET',c:5e7}].forEach(a=>{ let btn=ownedAssets[a.id]?"OWNED":`<button class="btn" onclick="buyAsset('${a.id}',${a.c})">BUY</button>`; l.innerHTML+=`<div class="asset-item"><div class="asset-name">${a.n}</div>${btn}</div>`; }); }
-        function buyAsset(id,c) { if(balance>=c){balance-=c; ownedAssets[id]=true; influence+=20; saveData(); renderUI(); openAssets(); sfx('success');} else msg("FUNDS?"); }
-        function buyInfra(t,c){ if(balance>=c){balance-=c; saveData(); renderUI(); msg("ACQUIRED"); sfx('success');} else msg("FUNDS?"); }
-        function rigNews(){ let cost = tech.insider ? 25000 : 50000; if(balance>=cost){balance-=cost; msg("RIGGED"); saveData(); renderUI();} else msg("FUNDS?"); }
-        
-        // --- SUPPLY DROP ---
-        function spawnCrate() {
-            const c = document.getElementById('supply-crate');
-            c.style.display = 'block'; c.style.left = '-10%'; c.style.top = Math.random() * 80 + 10 + '%';
-            setTimeout(() => { c.style.display = 'none'; }, 10000);
-        }
-        function claimCrate() {
-            balance += 50000; msg("CRATE LOOTED +₦50k"); sfx('success');
-            document.getElementById('supply-crate').style.display = 'none'; renderUI();
-        }
-        setInterval(spawnCrate, 60000);
-
-        // --- CHART & LOOP ---
+        // --- CHART ---
         let chartData = Array(50).fill(100);
         function drawChart() {
             const canvas = document.getElementById('priceChart'); const ctx = canvas.getContext('2d');
@@ -436,25 +512,8 @@
             setTimeout(() => requestAnimationFrame(drawChart), 100);
         }
 
-        setInterval(()=>{
-            ventures.forEach(v => v.rev += 1000);
-            if(agents.length>0) balance+=agents.length*100;
-            if(detection > 0) { detection -= 1; document.getElementById('detect-bar').style.width = detection + "%"; }
-            influence += 0.1; // Passive Influence Gen
-        }, 1000);
-
-        // --- UTILS ---
-        function toggleModal(id){ sfx('click'); const e=document.getElementById(id); e.style.display=(e.style.display==='flex')?'none':'flex'; }
-        function msg(t){ const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
-        function toggleCurrency(){ currency=currency==="NGN"?"USD":"NGN"; renderUI(); sfx('click'); }
-        function saveSettings(){ userName=document.getElementById('set-name').value; saveData(); renderUI(); toggleModal('settings-overlay'); }
-        function processTransfer(){ pay(document.getElementById('send-amt').value, 'Transfer'); toggleModal('send-overlay'); }
-        function godMode(){ balance+=10000000; renderUI(); msg("GOD MODE"); sfx('success'); }
-        function openMap(){ toggleModal('map-overlay'); document.getElementById('nexus-map').innerHTML="<div class='nexus-grid'></div>"; agents.forEach(a=>{document.getElementById('nexus-map').innerHTML+=`<div class='map-node' style='top:${Math.random()*80+10}%; left:${Math.random()*80+10}%;'></div>`}); }
-        function sendMsg(){ const i=document.getElementById('user-input'); if(i.value){ document.getElementById('chat-box').innerHTML+=`<div class="msg msg-user">${i.value}</div>`; i.value=""; sfx('click'); } }
-        function injectPower(){ balance+=150000; msg("RESTORED"); sfx('success'); document.getElementById('inject-btn').style.display='none'; }
-
         setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})},1000);
+        setTimeout(()=>{ if(agents.length>0 && Math.random()>0.9) document.getElementById('call-overlay').style.display='flex'; }, 30000);
     </script>
 </body>
 </html>
