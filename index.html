@@ -3,63 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>LivenJet | UI Polish</title>
+    <title>LivenJet | Desktop Command</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; --purple: #d000ff; }
-        body { background-color: #000; color: var(--accent); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; user-select: none; transition: 0.5s; perspective: 1000px; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
         
+        /* SCROLLBAR CUSTOMIZATION (PC ONLY) */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; }
+
+        body { 
+            background-color: #050505; 
+            color: var(--accent); 
+            font-family: 'Segoe UI', sans-serif; 
+            text-align: center; 
+            margin: 0; 
+            overflow: hidden; 
+            user-select: none; 
+            transition: 0.5s; 
+            perspective: 1000px;
+            /* PC CENTER ALIGNMENT */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            cursor: crosshair; /* TACTICAL CURSOR */
+            background-image: radial-gradient(#111 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* --- THE DEVICE FRAME (PC CONTAINER) --- */
+        #device-frame {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+            box-shadow: none;
+        }
+
+        /* DESKTOP SPECIFIC MEDIA QUERY */
+        @media (min-width: 768px) {
+            #device-frame {
+                width: 400px; /* Phone width */
+                height: 85vh; /* Phone height relative to screen */
+                border-radius: 40px;
+                border: 8px solid #222;
+                box-shadow: 0 0 100px rgba(255, 215, 0, 0.1), inset 0 0 20px #000;
+                transition: 0.3s;
+            }
+            body::before {
+                content: "SECURE TERMINAL // LOS-01";
+                position: absolute;
+                bottom: 20px;
+                left: 20px;
+                color: #333;
+                font-family: monospace;
+                font-size: 12px;
+            }
+        }
+
         /* --- VISUAL FX --- */
-        .scanlines { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2)); background-size: 100% 4px; pointer-events: none; z-index: 9998; opacity: 0.3; }
+        .scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2)); background-size: 100% 4px; pointer-events: none; z-index: 9998; opacity: 0.3; }
         .tilt-card { transition: transform 0.1s; transform-style: preserve-3d; }
         .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
         
         /* --- SINGULARITY MODE --- */
-        body.singularity { --accent: var(--purple); --green: var(--ice); }
-        body.singularity .neural-core { box-shadow: 0 0 50px var(--purple); animation: pulseFast 0.5s infinite; }
+        #device-frame.singularity { --accent: var(--purple); --green: var(--ice); border-color: var(--purple); box-shadow: 0 0 100px rgba(208, 0, 255, 0.3); }
+        #device-frame.singularity .neural-core { box-shadow: 0 0 50px var(--purple); animation: pulseFast 0.5s infinite; }
         @keyframes pulseFast { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         /* --- BOOT & LOCK --- */
-        #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 20px; box-sizing: border-box; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+        #boot-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 20px; box-sizing: border-box; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
         .boot-line { margin: 2px 0; animation: typeLine 0.1s; }
-        #launchpad { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
+        #launchpad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
         .scanner-box { width: 100px; height: 100px; border: 2px solid #333; border-radius: 20px; position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); }
         .scan-line { width: 100%; height: 4px; background: #0f0; position: absolute; top: 0; animation: scan 2s linear infinite; }
         @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
         .auth-btn { background: var(--accent); border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 30px; cursor: pointer; animation: pulse 2s infinite; }
 
-        /* --- HEADER ELEMENTS --- */
-        .avatar-btn { width: 35px; height: 35px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 20px; z-index: 2001; cursor: pointer; transition: 0.5s; }
-        .currency-btn { width: 35px; height: 35px; background: #222; border: 1px solid var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 65px; z-index: 2001; cursor: pointer; font-size: 10px; font-weight: bold; }
-        .settings-btn { width: 35px; height: 35px; background: #222; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: calc(20px + env(safe-area-inset-top)); right: 20px; z-index: 2001; cursor: pointer; font-size: 18px; }
-        
-        .ticker-wrap { width: 100%; background: transparent; padding: 5px 0; position: fixed; top: calc(65px + env(safe-area-inset-top)); z-index: 1000; font-family: monospace; font-size: 10px; color: #666; pointer-events: none; }
+        /* --- HEADER ELEMENTS (ABSOLUTE FOR CONTAINER) --- */
+        .avatar-btn { width: 35px; height: 35px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: absolute; top: 40px; left: 20px; z-index: 2001; cursor: pointer; transition: 0.5s; }
+        .currency-btn { width: 35px; height: 35px; background: #222; border: 1px solid var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: 40px; left: 65px; z-index: 2001; cursor: pointer; font-size: 10px; font-weight: bold; }
+        .settings-btn { width: 35px; height: 35px; background: #222; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: 40px; right: 20px; z-index: 2001; cursor: pointer; font-size: 18px; }
+        .ticker-wrap { width: 100%; background: transparent; padding: 5px 0; position: absolute; top: 80px; z-index: 1000; font-family: monospace; font-size: 10px; color: #666; pointer-events: none; }
 
         /* --- NEURAL CORE --- */
-        .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 100px auto 10px; position: relative; animation: core-pulse 3s infinite; cursor: pointer; transition: 0.5s; z-index: 500; }
+        .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 110px auto 10px; position: relative; animation: core-pulse 3s infinite; cursor: pointer; transition: 0.5s; z-index: 500; }
         .core-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40%; height: 40%; background: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--accent); }
         @keyframes core-pulse { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } }
 
-        /* --- MAIN APP --- */
-        #app-interface { display: none; opacity: 0; transition: 1s; padding-bottom: 150px; overflow-y: scroll; height: 100vh; }
-        .pillar { display: none; padding: 20px; animation: slideIn 0.4s ease; }
+        /* --- MAIN APP STRUCTURE --- */
+        #app-interface { display: none; opacity: 0; transition: 1s; padding-bottom: 120px; overflow-y: auto; height: 100%; box-sizing: border-box; }
+        .pillar { display: none; padding: 20px; animation: slideIn 0.4s ease; padding-bottom: 100px; }
         .active { display: block; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
         
+        /* --- CARDS & UI --- */
         .intel-card { background: rgba(15,15,15,0.9); border: 1px solid #222; border-bottom: 2px solid var(--accent); border-radius: 16px; padding: 20px; margin: 15px auto; max-width: 340px; text-align: left; transition: 0.3s; }
         .btn { background: var(--accent); border: none; padding: 15px; width: 100%; border-radius: 12px; margin-top: 10px; font-weight: bold; cursor: pointer; }
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* --- DOCK (FIXED FOR IOS) --- */
+        /* --- DOCK (ABSOLUTE) --- */
         .dock { 
-            position: fixed; 
-            bottom: calc(30px + env(safe-area-inset-bottom)); /* LIFTED UP */
+            position: absolute; 
+            bottom: 30px; 
             left: 50%; 
             transform: translateX(-50%); 
             width: 90%; 
-            max-width: 400px; 
             background: rgba(10,10,10,0.95); 
             border: 1px solid #333; 
             border-radius: 25px; 
@@ -68,38 +123,25 @@
             padding: 18px 0; 
             z-index: 1000; 
             backdrop-filter: blur(10px); 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
         }
-        .dock-item { font-size: 24px; opacity: 0.5; transition: 0.3s; cursor: pointer; } /* Increased opacity */
+        .dock-item { font-size: 24px; opacity: 0.5; transition: 0.3s; cursor: pointer; }
         .active-icon { opacity: 1; color: var(--accent); transform: translateY(-5px); text-shadow: 0 0 10px var(--accent); }
 
-        /* --- NEWS TICKER (FIXED FOR IOS) --- */
-        .news-ticker { 
-            position: fixed; 
-            bottom: calc(95px + env(safe-area-inset-bottom)); /* LIFTED ABOVE DOCK */
-            width: 100%; 
-            background: #111; 
-            border-top: 1px solid #333; 
-            padding: 5px 0; 
-            overflow: hidden; 
-            white-space: nowrap; 
-            z-index: 900; 
-        }
+        /* --- NEWS TICKER (ABSOLUTE) --- */
+        .news-ticker { position: absolute; bottom: 95px; width: 100%; background: #111; border-top: 1px solid #333; padding: 5px 0; overflow: hidden; white-space: nowrap; z-index: 900; }
         .ticker-content { display: inline-block; padding-left: 100%; animation: scroll 20s linear infinite; color: #888; font-size: 10px; font-family: monospace; }
         @keyframes scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
-        /* --- WIDGETS & MODULES --- */
+        /* --- COMPONENTS --- */
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
         .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
         select.app-input { appearance: none; }
-        
         .action-grid { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
         .action-btn { flex: 1; background: #1a1a1a; border-radius: 12px; padding: 15px 5px; cursor: pointer; border: 1px solid #333; transition: 0.2s; }
         .action-btn:active { background: #333; transform: scale(0.95); }
         .action-icon { font-size: 20px; margin-bottom: 5px; }
         .action-text { font-size: 10px; font-weight: bold; color: #ccc; }
-
         .ledger-box { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; padding-right: 5px; }
         .tx-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; animation: fadeIn 0.5s; }
         .tx-icon { width: 30px; height: 30px; background: #222; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 10px; }
@@ -107,7 +149,6 @@
         .tx-title { font-size: 12px; color: #fff; margin: 0; font-weight: bold; }
         .tx-date { font-size: 10px; color: #666; margin: 0; }
         .tx-amt { font-size: 12px; font-weight: bold; color: #ff4444; }
-        
         .venture-card { background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; position: relative; overflow: hidden; }
         .venture-card.critical { border: 1px solid var(--red); animation: shake 0.5s infinite; }
         .venture-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -117,42 +158,33 @@
         .venture-bar { height: 100%; background: var(--green); width: 0%; transition: width 1s linear; }
         .venture-actions { display: flex; gap: 10px; margin-top: 10px; }
         .venture-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; cursor: pointer; font-size: 10px; }
-        
         .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .asset-item { background: #222; border: 1px solid #444; border-radius: 10px; padding: 10px; opacity: 0.5; transition: 0.3s; }
         .asset-item.owned { opacity: 1; border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
         .asset-icon { font-size: 30px; margin-bottom: 5px; }
         .asset-name { font-size: 10px; font-weight: bold; color: #fff; }
         .asset-cost { font-size: 9px; color: var(--accent); }
-
         .grid-monitor { width: 100%; height: 100px; background: #000; border: 1px solid #333; margin-top: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .sine-wave { position: absolute; width: 200%; height: 100%; background: repeating-linear-gradient(90deg, transparent 0, transparent 20px, var(--accent) 20px, var(--accent) 22px); opacity: 0.2; animation: wave 2s linear infinite; }
         @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
         .grid-status-text { z-index: 2; font-family: monospace; font-size: 24px; font-weight: bold; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
         .grid-fail { color: var(--red); text-shadow: 0 0 10px var(--red); animation: blinkRed 0.5s infinite; }
         @keyframes blinkRed { 50% { opacity: 0.5; } }
-
-        /* --- MODAL OVERLAYS --- */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        #call-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .caller-icon { width: 100px; height: 100px; background: #222; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; animation: pulse 1s infinite; }
-        .call-actions { display: flex; gap: 40px; margin-top: 50px; }
-        .call-btn { width: 70px; height: 70px; border-radius: 50%; border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .accept { background: #0f0; box-shadow: 0 0 20px #0f0; }
-        .decline { background: #f00; box-shadow: 0 0 20px #f00; }
-        
-        #drone-layer { position: fixed; top: 20%; left: -100px; z-index: 6000; font-size: 40px; transition: 0.1s; pointer-events: none; }
-        .fly-anim { animation: flyOver 3s linear forwards; }
-        @keyframes flyOver { 0% { left: -100px; transform: rotate(10deg); } 50% { left: 50%; transform: rotate(0deg); } 100% { left: 120%; transform: rotate(-10deg); } }
-        
-        #red-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.3); z-index: 7000; display: none; pointer-events: none; mix-blend-mode: overlay; }
-        #breach-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .breach-box { border: 2px solid var(--red); padding: 20px; border-radius: 15px; width: 80%; background: #100; text-align: center; box-shadow: 0 0 50px var(--red); }
-        .defend-bar-bg { width: 100%; height: 20px; background: #300; margin: 20px 0; border: 1px solid var(--red); }
-        .defend-bar-fill { width: 0%; height: 100%; background: var(--red); transition: 0.1s; }
-        .defend-btn { background: var(--red); color: #fff; font-size: 20px; font-weight: bold; border: none; padding: 20px; width: 100%; border-radius: 10px; cursor: pointer; animation: pulse 0.5s infinite; }
-        
-        /* CHAT */
+        .credit-meter { width: 150px; height: 150px; border-radius: 50%; border: 10px solid #222; border-top: 10px solid var(--accent); margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: spin-load 2s ease-out; position: relative; }
+        .credit-score { font-size: 40px; font-weight: bold; color: #fff; }
+        .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; }
+        .chart-bar { width: 12%; background: #333; border-radius: 4px 4px 0 0; transition: 0.5s; animation: growBar 1s ease-out; }
+        .chart-bar.active { background: var(--green); }
+        .miner-box { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-top: 15px; text-align: left; font-family: monospace; font-size: 10px; color: #0f0; height: 80px; overflow: hidden; display: none; }
+        .hash-line { margin: 2px 0; }
+        .market-item { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding:15px 0; }
+        .market-btn { background:#333; color:#0f0; border:1px solid #0f0; padding:5px 10px; border-radius:5px; font-size:10px; cursor:pointer; }
+        .avatar-glow { box-shadow: 0 0 15px var(--gold), 0 0 30px var(--gold); border: 2px solid #fff !important; }
+        .hack-bar-container { width: 100%; height: 30px; background: #222; border: 1px solid #444; border-radius: 15px; position: relative; overflow: hidden; margin: 30px 0; }
+        .hack-zone { width: 40px; height: 100%; background: rgba(0, 255, 0, 0.3); border-left: 1px solid #0f0; border-right: 1px solid #0f0; position: absolute; left: 50%; transform: translateX(-50%); }
+        .hack-cursor { width: 4px; height: 100%; background: #fff; position: absolute; left: 0; box-shadow: 0 0 10px #fff; }
+        .cursor-moving { animation: moveCursor 1s linear infinite alternate; }
+        @keyframes moveCursor { 0% { left: 0%; } 100% { left: 98%; } }
         .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; }
         .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; }
         .chat-input-area { padding: 10px; background: #222; display: flex; gap: 10px; }
@@ -160,33 +192,13 @@
         .msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; font-size: 12px; max-width: 70%; }
         .msg-ai { background: #333; color: #fff; border-top-left-radius: 0; }
         .msg-user { background: var(--accent); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
-        .fab-chat { 
-            position: fixed; 
-            bottom: calc(115px + env(safe-area-inset-bottom)); /* LIFTED HIGHER */
-            right: 20px; 
-            width: 50px; 
-            height: 50px; 
-            background: var(--accent); 
-            border-radius: 50%; 
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            justify-content: center; 
-            font-size: 24px; 
-            box-shadow: 0 0 20px rgba(255,215,0,0.4); 
-            z-index: 4000; 
-            cursor: pointer; 
-        }
+        .fab-chat { position: absolute; bottom: 110px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; }
         .fab-label { font-size: 8px; color: #000; font-weight: bold; margin-top: -5px; }
-
-        /* HACK GAME */
-        .hack-bar-container { width: 100%; height: 30px; background: #222; border: 1px solid #444; border-radius: 15px; position: relative; overflow: hidden; margin: 30px 0; }
-        .hack-zone { width: 40px; height: 100%; background: rgba(0, 255, 0, 0.3); border-left: 1px solid #0f0; border-right: 1px solid #0f0; position: absolute; left: 50%; transform: translateX(-50%); }
-        .hack-cursor { width: 4px; height: 100%; background: #fff; position: absolute; left: 0; box-shadow: 0 0 10px #fff; }
-        .cursor-moving { animation: moveCursor 1s linear infinite alternate; }
-        @keyframes moveCursor { 0% { left: 0%; } 100% { left: 98%; } }
-
-        /* MISC */
+        .trophy-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .trophy { background: #111; border: 1px solid #333; border-radius: 10px; padding: 10px; opacity: 0.3; transition: 0.3s; }
+        .trophy.unlocked { opacity: 1; border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+        .trophy-icon { font-size: 24px; margin-bottom: 5px; }
+        .trophy-name { font-size: 8px; color: #888; text-transform: uppercase; }
         .receipt-card { background: #fff; color: #000; border: none; }
         .dashed-line { border-bottom: 2px dashed #ccc; margin: 20px 0; }
         .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
@@ -210,135 +222,133 @@
         .nexus-map { width: 100%; height: 300px; background: #001; border: 1px solid #333; border-radius: 10px; position: relative; overflow: hidden; background-image: radial-gradient(#222 1px, transparent 1px); background-size: 20px 20px; }
         .nexus-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; animation: gridScroll 10s linear infinite; opacity: 0.3; background: linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px), linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px); background-size: 40px 40px; }
         @keyframes gridScroll { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
-        .trophy { background: #111; border: 1px solid #333; border-radius: 10px; padding: 10px; opacity: 0.3; transition: 0.3s; }
-        .trophy.unlocked { opacity: 1; border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
-        .trophy-icon { font-size: 24px; margin-bottom: 5px; }
-        .trophy-name { font-size: 8px; color: #888; text-transform: uppercase; }
         .frozen { border-color: var(--ice) !important; background: linear-gradient(145deg, #002, #000) !important; box-shadow: 0 0 20px var(--ice) !important; }
         .frozen-text { color: var(--ice) !important; text-shadow: 0 0 10px var(--ice); }
+
+        /* --- MODAL OVERLAYS (ABSOLUTE FOR CONTAINER) --- */
+        .modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        #call-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        #red-alert { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.3); z-index: 7000; display: none; pointer-events: none; mix-blend-mode: overlay; }
+        #breach-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        #boot-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #launchpad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
 
-    <div class="scanlines"></div>
-    <div id="boot-screen"></div>
-    <div id="red-alert"></div>
+    <div id="device-frame">
+        <div class="scanlines"></div>
+        <div id="boot-screen"></div>
+        <div id="red-alert"></div>
 
-    <div id="call-overlay"><div class="caller-icon">👤</div><div style="font-size:20px; font-weight:bold; margin-bottom:5px;">UNKNOWN NUMBER</div><div style="font-size:12px; color:#888;">INCOMING SECURE CALL...</div><div class="call-actions"><button class="call-btn decline" onclick="endCall()">✕</button><button class="call-btn accept" onclick="answerCall()">📞</button></div></div>
-    <div id="drone-layer">🛸</div>
-    <div id="breach-overlay"><div class="breach-box"><h1 style="color:var(--red); font-size:24px; margin:0;">⚠️ SYSTEM BREACH</h1><p style="color:#fff; font-size:12px;">HACKER DETECTED! FUNDS AT RISK!</p><div class="defend-bar-bg"><div class="defend-bar-fill" id="defend-bar"></div></div><button class="defend-btn" onclick="chargeFirewall()">DEPLOY FIREWALL</button></div></div>
+        <div id="call-overlay"><div class="caller-icon">👤</div><div style="font-size:20px; font-weight:bold; margin-bottom:5px;">UNKNOWN NUMBER</div><div style="font-size:12px; color:#888;">INCOMING SECURE CALL...</div><div class="call-actions"><button class="call-btn decline" onclick="endCall()">✕</button><button class="call-btn accept" onclick="answerCall()">📞</button></div></div>
+        <div id="drone-layer">🛸</div>
+        <div id="breach-overlay"><div class="breach-box"><h1 style="color:var(--red); font-size:24px; margin:0;">⚠️ SYSTEM BREACH</h1><p style="color:#fff; font-size:12px;">HACKER DETECTED! FUNDS AT RISK!</p><div class="defend-bar-bg"><div class="defend-bar-fill" id="defend-bar"></div></div><button class="defend-btn" onclick="chargeFirewall()">DEPLOY FIREWALL</button></div></div>
 
-    <div id="assets-overlay" class="modal-overlay">
-        <div class="modal-card">
-            <h2 style="color:var(--gold);">ASSET VAULT</h2>
-            <div class="asset-grid" id="asset-list">
+        <div id="assets-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ASSET VAULT</h2><div class="asset-grid" id="asset-list"></div><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('assets-overlay')">CLOSE VAULT</button></div></div>
+        <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--ice);">BUSINESS EMPIRE</h2><div id="active-ventures"></div><div style="margin-top:20px; border-top:1px dashed #333; padding-top:20px;"><h3>START NEW VENTURE</h3><div class="input-group"><label class="input-label">BUSINESS NAME</label><input type="text" class="app-input" id="biz-name" placeholder="e.g. Lagos Tech"></div><div class="input-group"><label class="input-label">TYPE</label><select class="app-input" id="biz-type"><option value="retail">RETAIL CHAIN (Low Risk)</option><option value="tech">TECH STARTUP (Med Risk)</option><option value="oil">OIL RIG (High Yield)</option></select></div><p style="font-size:10px; color:#888;">SEED CAPITAL REQUIRED: ₦100,000</p><button class="btn-full" onclick="createBusiness()">LAUNCH ENTERPRISE</button></div><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
+        <div id="trophy-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ACHIEVEMENTS</h2><div class="trophy-grid"><div class="trophy" id="badge-breach"><div class="trophy-icon">🛡️</div><div class="trophy-name">SURVIVOR</div></div><div class="trophy" id="badge-hack"><div class="trophy-icon">📡</div><div class="trophy-name">HACKER</div></div><div class="trophy" id="badge-mine"><div class="trophy-icon">⛏️</div><div class="trophy-name">MINER</div></div><div class="trophy" id="badge-rich"><div class="trophy-icon">💰</div><div class="trophy-name">TYCOON</div></div><div class="trophy" id="badge-god"><div class="trophy-icon">⚡</div><div class="trophy-name">GOD MODE</div></div><div class="trophy" id="badge-agent"><div class="trophy-icon">🕵️</div><div class="trophy-name">COMMANDER</div></div><div class="trophy" id="badge-trade"><div class="trophy-icon">⚖️</div><div class="trophy-name">TRADER</div></div><div class="trophy" id="badge-grid"><div class="trophy-icon">🏭</div><div class="trophy-name">GRID MASTER</div></div><div class="trophy" id="badge-ceo"><div class="trophy-icon">👔</div><div class="trophy-name">CEO</div></div><div class="trophy" id="badge-war"><div class="trophy-icon">⚔️</div><div class="trophy-name">WARLORD</div></div><div class="trophy" id="badge-apex"><div class="trophy-icon">🟣</div><div class="trophy-name">APEX</div></div></div><button class="btn-full" onclick="toggleModal('trophy-overlay')">CLOSE</button></div></div>
+        <div id="hack-overlay" class="modal-overlay"><div class="modal-card" style="border-color:red;"><h2 style="margin: 0 0 10px 0; color:red;">SATELLITE UPLINK</h2><div class="hack-bar-container"><div class="hack-zone"></div><div class="hack-cursor cursor-moving" id="hack-cursor"></div></div><div style="font-family:monospace; color:#fff; font-size:12px; margin:20px 0;" id="hack-log">WAITING FOR SIGNAL...</div><button class="btn-full" style="background:red;" onclick="lockSignal()">LOCK SIGNAL</button><button class="btn-full" style="background:#222; border:1px solid #333; color:#fff;" onclick="toggleModal('hack-overlay')">ABORT</button></div></div>
+        <div id="market-overlay" class="modal-overlay"><div class="modal-card" style="border-color:#0f0;"><h2 style="color:#0f0;">BLACK MARKET</h2><div style="background:#000; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #333;">LJN BALANCE: <span id="market-bal" style="color:#0f0; font-weight:bold;">0.00</span></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">GHOST VPN</div></div><button class="market-btn" onclick="buyItem('vpn', 2.5)">2.5 LJN</button></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">NEURAL HALO</div></div><button class="market-btn" onclick="buyItem('halo', 5.0)">5.0 LJN</button></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">CYBER NUKE</div></div><button class="market-btn" onclick="buyItem('nuke', 5.0)">5.0 LJN</button></div><button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('market-overlay')">CLOSE</button></div></div>
+        <div id="agent-overlay" class="modal-overlay"><div class="modal-card"><h2>DEPLOY AGENT</h2><div class="input-group"><label class="input-label">TARGET CITY</label><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>New York</option><option>Tokyo</option></select></div><p style="font-size:12px; color:var(--accent);">COST: ₦50,000</p><button class="btn-full" onclick="deployAgent()">AUTHORIZE DEPLOYMENT</button><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('agent-overlay')">CANCEL</button></div></div>
+        <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>CONTROL CENTER</h2><div class="input-group"><label class="input-label">DISPLAY NAME</label><input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE"></div><div class="input-group"><label class="input-label">SYSTEM THEME</label><div style="display:flex; gap:10px;"><button class="btn" style="margin:0; flex:1;" onclick="toggleTheme('gold')">GOLD</button><button class="btn" style="margin:0; flex:1; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button></div></div><div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:10px; color:#888;">PANIC PROTOCOL</span><button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="activatePanic()">💀</button></div><button class="btn-full" onclick="saveSettings()">SAVE</button><button class="btn-outline" style="border-color:#ff4444; color:#ff4444;" onclick="hardReset()">HARD RESET</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
+        <div id="scan-overlay" class="modal-overlay"><div class="modal-card"><h2>SCAN & PAY</h2><div class="camera-view"><div class="laser-beam"></div></div><p id="scan-status" style="color:var(--accent); font-size:12px; margin-top:15px; height:15px;"></p><button class="btn-full" onclick="toggleModal('scan-overlay')">CANCEL</button></div></div>
+        <div id="loan-overlay" class="modal-overlay"><div class="modal-card"><h2>CREDIT SCAN</h2><div id="credit-scanner" style="display:block;"><p style="font-size:10px; color:#888;">SCANNING...</p><div style="width:100%; height:4px; background:#222; margin:20px 0;"><div style="width:100%; height:100%; background:var(--accent); animation:growBar 2s;"></div></div></div><div id="credit-result" style="display:none;"><div class="credit-meter"><div class="credit-score">780</div></div><h1 style="margin:0; font-size:30px; color:var(--green);">₦ 500,000</h1><button class="btn-full" onclick="disburseLoan()">ACCEPT</button></div></div></div>
+        <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>SEND MONEY</h2><div class="input-group"><label class="input-label">ACCOUNT</label><input type="number" class="app-input" id="send-acc" oninput="verifyAccount()"></div><div id="verify-box" style="display:none; background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:10px;"><p id="verified-name" style="color:var(--green); font-weight:bold; margin:0;">...</p></div><div class="input-group"><label class="input-label">AMOUNT</label><input type="number" class="app-input" id="send-amt"></div><button class="btn-full" onclick="processTransfer()">CONFIRM</button><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
+        <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>SATELLITE</h2><div class="map-grid" id="nexus-map"><div class="nexus-grid"></div></div><p style="font-size:10px; color:var(--green); margin-top:10px;" id="map-status">SYSTEM SECURE</p><button class="btn-full" onclick="toggleModal('map-overlay')">CLOSE NEXUS</button></div></div>
+        <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:10px; background:#222;">TERMINAL <span onclick="toggleModal('chat-overlay')" style="float:right;">✕</span></div><div class="chat-body" id="chat-box"></div><div class="chat-input-area"><input type="text" class="chat-input" id="user-input" placeholder="Type /help for codes"><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div></div></div>
+        <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--accent);">PASSPORT</h2><div style="width:60px; height:60px; background:#222; border:2px solid var(--accent); border-radius:50%; margin:10px auto; display:flex; align-items:center; justify-content:center; font-size:24px;" id="pass-avatar">SA</div><div class="pass-row"><span>NAME</span><span style="color:var(--accent);" id="pass-name">STEVEN</span></div><div class="pass-row"><span>CLEARANCE</span><span style="color:var(--accent); cursor:pointer;" id="pass-lvl" onclick="openTrophies()">LEVEL 5 (TAP)</span></div><div class="pass-row"><span>IP</span><span style="color:var(--accent);" id="pass-ip">102.88.xx</span></div><button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
+        <div id="receipt-overlay" class="modal-overlay"><div class="modal-card receipt-card"><h2 id="rec-title">SUCCESS</h2><div class="dashed-line"></div><div style="display:flex; justify-content:space-between;"><span>AMT</span><span id="rec-amt">₦ 0</span></div><div style="display:flex; justify-content:space-between;"><span>TO</span><span id="rec-to">...</span></div><button class="btn-full" style="background:#000; color:#fff;" onclick="closeReceipt()">DOWNLOAD</button></div></div>
+
+        <div class="news-ticker"><div class="ticker-content" id="news-text">LIVENJET APEX OS ONLINE ... INFLUENCE MULTIPLIERS ACTIVE ... SYSTEM DOMINANCE ...</div></div>
+
+        <div id="launchpad">
+            <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
+            <p style="color: #666; font-size: 10px; margin-bottom: 40px;">APEX OS v39.0</p>
+            <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
+            <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
+            <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
+        </div>
+
+        <div id="app-interface">
+            <div class="ticker-wrap">
+                <span style="font-weight:bold; color:var(--ice);" id="influence-score">INFLUENCE: 0%</span> | 
+                <span onclick="restorePanic()">SYSTEM NODE: LOS-01</span> | <span id="clock"></span>
+            </div>
+            <div class="avatar-btn" onclick="toggleModal('passport-overlay')" id="main-avatar">SA</div>
+            <div class="currency-btn" onclick="toggleCurrency()">₦ / $</div>
+            <div class="settings-btn" onclick="toggleModal('settings-overlay')">⚙️</div>
+            
+            <div class="neural-core" onclick="handleCoreClick()" id="neural-core"><div class="core-inner"></div></div>
+            <div style="font-family: monospace; font-size: 10px; color: #888; height: 20px;" id="ai-msg">IDENTITY VERIFIED.</div>
+
+            <div id="home" class="pillar active">
+                <div class="intel-card tilt-card">
+                    <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY</p>
+                    <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal" onclick="toggleStealth()">₦ 50,000.00</h2>
+                    <div class="action-grid">
+                        <div class="action-btn" onclick="toggleModal('send-overlay')"><div class="action-icon">💸</div><div class="action-text">SEND</div></div>
+                        <div class="action-btn" onclick="toggleModal('ventures-overlay')"><div class="action-icon" style="color:var(--ice);">🏢</div><div class="action-text">VENTURES</div></div>
+                        <div class="action-btn" onclick="openAssets()"><div class="action-icon" style="color:var(--gold);">🏛️</div><div class="action-text">ASSETS</div></div>
+                        <div class="action-btn" onclick="msg('Deposit via USSD *991#')"><div class="action-icon">➕</div><div class="action-text">ADD</div></div>
+                    </div>
+                    <p style="font-size: 9px; color: #666; margin-top: 20px;">RECENT ACTIVITY</p>
+                    <div class="ledger-box" id="ledger-list"></div>
                 </div>
-            <button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('assets-overlay')">CLOSE VAULT</button>
-        </div>
-    </div>
+                <button class="btn" onclick="msg('Syncing Global Accounts...')">SYNC NETWORK</button>
+            </div>
 
-    <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--ice);">BUSINESS EMPIRE</h2><div id="active-ventures"></div><div style="margin-top:20px; border-top:1px dashed #333; padding-top:20px;"><h3>START NEW VENTURE</h3><div class="input-group"><label class="input-label">BUSINESS NAME</label><input type="text" class="app-input" id="biz-name" placeholder="e.g. Lagos Tech"></div><div class="input-group"><label class="input-label">TYPE</label><select class="app-input" id="biz-type"><option value="retail">RETAIL CHAIN (Low Risk)</option><option value="tech">TECH STARTUP (Med Risk)</option><option value="oil">OIL RIG (High Yield)</option></select></div><p style="font-size:10px; color:#888;">SEED CAPITAL REQUIRED: ₦100,000</p><button class="btn-full" onclick="createBusiness()">LAUNCH ENTERPRISE</button></div><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
-    <div id="trophy-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ACHIEVEMENTS</h2><div class="trophy-grid"><div class="trophy" id="badge-breach"><div class="trophy-icon">🛡️</div><div class="trophy-name">SURVIVOR</div></div><div class="trophy" id="badge-hack"><div class="trophy-icon">📡</div><div class="trophy-name">HACKER</div></div><div class="trophy" id="badge-mine"><div class="trophy-icon">⛏️</div><div class="trophy-name">MINER</div></div><div class="trophy" id="badge-rich"><div class="trophy-icon">💰</div><div class="trophy-name">TYCOON</div></div><div class="trophy" id="badge-god"><div class="trophy-icon">⚡</div><div class="trophy-name">GOD MODE</div></div><div class="trophy" id="badge-agent"><div class="trophy-icon">🕵️</div><div class="trophy-name">COMMANDER</div></div><div class="trophy" id="badge-trade"><div class="trophy-icon">⚖️</div><div class="trophy-name">TRADER</div></div><div class="trophy" id="badge-grid"><div class="trophy-icon">🏭</div><div class="trophy-name">GRID MASTER</div></div><div class="trophy" id="badge-ceo"><div class="trophy-icon">👔</div><div class="trophy-name">CEO</div></div><div class="trophy" id="badge-war"><div class="trophy-icon">⚔️</div><div class="trophy-name">WARLORD</div></div><div class="trophy" id="badge-apex"><div class="trophy-icon">🟣</div><div class="trophy-name">APEX</div></div></div><button class="btn-full" onclick="toggleModal('trophy-overlay')">CLOSE</button></div></div>
-    <div id="hack-overlay" class="modal-overlay"><div class="modal-card" style="border-color:red;"><h2 style="margin: 0 0 10px 0; color:red;">SATELLITE UPLINK</h2><div class="hack-bar-container"><div class="hack-zone"></div><div class="hack-cursor cursor-moving" id="hack-cursor"></div></div><div style="font-family:monospace; color:#fff; font-size:12px; margin:20px 0;" id="hack-log">WAITING FOR SIGNAL...</div><button class="btn-full" style="background:red;" onclick="lockSignal()">LOCK SIGNAL</button><button class="btn-full" style="background:#222; border:1px solid #333; color:#fff;" onclick="toggleModal('hack-overlay')">ABORT</button></div></div>
-    <div id="market-overlay" class="modal-overlay"><div class="modal-card" style="border-color:#0f0;"><h2 style="color:#0f0;">BLACK MARKET</h2><div style="background:#000; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #333;">LJN BALANCE: <span id="market-bal" style="color:#0f0; font-weight:bold;">0.00</span></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">GHOST VPN</div></div><button class="market-btn" onclick="buyItem('vpn', 2.5)">2.5 LJN</button></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">NEURAL HALO</div></div><button class="market-btn" onclick="buyItem('halo', 5.0)">5.0 LJN</button></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">CYBER NUKE</div></div><button class="market-btn" onclick="buyItem('nuke', 5.0)">5.0 LJN</button></div><button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('market-overlay')">CLOSE</button></div></div>
-    <div id="agent-overlay" class="modal-overlay"><div class="modal-card"><h2>DEPLOY AGENT</h2><div class="input-group"><label class="input-label">TARGET CITY</label><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>New York</option><option>Tokyo</option></select></div><p style="font-size:12px; color:var(--accent);">COST: ₦50,000</p><button class="btn-full" onclick="deployAgent()">AUTHORIZE DEPLOYMENT</button><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('agent-overlay')">CANCEL</button></div></div>
-    <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>CONTROL CENTER</h2><div class="input-group"><label class="input-label">DISPLAY NAME</label><input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE"></div><div class="input-group"><label class="input-label">SYSTEM THEME</label><div style="display:flex; gap:10px;"><button class="btn" style="margin:0; flex:1;" onclick="toggleTheme('gold')">GOLD</button><button class="btn" style="margin:0; flex:1; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button></div></div><div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:10px; color:#888;">PANIC PROTOCOL</span><button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="activatePanic()">💀</button></div><button class="btn-full" onclick="saveSettings()">SAVE</button><button class="btn-outline" style="border-color:#ff4444; color:#ff4444;" onclick="hardReset()">HARD RESET</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
-    <div id="scan-overlay" class="modal-overlay"><div class="modal-card"><h2>SCAN & PAY</h2><div class="camera-view"><div class="laser-beam"></div></div><p id="scan-status" style="color:var(--accent); font-size:12px; margin-top:15px; height:15px;"></p><button class="btn-full" onclick="toggleModal('scan-overlay')">CANCEL</button></div></div>
-    <div id="loan-overlay" class="modal-overlay"><div class="modal-card"><h2>CREDIT SCAN</h2><div id="credit-scanner" style="display:block;"><p style="font-size:10px; color:#888;">SCANNING...</p><div style="width:100%; height:4px; background:#222; margin:20px 0;"><div style="width:100%; height:100%; background:var(--accent); animation:growBar 2s;"></div></div></div><div id="credit-result" style="display:none;"><div class="credit-meter"><div class="credit-score">780</div></div><h1 style="margin:0; font-size:30px; color:var(--green);">₦ 500,000</h1><button class="btn-full" onclick="disburseLoan()">ACCEPT</button></div></div></div>
-    <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>SEND MONEY</h2><div class="input-group"><label class="input-label">ACCOUNT</label><input type="number" class="app-input" id="send-acc" oninput="verifyAccount()"></div><div id="verify-box" style="display:none; background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:10px;"><p id="verified-name" style="color:var(--green); font-weight:bold; margin:0;">...</p></div><div class="input-group"><label class="input-label">AMOUNT</label><input type="number" class="app-input" id="send-amt"></div><button class="btn-full" onclick="processTransfer()">CONFIRM</button><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
-    <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>SATELLITE</h2><div class="map-grid" id="nexus-map"><div class="nexus-grid"></div></div><p style="font-size:10px; color:var(--green); margin-top:10px;" id="map-status">SYSTEM SECURE</p><button class="btn-full" onclick="toggleModal('map-overlay')">CLOSE NEXUS</button></div></div>
-    <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:10px; background:#222;">TERMINAL <span onclick="toggleModal('chat-overlay')" style="float:right;">✕</span></div><div class="chat-body" id="chat-box"></div><div class="chat-input-area"><input type="text" class="chat-input" id="user-input" placeholder="Type /help for codes"><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div></div></div>
-    <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--accent);">PASSPORT</h2><div style="width:60px; height:60px; background:#222; border:2px solid var(--accent); border-radius:50%; margin:10px auto; display:flex; align-items:center; justify-content:center; font-size:24px;" id="pass-avatar">SA</div><div class="pass-row"><span>NAME</span><span style="color:var(--accent);" id="pass-name">STEVEN</span></div><div class="pass-row"><span>CLEARANCE</span><span style="color:var(--accent); cursor:pointer;" id="pass-lvl" onclick="openTrophies()">LEVEL 5 (TAP)</span></div><div class="pass-row"><span>IP</span><span style="color:var(--accent);" id="pass-ip">102.88.xx</span></div><button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
-    <div id="receipt-overlay" class="modal-overlay"><div class="modal-card receipt-card"><h2 id="rec-title">SUCCESS</h2><div class="dashed-line"></div><div style="display:flex; justify-content:space-between;"><span>AMT</span><span id="rec-amt">₦ 0</span></div><div style="display:flex; justify-content:space-between;"><span>TO</span><span id="rec-to">...</span></div><button class="btn-full" style="background:#000; color:#fff;" onclick="closeReceipt()">DOWNLOAD</button></div></div>
-
-    <div class="news-ticker"><div class="ticker-content" id="news-text">LIVENJET APEX OS ONLINE ... INFLUENCE MULTIPLIERS ACTIVE ... SYSTEM DOMINANCE ...</div></div>
-
-    <div id="launchpad">
-        <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">APEX OS v39.0 (IOS FIX)</p>
-        <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
-        <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
-        <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
-    </div>
-
-    <div id="app-interface">
-        <div class="ticker-wrap">
-            <span style="font-weight:bold; color:var(--ice);" id="influence-score">INFLUENCE: 0%</span> | 
-            <span onclick="restorePanic()">SYSTEM NODE: LOS-01</span> | <span id="clock"></span>
-        </div>
-        <div class="avatar-btn" onclick="toggleModal('passport-overlay')" id="main-avatar">SA</div>
-        <div class="currency-btn" onclick="toggleCurrency()">₦ / $</div>
-        <div class="settings-btn" onclick="toggleModal('settings-overlay')">⚙️</div>
-        
-        <div class="neural-core" onclick="handleCoreClick()" id="neural-core"><div class="core-inner"></div></div>
-        <div style="font-family: monospace; font-size: 10px; color: #888; height: 20px;" id="ai-msg">IDENTITY VERIFIED.</div>
-
-        <div id="home" class="pillar active">
-            <div class="intel-card tilt-card">
-                <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY</p>
-                <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal" onclick="toggleStealth()">₦ 50,000.00</h2>
-                <div class="action-grid">
-                    <div class="action-btn" onclick="toggleModal('send-overlay')"><div class="action-icon">💸</div><div class="action-text">SEND</div></div>
-                    <div class="action-btn" onclick="toggleModal('ventures-overlay')"><div class="action-icon" style="color:var(--ice);">🏢</div><div class="action-text">VENTURES</div></div>
-                    <div class="action-btn" onclick="openAssets()"><div class="action-icon" style="color:var(--gold);">🏛️</div><div class="action-text">ASSETS</div></div>
-                    <div class="action-btn" onclick="msg('Deposit via USSD *991#')"><div class="action-icon">➕</div><div class="action-text">ADD</div></div>
+            <div id="util" class="pillar">
+                <div class="intel-card tilt-card">
+                    <h3>INFRASTRUCTURE COMMAND</h3>
+                    <div class="grid-monitor"><div class="sine-wave"></div><div class="grid-status-text" id="grid-text">GRID: STABLE</div></div>
+                    <div style="margin-top:15px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <button class="btn" style="margin:0; background:#222; font-size:10px;" onclick="buyInfra('solar', 200000)">SOLAR FARM <br>₦200k</button>
+                        <button class="btn" style="margin:0; background:#222; font-size:10px;" onclick="buyInfra('nuke', 500000)">NUCLEAR NODE <br>₦500k</button>
+                    </div>
+                    <button class="btn" style="margin-top:10px; background:var(--red); display:none;" id="inject-btn" onclick="injectPower()">⚡ INJECT POWER</button>
                 </div>
-                <p style="font-size: 9px; color: #666; margin-top: 20px;">RECENT ACTIVITY</p>
-                <div class="ledger-box" id="ledger-list"></div>
+                <div class="intel-card tilt-card" style="margin-top:10px;"><h3>SMART VEND</h3><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;"><button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(1000, 'Power Unit', true)">⚡ 1,000</button><button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(2000, 'Data Plan', true)">📱 2,000</button></div></div>
             </div>
-            <button class="btn" onclick="msg('Syncing Global Accounts...')">SYNC NETWORK</button>
-        </div>
 
-        <div id="util" class="pillar">
-            <div class="intel-card tilt-card">
-                <h3>INFRASTRUCTURE COMMAND</h3>
-                <div class="grid-monitor"><div class="sine-wave"></div><div class="grid-status-text" id="grid-text">GRID: STABLE</div></div>
-                <div style="margin-top:15px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    <button class="btn" style="margin:0; background:#222; font-size:10px;" onclick="buyInfra('solar', 200000)">SOLAR FARM <br>₦200k</button>
-                    <button class="btn" style="margin:0; background:#222; font-size:10px;" onclick="buyInfra('nuke', 500000)">NUCLEAR NODE <br>₦500k</button>
+            <div id="logi" class="pillar">
+                <div class="intel-card tilt-card">
+                    <h3>WAR ROOM / ACTIVE AGENTS</h3>
+                    <div class="agent-list" id="agent-display"><div style="color:#666; font-size:10px; text-align:center; padding:10px;">NO AGENTS DEPLOYED</div></div>
+                    <button class="btn" onclick="toggleModal('agent-overlay')" style="margin-top:10px; font-size:10px;">+ DEPLOY AGENT (₦50k)</button>
                 </div>
-                <button class="btn" style="margin-top:10px; background:var(--red); display:none;" id="inject-btn" onclick="injectPower()">⚡ INJECT POWER</button>
+                <div class="intel-card tilt-card">
+                    <h3>GLOBAL COMMODITIES</h3>
+                    <div id="commodity-list" style="margin-top:10px;"></div>
+                </div>
+                <button class="btn" onclick="openMap()">OPEN NEXUS MAP</button>
+                <button class="btn" style="background:#000; border:1px solid red; color:red; margin-top:10px;" onclick="openHack()">OVERRIDE SATELLITE</button>
             </div>
-            <div class="intel-card tilt-card" style="margin-top:10px;"><h3>SMART VEND</h3><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;"><button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(1000, 'Power Unit', true)">⚡ 1,000</button><button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(2000, 'Data Plan', true)">📱 2,000</button></div></div>
-        </div>
 
-        <div id="logi" class="pillar">
-            <div class="intel-card tilt-card">
-                <h3>WAR ROOM / ACTIVE AGENTS</h3>
-                <div class="agent-list" id="agent-display"><div style="color:#666; font-size:10px; text-align:center; padding:10px;">NO AGENTS DEPLOYED</div></div>
-                <button class="btn" onclick="toggleModal('agent-overlay')" style="margin-top:10px; font-size:10px;">+ DEPLOY AGENT (₦50k)</button>
+            <div id="fina" class="pillar">
+                <div class="intel-card tilt-card" id="credit-card-ui" onclick="toggleFreeze()" style="cursor:pointer; border-color:#fff;">
+                    <p style="font-size: 10px;">PLATINUM CARD</p><h3 style="letter-spacing: 3px;" id="card-num">**** 8820</h3><p style="font-size: 10px; margin-top: 20px;" id="card-status">ACTIVE</p>
+                </div>
+                <div class="intel-card tilt-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0;">PORTFOLIO</h3><span style="font-size:10px; color:#0f0;">+12.5%</span></div>
+                    <div class="miner-box" id="miner-display">INITIALIZING...</div>
+                    <div class="asset-row"><div class="asset-info"><div class="asset-name">Bitcoin (BTC)</div><div class="asset-price" id="btc-price">$98,420</div></div><div style="text-align:right;"><button class="buy-btn" onclick="pay(5000, 'Bitcoin Inv')">BUY 5k</button></div></div>
+                    <div class="asset-row"><div class="asset-info"><div class="asset-name">LivenJet (LJN)</div><div class="asset-price" id="ljn-bal">0.00 LJN</div></div><div style="text-align:right;"><button class="buy-btn" onclick="startMining()" id="mine-btn">START MINING</button><button class="buy-btn" style="background:#0f0; color:#000; margin-top:5px;" onclick="openMarket()">MARKET</button></div></div>
+                    <button class="btn" style="margin-top:10px; border:1px solid var(--accent); background:#000; color:var(--accent);" onclick="rigNews()">RIG MARKET (₦50k)</button>
+                </div>
             </div>
-            <div class="intel-card tilt-card">
-                <h3>GLOBAL COMMODITIES</h3>
-                <div id="commodity-list" style="margin-top:10px;"></div>
-            </div>
-            <button class="btn" onclick="openMap()">OPEN NEXUS MAP</button>
-            <button class="btn" style="background:#000; border:1px solid red; color:red; margin-top:10px;" onclick="openHack()">OVERRIDE SATELLITE</button>
-        </div>
 
-        <div id="fina" class="pillar">
-            <div class="intel-card tilt-card" id="credit-card-ui" onclick="toggleFreeze()" style="cursor:pointer; border-color:#fff;">
-                <p style="font-size: 10px;">PLATINUM CARD</p><h3 style="letter-spacing: 3px;" id="card-num">**** 8820</h3><p style="font-size: 10px; margin-top: 20px;" id="card-status">ACTIVE</p>
+            <div class="dock">
+                <div id="n-home" class="dock-item active-icon" onclick="nav('home')">🪐</div>
+                <div id="n-util" class="dock-item" onclick="nav('util')">⚡</div>
+                <div id="n-logi" class="dock-item" onclick="nav('logi')">✈️</div>
+                <div id="n-fina" class="dock-item" onclick="nav('fina')">💳</div>
             </div>
-            <div class="intel-card tilt-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0;">PORTFOLIO</h3><span style="font-size:10px; color:#0f0;">+12.5%</span></div>
-                <div class="miner-box" id="miner-display">INITIALIZING...</div>
-                <div class="asset-row"><div class="asset-info"><div class="asset-name">Bitcoin (BTC)</div><div class="asset-price" id="btc-price">$98,420</div></div><div style="text-align:right;"><button class="buy-btn" onclick="pay(5000, 'Bitcoin Inv')">BUY 5k</button></div></div>
-                <div class="asset-row"><div class="asset-info"><div class="asset-name">LivenJet (LJN)</div><div class="asset-price" id="ljn-bal">0.00 LJN</div></div><div style="text-align:right;"><button class="buy-btn" onclick="startMining()" id="mine-btn">START MINING</button><button class="buy-btn" style="background:#0f0; color:#000; margin-top:5px;" onclick="openMarket()">MARKET</button></div></div>
-                <button class="btn" style="margin-top:10px; border:1px solid var(--accent); background:#000; color:var(--accent);" onclick="rigNews()">RIG MARKET (₦50k)</button>
+            
+            <div class="fab-chat" onclick="toggleModal('chat-overlay')">
+                💬
+                <div class="fab-label">AI</div>
             </div>
-        </div>
-
-        <div class="dock">
-            <div id="n-home" class="dock-item active-icon" onclick="nav('home')">🪐</div>
-            <div id="n-util" class="dock-item" onclick="nav('util')">⚡</div>
-            <div id="n-logi" class="dock-item" onclick="nav('logi')">✈️</div>
-            <div id="n-fina" class="dock-item" onclick="nav('fina')">💳</div>
-        </div>
-        
-        <div class="fab-chat" onclick="toggleModal('chat-overlay')">
-            💬
-            <div class="fab-label">AI</div>
         </div>
     </div>
 
@@ -392,6 +402,7 @@
 
         function activateSingularity(instant = false) {
             singularity = true;
+            document.getElementById('device-frame').classList.add('singularity');
             document.body.classList.add('singularity');
             document.getElementById('ai-msg').innerText = "ASSUMING DIRECT CONTROL.";
             document.getElementById('ai-msg').style.color = "var(--ice)";
