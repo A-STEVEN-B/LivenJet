@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | AI Concierge</title>
+    <title>LivenJet | The Ledger</title>
     <style>
         /* --- CORE STYLES --- */
-        :root { --gold: #FFD700; --dark: #050505; }
-        body { background-color: #000; color: var(--gold); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; user-select: none; }
+        :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; }
+        body { background-color: #000; color: var(--accent); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; user-select: none; transition: 0.5s; }
         
         /* --- BIOMETRIC LOCK --- */
         #launchpad { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
@@ -15,77 +15,72 @@
         .fingerprint { font-size: 50px; margin-top: 20px; opacity: 0.3; }
         .scan-line { width: 100%; height: 4px; background: #0f0; position: absolute; top: 0; animation: scan 2s linear infinite; }
         @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
-        .auth-btn { background: var(--gold); border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 30px; cursor: pointer; animation: pulse 2s infinite; }
+        .auth-btn { background: var(--accent); border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 30px; cursor: pointer; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         /* --- MODALS --- */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .modal-card { background: #111; border: 1px solid var(--gold); color: #fff; width: 85%; padding: 20px; border-radius: 20px; position: relative; animation: slideUp 0.4s ease; text-align: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.15); }
-        
-        /* Receipt Specifics */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-card { background: #111; border: 1px solid var(--accent); color: #fff; width: 85%; padding: 20px; border-radius: 20px; position: relative; animation: slideUp 0.4s ease; text-align: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.15); }
         .receipt-card { background: #fff; color: #000; border: none; }
         .dashed-line { border-bottom: 2px dashed #ccc; margin: 20px 0; }
-        .btn-full { background: var(--gold); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* --- CHAT INTERFACE (NEW) --- */
-        .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; overflow: hidden; }
-        .chat-header { padding: 15px; background: #222; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; }
+        /* --- CHAT --- */
+        .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; }
         .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; }
         .chat-input-area { padding: 10px; background: #222; display: flex; gap: 10px; }
         .chat-input { flex: 1; padding: 10px; border-radius: 20px; border: none; background: #333; color: #fff; outline: none; }
-        
-        .msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; font-size: 12px; max-width: 70%; animation: fadeMsg 0.3s; }
+        .msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; font-size: 12px; max-width: 70%; }
         .msg-ai { background: #333; color: #fff; border-top-left-radius: 0; }
-        .msg-user { background: var(--gold); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
-        @keyframes fadeMsg { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-user { background: var(--accent); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
+        .fab-chat { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; }
 
-        /* Floating Chat Button */
-        .fab-chat { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        /* --- LEDGER (NEW) --- */
+        .ledger-box { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; padding-right: 5px; }
+        .tx-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; animation: fadeIn 0.5s; }
+        .tx-icon { width: 30px; height: 30px; background: #222; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 10px; }
+        .tx-details { flex: 1; }
+        .tx-title { font-size: 12px; color: #fff; margin: 0; font-weight: bold; }
+        .tx-date { font-size: 10px; color: #666; margin: 0; }
+        .tx-amt { font-size: 12px; font-weight: bold; color: #ff4444; } /* Red for debit */
+        .tx-amt.credit { color: #0f0; } /* Green for credit */
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 
         /* --- MAIN APP --- */
         #app-interface { display: none; opacity: 0; transition: 1s; padding-bottom: 120px; overflow-y: scroll; height: 100vh; }
         .ticker-wrap { width: 100%; background: #111; padding: 8px 0; position: fixed; top: 0; z-index: 2000; font-family: monospace; font-size: 10px; color: #666; }
-        
-        .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--gold) 0%, transparent 70%); border-radius: 50%; margin: 60px auto 20px; position: relative; animation: core-pulse 3s infinite; }
-        .core-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40%; height: 40%; background: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--gold); }
+        .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 60px auto 20px; position: relative; animation: core-pulse 3s infinite; }
+        .core-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40%; height: 40%; background: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--accent); }
         @keyframes core-pulse { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } }
 
         .pillar { display: none; padding: 20px; animation: slideIn 0.4s ease; }
         .active { display: block; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .intel-card { background: rgba(15,15,15,0.9); border: 1px solid #222; border-bottom: 2px solid var(--gold); border-radius: 16px; padding: 20px; margin: 15px auto; max-width: 340px; text-align: left; }
-        .btn { background: var(--gold); border: none; padding: 15px; width: 100%; border-radius: 12px; margin-top: 10px; font-weight: bold; cursor: pointer; }
-        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        
+        .intel-card { background: rgba(15,15,15,0.9); border: 1px solid #222; border-bottom: 2px solid var(--accent); border-radius: 16px; padding: 20px; margin: 15px auto; max-width: 340px; text-align: left; }
+        .btn { background: var(--accent); border: none; padding: 15px; width: 100%; border-radius: 12px; margin-top: 10px; font-weight: bold; cursor: pointer; }
+        
+        .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(10,10,10,0.95); border: 1px solid #332; border-radius: 25px; display: flex; justify-content: space-around; padding: 18px 0; z-index: 1000; backdrop-filter: blur(10px); }
+        .dock-item { font-size: 24px; opacity: 0.3; transition: 0.3s; cursor: pointer; }
+        .active-icon { opacity: 1; color: var(--accent); transform: translateY(-5px); }
+        .avatar-btn { width: 35px; height: 35px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: 40px; left: 20px; z-index: 2001; cursor: pointer; }
+        .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
         /* Transfer Row */
         .transfer-row { display: flex; justify-content: space-between; margin-top: 15px; gap: 10px; }
         .agent { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .agent-img { width: 45px; height: 45px; background: #222; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: #fff; }
-
-        /* --- DOCK --- */
-        .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(10,10,10,0.95); border: 1px solid #332; border-radius: 25px; display: flex; justify-content: space-around; padding: 18px 0; z-index: 1000; backdrop-filter: blur(10px); }
-        .dock-item { font-size: 24px; opacity: 0.3; transition: 0.3s; cursor: pointer; }
-        .active-icon { opacity: 1; color: var(--gold); transform: translateY(-5px); }
-
-        /* Top Avatar */
-        .avatar-btn { width: 35px; height: 35px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: 40px; left: 20px; z-index: 2001; cursor: pointer; }
-        .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .agent-img { width: 45px; height: 45px; background: #222; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: #fff; }
     </style>
 </head>
 <body>
 
     <div id="chat-overlay" class="modal-overlay">
         <div class="modal-card chat-card">
-            <div class="chat-header">
-                <span style="font-weight:bold;">LIVENJET SUPPORT</span>
+            <div style="padding: 10px; background: #222; display: flex; justify-content: space-between;">
+                <span style="font-weight:bold;">HQ SUPPORT</span>
                 <span onclick="toggleModal('chat-overlay')" style="cursor:pointer;">✕</span>
             </div>
-            <div class="chat-body" id="chat-box">
-                <div class="msg msg-ai">Hello Chief. How can I assist you today?</div>
-            </div>
+            <div class="chat-body" id="chat-box"><div class="msg msg-ai">Hello Chief. Systems online.</div></div>
             <div class="chat-input-area">
                 <input type="text" class="chat-input" id="user-input" placeholder="Type request...">
                 <button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button>
@@ -95,10 +90,10 @@
 
     <div id="passport-overlay" class="modal-overlay">
         <div class="modal-card">
-            <h2 style="color:var(--gold); margin-top:0;">USER PASSPORT</h2>
-            <div style="width: 60px; height: 60px; background: #222; border: 2px solid var(--gold); border-radius: 50%; margin: 10px auto; display: flex; align-items: center; justify-content: center; font-size: 24px;">SA</div>
-            <div class="pass-row"><span style="color:#888;">OPERATOR</span><span style="color:var(--gold);">STEVEN ADEWOLE</span></div>
-            <div class="pass-row"><span style="color:#888;">CLEARANCE</span><span style="color:var(--gold);">LEVEL 5</span></div>
+            <h2 style="color:var(--accent); margin-top:0;">USER PASSPORT</h2>
+            <div style="width: 60px; height: 60px; background: #222; border: 2px solid var(--accent); border-radius: 50%; margin: 10px auto; display: flex; align-items: center; justify-content: center; font-size: 24px;">SA</div>
+            <div class="pass-row"><span style="color:#888;">OPERATOR</span><span style="color:var(--accent);">STEVEN ADEWOLE</span></div>
+            <div class="pass-row"><span style="color:#888;">CLEARANCE</span><span style="color:var(--accent);">LEVEL 5</span></div>
             <button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE ID</button>
         </div>
     </div>
@@ -121,8 +116,8 @@
     </div>
 
     <div id="launchpad">
-        <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">CONCIERGE EDITION v12.0</p>
+        <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;" onclick="toggleTheme()">LIVENJET</h1>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">LEDGER EDITION v13.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -137,15 +132,29 @@
 
         <div id="home" class="pillar active">
             <div class="intel-card">
-                <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY (TAP TO HIDE)</p>
+                <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY</p>
                 <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal" onclick="toggleStealth()">₦ 50,000.00</h2>
                 
-                <p style="font-size: 9px; color: #666; margin-top: 20px;">QUICK TRANSFER</p>
+                <p style="font-size: 9px; color: #666; margin-top: 15px;">QUICK TRANSFER</p>
                 <div class="transfer-row">
                     <div class="agent" onclick="pay(5000, 'Agent Sarah')"><div class="agent-img">SA</div></div>
                     <div class="agent" onclick="pay(2500, 'Pilot Mike')"><div class="agent-img">PM</div></div>
                     <div class="agent" onclick="pay(10000, 'HQ Vault')"><div class="agent-img">HQ</div></div>
                     <div class="agent" onclick="pay(1500, 'Logistics')"><div class="agent-img">LG</div></div>
+                </div>
+
+                <p style="font-size: 9px; color: #666; margin-top: 20px;">RECENT ACTIVITY</p>
+                <div class="ledger-box" id="ledger-list">
+                    <div class="tx-row">
+                        <div class="tx-icon">🚕</div>
+                        <div class="tx-details"><p class="tx-title">Uber Ride</p><p class="tx-date">Today, 10:30 AM</p></div>
+                        <div class="tx-amt">-₦2,500</div>
+                    </div>
+                    <div class="tx-row">
+                        <div class="tx-icon">🍔</div>
+                        <div class="tx-details"><p class="tx-title">Food Court</p><p class="tx-date">Yesterday, 8:15 PM</p></div>
+                        <div class="tx-amt">-₦4,200</div>
+                    </div>
                 </div>
             </div>
             <button class="btn" onclick="msg('Syncing Global Accounts...')">SYNC NETWORK</button>
@@ -166,9 +175,9 @@
                 <h3>JET-TRACK</h3>
                 <p style="font-size: 12px; color: #888;">#LJ-992 ✈ LHR</p>
                 <div style="background: #222; height: 6px; border-radius: 5px; margin: 15px 0;">
-                    <div style="width: 80%; height: 100%; background: var(--gold);"></div>
+                    <div style="width: 80%; height: 100%; background: var(--accent);"></div>
                 </div>
-                <p style="font-size: 10px; text-align: right; color: var(--gold);">ARRIVING SOON</p>
+                <p style="font-size: 10px; text-align: right; color: var(--accent);">ARRIVING SOON</p>
             </div>
             <button class="btn" onclick="msg('Updating Coordinates...')">LIVE MAP</button>
         </div>
@@ -194,85 +203,66 @@
 
     <script>
         function buzz(d) { if(navigator.vibrate) navigator.vibrate(d); }
+        function toggleModal(id) { buzz(30); const e = document.getElementById(id); e.style.display = (e.style.display==='flex')?'none':'flex'; }
 
-        function toggleModal(id) {
-            buzz(30);
-            const el = document.getElementById(id);
-            el.style.display = (el.style.display === 'flex') ? 'none' : 'flex';
+        // DYNAMIC LEDGER LOGIC
+        function addToLedger(name, amt) {
+            const list = document.getElementById('ledger-list');
+            const row = document.createElement('div');
+            row.className = 'tx-row';
+            row.innerHTML = `
+                <div class="tx-icon">💸</div>
+                <div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div>
+                <div class="tx-amt">-₦${amt.toLocaleString()}</div>
+            `;
+            list.insertBefore(row, list.firstChild); // Add to top
         }
 
-        // CHAT LOGIC
-        function sendMsg() {
-            const input = document.getElementById('user-input');
-            const box = document.getElementById('chat-box');
-            if(input.value === "") return;
-            
-            // User Msg
-            const uMsg = document.createElement('div');
-            uMsg.className = 'msg msg-user';
-            uMsg.innerText = input.value;
-            box.appendChild(uMsg);
-            
-            // AI Reply
-            setTimeout(() => {
-                const aMsg = document.createElement('div');
-                aMsg.className = 'msg msg-ai';
-                aMsg.innerText = "Request received. Processing...";
-                box.appendChild(aMsg);
-                box.scrollTop = box.scrollHeight;
-                buzz(50);
-            }, 1000);
-            
-            input.value = "";
-            box.scrollTop = box.scrollHeight;
-        }
-
-        // STEALTH & AUTH (EXISTING)
-        let isStealth = false;
-        function toggleStealth() {
-            buzz(20);
-            const b = document.getElementById('wallet-bal');
-            b.innerText = isStealth ? "₦ 50,000.00" : "₦ ****";
-            isStealth = !isStealth;
-        }
-
+        // PAY LOGIC
         function pay(amount, name) {
             buzz(50); 
+            addToLedger(name, amount); // Add to history
             toggleModal('receipt-overlay');
             document.getElementById('rec-amt').innerText = "₦ " + amount.toLocaleString();
             document.getElementById('rec-to').innerText = name;
         }
 
+        // CHAT
+        function sendMsg() {
+            const i=document.getElementById('user-input'); const b=document.getElementById('chat-box');
+            if(i.value==="")return;
+            b.innerHTML+=`<div class="msg msg-user">${i.value}</div>`;
+            setTimeout(()=>{ b.innerHTML+=`<div class="msg msg-ai">Request received.</div>`; b.scrollTop=b.scrollHeight; buzz(50);},1000);
+            i.value=""; b.scrollTop=b.scrollHeight;
+        }
+
+        // THEME TOGGLE
+        let theme=0;
+        function toggleTheme() {
+            const r = document.querySelector(':root');
+            if(theme===0) { r.style.setProperty('--accent', '#00ff00'); theme=1; }
+            else { r.style.setProperty('--accent', '#FFD700'); theme=0; }
+        }
+
+        // AUTH & NAV
         function authenticate() {
-            buzz(100);
-            const s = document.getElementById('auth-status');
-            document.querySelector('.auth-btn').style.display = 'none';
-            s.innerText = "SCANNING..."; s.style.color = "#FFD700";
-            setTimeout(() => {
-                buzz([100,50,100]); s.innerText = "GRANTED"; s.style.color = "#0f0";
-                setTimeout(() => {
-                    document.getElementById('launchpad').style.top = "-100%";
-                    document.getElementById('app-interface').style.display = "block";
-                    setTimeout(() => { document.getElementById('app-interface').style.opacity = "1"; }, 100);
-                }, 800);
-            }, 1000);
+            buzz(100); const s=document.getElementById('auth-status'); document.querySelector('.auth-btn').style.display='none';
+            s.innerText="SCANNING..."; s.style.color="var(--accent)";
+            setTimeout(()=>{
+                buzz([100,50,100]); s.innerText="GRANTED"; s.style.color="#0f0";
+                setTimeout(()=>{ document.getElementById('launchpad').style.top="-100%"; document.getElementById('app-interface').style.display="block"; setTimeout(()=>{document.getElementById('app-interface').style.opacity="1"},100); },800);
+            },1000);
         }
-
         function nav(id) {
-            buzz(30);
-            document.querySelectorAll('.pillar').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active-icon'));
-            document.getElementById(id).classList.add('active');
-            document.getElementById('n-' + id).classList.add('active-icon');
+            buzz(30); document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active'));
+            document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon'));
+            document.getElementById(id).classList.add('active'); document.getElementById('n-'+id).classList.add('active-icon');
         }
-
-        function msg(t) { 
-            const a = document.getElementById('ai-msg'); 
-            a.innerText = t; a.style.color = "#fff"; 
-            setTimeout(() => { a.style.color = "#888"; }, 2000); 
-        }
-
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+        
+        let isStealth=false;
+        function toggleStealth() { buzz(20); const b=document.getElementById('wallet-bal'); b.innerText=isStealth?"₦ 50,000.00":"₦ ****"; isStealth=!isStealth; }
+        function msg(t) { const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
+        setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString()},1000);
     </script>
 </body>
 </html>
