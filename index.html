@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Apex Terminal</title>
+    <title>LivenJet | Multi-Pillar Terminal</title>
     <style>
         :root { --gold: #FFD700; --dark: #0a0a0a; --glass: rgba(255, 215, 0, 0.05); }
         body { background-color: #000; color: var(--gold); font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; margin: 0; overflow-x: hidden; padding-bottom: 120px; }
@@ -15,33 +15,31 @@
         .logo { font-size: 55px; margin: 20px 0 5px 0; filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4)); }
         h1 { letter-spacing: 6px; font-size: 26px; margin: 0; font-weight: 900; }
         
-        /* Dashboard Container */
-        .pillar-container { display: block; animation: fadeIn 0.5s ease; }
-        #logistics-hub { display: none; } /* Hidden by default */
+        .pillar-container { display: none; animation: fadeIn 0.4s ease; }
+        .active-pillar { display: block; }
 
-        .balance-card, .logistics-card { 
-            background: linear-gradient(135deg, var(--glass) 0%, #000 100%); 
+        .card-ui { 
+            background: linear-gradient(135deg, #1a1a1a 0%, #000 100%); 
             border: 1px solid var(--gold); 
-            border-radius: 28px; padding: 30px; margin: 25px auto; max-width: 340px;
+            border-radius: 20px; padding: 25px; margin: 20px auto; max-width: 320px;
+            text-align: left; position: relative; height: 180px;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.1);
         }
 
-        /* Tracking Bar */
-        .track-bg { background: #1a1a1a; height: 8px; border-radius: 10px; margin: 20px 0; overflow: hidden; }
-        .track-progress { background: var(--gold); height: 100%; width: 65%; box-shadow: 0 0 10px var(--gold); animation: pulse 2s infinite; }
+        .chip { width: 40px; height: 30px; background: linear-gradient(45deg, #d4af37, #FFD700); border-radius: 5px; margin-bottom: 20px; }
+        .card-number { font-family: 'Courier New', monospace; font-size: 18px; letter-spacing: 2px; color: #fff; }
 
-        .btn { background: var(--gold); color: #000; font-weight: bold; padding: 18px; width: 95%; border: none; border-radius: 16px; margin: 12px 0; cursor: pointer; transition: 0.3s; font-size: 14px; }
-        .btn:active { transform: scale(0.96); }
+        .btn { background: var(--gold); color: #000; font-weight: bold; padding: 16px; width: 95%; border: none; border-radius: 14px; margin: 10px 0; cursor: pointer; }
 
-        #payment-form, #pin-section { display: none; background: var(--dark); padding: 30px; border-radius: 28px; border: 1px solid var(--gold); max-width: 340px; margin: 20px auto; }
-        input { padding: 16px; width: 88%; margin: 10px 0; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; text-align: center; }
+        /* Track Progress Bar */
+        .track-bg { background: #222; height: 8px; border-radius: 5px; margin: 15px 0; }
+        .track-progress { background: var(--gold); height: 100%; width: 75%; border-radius: 5px; }
 
-        /* Navigation Dock */
-        .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 350px; background: rgba(10,10,10,0.9); border: 1px solid #222; border-radius: 24px; display: flex; justify-content: space-around; padding: 15px 0; z-index: 999; }
-        .dock-item { font-size: 22px; filter: grayscale(1); cursor: pointer; transition: 0.3s; }
-        .dock-item.active { filter: grayscale(0); transform: translateY(-5px); }
+        .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 350px; background: rgba(10,10,10,0.95); border: 1px solid #222; border-radius: 24px; display: flex; justify-content: space-around; padding: 15px 0; z-index: 1000; }
+        .dock-item { font-size: 24px; opacity: 0.3; cursor: pointer; transition: 0.3s; }
+        .dock-item.active { opacity: 1; transform: translateY(-5px); color: var(--gold); }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -50,94 +48,85 @@
         <div class="user-profile">
             <div class="avatar">SA</div>
             <div style="text-align: left;">
-                <div style="font-size: 13px; font-weight: bold; color: #fff;">Steven Adewole <span style="color:#1DA1F2;">✔</span></div>
-                <div id="greeting" style="font-size: 10px; color: #666;">System Online</div>
+                <div style="font-size: 12px; font-weight: bold; color: #fff;">Steven Adewole <span style="color:#1DA1F2;">✔</span></div>
+                <div id="greeting" style="font-size: 10px; color: #666;">Nexus v6.0</div>
             </div>
         </div>
         <div id="clock" style="font-size: 11px; font-family: monospace;">00:00:00</div>
     </div>
 
-    <div id="utility-hub" class="pillar-container">
+    <div id="p-utility" class="pillar-container active-pillar">
         <div class="logo">🦅</div>
         <h1>LIVENJET</h1>
-        <div class="balance-card">
-            <p style="color: #666; font-size: 10px; margin: 0;">VAULT LIQUIDITY</p>
-            <h2 id="balance" style="font-size: 36px; margin: 10px 0;">₦ 50,000.00</h2>
-            <p style="font-size: 10px; color: #00ff00;">● MERCURY v5.0 ACTIVE</p>
+        <div class="card-ui" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
+            <p style="color: #666; font-size: 11px; margin: 0;">AVAILABLE LIQUIDITY</p>
+            <h2 id="balance" style="font-size: 32px; color: var(--gold); margin: 10px 0;">₦ 50,000.00</h2>
         </div>
-        <button class="btn" onclick="openForm('Electricity')">⚡ VEND POWER</button>
-        <button class="btn" onclick="openForm('Airtime')">📱 VEND DATA</button>
+        <button class="btn" onclick="alert('Vend Interface Active')">⚡ VEND UTILITIES</button>
     </div>
 
-    <div id="logistics-hub" class="pillar-container">
+    <div id="p-logistics" class="pillar-container">
         <div class="logo">📦</div>
         <h1>JET-TRACK</h1>
-        <div class="logistics-card">
-            <p style="color: #888; font-size: 10px; margin: 0; text-align: left;">ACTIVE CARGO: #LJ-9920</p>
-            <div style="display: flex; justify-content: space-between; margin-top: 15px;">
-                <span style="font-size: 12px; font-weight: bold;">Lagos Int.</span>
-                <span style="font-size: 12px; color: var(--gold);">✈</span>
-                <span style="font-size: 12px; font-weight: bold;">London City</span>
-            </div>
+        <div class="card-ui">
+            <p style="font-size: 10px; color: #888;">CARGO ID: #LJ-882</p>
+            <h3 style="margin: 10px 0; font-size: 14px;">Lagos ➔ New York</h3>
             <div class="track-bg"><div class="track-progress"></div></div>
-            <p style="font-size: 11px; color: #666; margin: 0;">Status: <span style="color: var(--gold);">In Transit (65%)</span></p>
+            <p style="font-size: 10px; color: var(--gold);">ETA: 4 Hours 20 Mins</p>
         </div>
-        <button class="btn" onclick="alert('Scan Feature Coming Soon')">📷 SCAN MANIFEST</button>
+        <button class="btn">📡 LIVE RADAR</button>
     </div>
 
-    <div id="payment-form">
-        <h3 id="form-title">Vend Request</h3>
-        <input type="number" id="amt" placeholder="Amount (₦)">
-        <button class="btn" onclick="showPin()">AUTHORIZE</button>
-    </div>
-
-    <div id="pin-section">
-        <h3 style="color:var(--gold);">ENTER PIN</h3>
-        <input type="password" id="pin" maxlength="4" placeholder="****" style="font-size: 32px; letter-spacing: 15px;">
-        <button class="btn" style="background: #00ff00;" onclick="finalize()">CONFIRM</button>
+    <div id="p-finance" class="pillar-container">
+        <div class="logo">💳</div>
+        <h1>THE VAULT</h1>
+        <div class="card-ui">
+            <div class="chip"></div>
+            <div class="card-number" id="card-num">**** **** **** 8820</div>
+            <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                <div>
+                    <p style="font-size: 8px; color: #666; margin: 0;">CARD HOLDER</p>
+                    <p style="font-size: 12px; margin: 0; color: #fff;">S. ADEWOLE</p>
+                </div>
+                <div>
+                    <p style="font-size: 8px; color: #666; margin: 0;">EXPIRY</p>
+                    <p style="font-size: 12px; margin: 0; color: #fff;">12/29</p>
+                </div>
+            </div>
+        </div>
+        <button class="btn" onclick="toggleCard()">👁 SHOW CARD DIGITS</button>
     </div>
 
     <div class="dock">
-        <div id="nav-home" class="dock-item active" onclick="switchPillar('utility')">🏛️</div>
-        <div id="nav-track" class="dock-item" onclick="switchPillar('logistics')">📦</div>
-        <div class="dock-item">🔐</div>
+        <div id="n-util" class="dock-item active" onclick="nav('utility')">🏛️</div>
+        <div id="n-logi" class="dock-item" onclick="nav('logistics')">📦</div>
+        <div id="n-fina" class="dock-item" onclick="nav('finance')">💳</div>
         <div class="dock-item">👤</div>
     </div>
 
     <script>
-        let bal = 50000;
-
-        function updateUI() {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
-        }
-        setInterval(updateUI, 1000);
-
-        function switchPillar(pillar) {
-            document.getElementById('utility-hub').style.display = (pillar === 'utility') ? 'block' : 'none';
-            document.getElementById('logistics-hub').style.display = (pillar === 'logistics') ? 'block' : 'none';
+        function nav(p) {
+            // Hide all
+            document.querySelectorAll('.pillar-container').forEach(c => c.classList.remove('active-pillar'));
+            document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active'));
             
-            document.getElementById('nav-home').classList.toggle('active', pillar === 'utility');
-            document.getElementById('nav-track').classList.toggle('active', pillar === 'logistics');
+            // Show selected
+            document.getElementById('p-' + p).classList.add('active-pillar');
+            document.getElementById('n-' + p.substring(0,4)).classList.add('active');
         }
 
-        function openForm(s) {
-            document.getElementById('payment-form').style.display = 'block';
-            document.getElementById('form-title').innerText = "Vend " + s;
+        function toggleCard() {
+            const n = document.getElementById('card-num');
+            if(n.innerText.includes('*')) {
+                n.innerText = "5542 0019 8820 4491";
+            } else {
+                n.innerText = "**** **** **** 8820";
+            }
         }
 
-        function showPin() {
-            document.getElementById('payment-form').style.display = 'none';
-            document.getElementById('pin-section').style.display = 'block';
-        }
-
-        function finalize() {
-            if(document.getElementById('pin').value !== '1234') return alert('Invalid PIN');
-            const a = parseInt(document.getElementById('amt').value);
-            bal -= a;
-            document.getElementById('balance').innerText = "₦ " + bal.toLocaleString();
-            alert('Transaction Sealed!');
-            document.getElementById('pin-section').style.display = 'none';
-        }
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+        }, 1000);
     </script>
 </body>
 </html>
