@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Transfer Network</title>
+    <title>LivenJet | Full Nexus</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; }
@@ -76,7 +76,7 @@
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">HAPTIC INTERFACE v9.1</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">NEXUS SYSTEM v10.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -113,9 +113,32 @@
             </div>
         </div>
 
+        <div id="logi" class="pillar">
+            <div class="intel-card">
+                <h3>JET-TRACK</h3>
+                <p style="font-size: 12px; color: #888;">#LJ-992 ✈ LHR</p>
+                <div style="background: #222; height: 6px; border-radius: 5px; margin: 15px 0;">
+                    <div style="width: 80%; height: 100%; background: var(--gold);"></div>
+                </div>
+                <p style="font-size: 10px; text-align: right; color: var(--gold);">ARRIVING SOON</p>
+            </div>
+            <button class="btn" onclick="msg('Updating Coordinates...')">LIVE MAP</button>
+        </div>
+
+        <div id="fina" class="pillar">
+            <div class="intel-card" style="border-color: #fff;">
+                <p style="font-size: 10px;">PLATINUM CARD</p>
+                <h3 style="letter-spacing: 3px;">**** 8820</h3>
+                <p style="font-size: 10px; margin-top: 20px;">STEVEN ADEWOLE</p>
+            </div>
+            <button class="btn" style="background:#fff;" onclick="msg('Opening Secure Vault...')">VIEW DETAILS</button>
+        </div>
+
         <div class="dock">
             <div id="n-home" class="dock-item active-icon" onclick="nav('home')">🪐</div>
             <div id="n-util" class="dock-item" onclick="nav('util')">⚡</div>
+            <div id="n-logi" class="dock-item" onclick="nav('logi')">✈️</div>
+            <div id="n-fina" class="dock-item" onclick="nav('fina')">💳</div>
         </div>
     </div>
 
@@ -127,13 +150,13 @@
 
         // PAYMENT LOGIC
         function pay(amount, name) {
-            buzz(50); // Small vibration on click
+            buzz(50); 
             const ai = document.getElementById('ai-msg');
             ai.innerText = "SENDING TO " + name.toUpperCase() + "...";
             ai.style.color = "#FFD700";
 
             setTimeout(() => {
-                buzz(200); // Long vibration on success
+                buzz(200); 
                 document.getElementById('receipt-overlay').style.display = 'flex';
                 document.getElementById('rec-amt').innerText = "₦ " + amount.toLocaleString();
                 document.getElementById('rec-to').innerText = name;
@@ -154,7 +177,7 @@
             status.innerText = "SCANNING...";
             status.style.color = "#FFD700";
             setTimeout(() => {
-                buzz([100, 50, 100]); // Success pattern vibration
+                buzz([100, 50, 100]); 
                 status.innerText = "ACCESS GRANTED";
                 status.style.color = "#0f0";
                 setTimeout(() => {
