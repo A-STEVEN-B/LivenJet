@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Platinum Access</title>
+    <title>LivenJet | Apex Terminal</title>
     <style>
-        body { background-color: #000; color: #FFD700; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; margin: 0; overflow-x: hidden; }
+        body { background-color: #000; color: #FFD700; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; margin: 0; overflow-x: hidden; padding-bottom: 100px; }
         
         /* Premium Header */
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #0a0a0a; border-bottom: 1px solid #1a1a1a; margin: -20px -20px 20px -20px; }
         .user-profile { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 40px; height: 40px; background: #FFD700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; border: 2px solid #333; box-shadow: 0 0 10px rgba(255,215,0,0.2); }
+        .avatar { width: 40px; height: 40px; background: #FFD700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; border: 2px solid #333; }
         .verified-mark { color: #1DA1F2; font-size: 14px; }
 
         .logo { font-size: 55px; margin: 20px 0 5px 0; filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.3)); }
         h1 { letter-spacing: 5px; font-size: 24px; margin: 0; font-weight: 800; }
         
-        /* Glassmorphism Card */
         .balance-card { 
             background: linear-gradient(135deg, rgba(255,215,0,0.05) 0%, rgba(0,0,0,1) 100%); 
             border: 1px solid #FFD700; 
@@ -24,38 +23,44 @@
             padding: 30px; 
             margin: 25px auto; 
             max-width: 340px;
-            position: relative;
         }
         
-        .btn { background: #FFD700; color: #000; font-weight: bold; padding: 18px; width: 95%; border: none; border-radius: 15px; margin: 12px 0; cursor: pointer; transition: 0.3s; font-size: 14px; letter-spacing: 1px; }
-        .btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,215,0,0.3); }
+        .btn { background: #FFD700; color: #000; font-weight: bold; padding: 18px; width: 95%; border: none; border-radius: 15px; margin: 12px 0; cursor: pointer; transition: 0.3s; font-size: 14px; }
+        .btn:hover { background: #fff; transform: translateY(-2px); }
 
         #payment-form, #pin-section { display: none; margin-top: 20px; background: #0a0a0a; padding: 25px; border-radius: 24px; border: 1px solid #FFD700; max-width: 340px; margin-left: auto; margin-right: auto; animation: slideUp 0.4s ease; }
         input { padding: 15px; width: 88%; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: white; font-size: 16px; text-align: center; }
         
-        .history-section { margin-top: 40px; text-align: left; max-width: 340px; margin: 40px auto; min-height: 100px; }
-        .history-label { color: #FFD700; font-size: 11px; font-weight: bold; letter-spacing: 2px; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 15px; display: block; }
         .history-item { background: #0a0a0a; margin-bottom: 8px; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #FFD700; }
 
-        /* Market Footer Stats */
-        .stats-footer { margin-top: 50px; background: #0a0a0a; padding: 20px; border-radius: 20px 20px 0 0; border-top: 1px solid #1a1a1a; margin-bottom: -20px; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stat-box { background: #000; padding: 10px; border-radius: 10px; border: 1px solid #222; text-align: left; }
-        .stat-label { font-size: 9px; color: #888; text-transform: uppercase; }
-        .stat-value { font-size: 14px; color: #fff; font-family: monospace; }
-        .trending-up { color: #00ff00; font-size: 10px; }
+        /* Custom Notification Toast */
+        #notification-toast {
+            position: fixed; top: 20px; right: -300px; width: 250px; background: #111; border: 1px solid #FFD700;
+            color: #fff; padding: 15px; border-radius: 12px; transition: 0.5s; z-index: 1000; text-align: left;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0a; border-top: 1px solid #1a1a1a; display: flex; justify-content: space-around; padding: 15px 0; z-index: 999; }
+        .nav-item { color: #555; font-size: 20px; cursor: pointer; }
+        .nav-item.active { color: #FFD700; }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
+    <div id="notification-toast">
+        <strong id="toast-title" style="color:#FFD700;">Success</strong><br>
+        <span id="toast-msg" style="font-size: 12px;">Transaction complete.</span>
+    </div>
+
     <div class="top-bar">
         <div class="user-profile">
             <div class="avatar">AS</div>
             <div style="text-align: left;">
                 <div style="font-size: 12px; font-weight: bold; color: #fff;">Steven Adewole <span class="verified-mark">✔</span></div>
-                <div id="live-greeting" style="font-size: 10px; color: #888;">Updating...</div>
+                <div id="live-greeting" style="font-size: 10px; color: #888;">Hello...</div>
             </div>
         </div>
         <div id="live-clock" style="font-size: 11px; color: #FFD700; font-family: monospace;">00:00:00</div>
@@ -63,54 +68,38 @@
 
     <div class="logo">🦅</div>
     <h1>LIVENJET</h1>
-    <p style="font-size: 9px; color: #888; letter-spacing: 3px; margin-top: 5px;">PILLAR I: SUPREME UTILITY</p>
     
     <div class="balance-card">
         <p style="color: #888; font-size: 11px; margin: 0; letter-spacing: 1px;">TOTAL ASSET VALUE</p>
         <h2 id="balance-display" style="font-size: 38px; margin: 12px 0; font-family: 'Courier New', monospace;">₦ 50,000.00</h2>
-        <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
-            <span style="color: #00ff00; font-size: 10px;">● SECURE</span>
-            <span style="color: #888; font-size: 10px;">● MERCURY v3.5</span>
-        </div>
+        <span style="color: #00ff00; font-size: 10px;">● SECURE MERCURY v4.0</span>
     </div>
 
-    <div style="max-width: 380px; margin: 0 auto;">
-        <button class="btn" onclick="openService('Electricity')">⚡ VEND POWER</button>
-        <button class="btn" onclick="openService('Airtime')">📱 VEND AIRTIME</button>
-    </div>
+    <button class="btn" onclick="openService('Electricity')">⚡ VEND POWER</button>
+    <button class="btn" onclick="openService('Airtime')">📱 VEND AIRTIME</button>
 
     <div id="payment-form">
-        <h3 id="form-title" style="margin-top:0; font-size: 18px;">Initiating Transfer</h3>
+        <h3 id="form-title" style="margin-top:0;">Vend Service</h3>
         <input type="number" id="amount-input" placeholder="Value (₦)">
-        <input type="text" id="id-input" placeholder="Destination ID">
-        <button class="btn" onclick="showPin()">CONTINUE TO AUTH</button>
+        <input type="text" id="id-input" placeholder="ID Number">
+        <button class="btn" onclick="showPin()">CONTINUE</button>
     </div>
 
     <div id="pin-section">
-        <h3 style="color: #FFD700; margin-top:0;">BIOMETRIC BYPASS</h3>
-        <p style="font-size: 11px; color: #888;">Enter Master Authorization PIN</p>
+        <h3 style="color: #FFD700; margin-top:0;">AUTHORIZE</h3>
         <input type="password" id="pin-input" maxlength="4" placeholder="****" style="font-size: 28px; letter-spacing: 12px; border: 1px solid #FFD700;">
-        <button class="btn" style="background: #00ff00;" onclick="verifyAndPay()">CONFIRM VEND</button>
-        <p onclick="cancel()" style="color:#555; font-size:11px; cursor:pointer; margin-top:15px; text-decoration: underline;">ABORT TRANSACTION</p>
+        <button class="btn" style="background: #00ff00;" onclick="verifyAndPay()">CONFIRM</button>
     </div>
 
-    <div class="history-section">
-        <span class="history-label">TRANSACTION LEDGER</span>
+    <div style="max-width:340px; margin: 40px auto; text-align: left;">
+        <span style="color:#FFD700; font-size:11px; font-weight:bold;">LEDGER</span>
         <div id="history-list"></div>
     </div>
 
-    <div class="stats-footer">
-        <div class="stat-grid">
-            <div class="stat-box">
-                <div class="stat-label">System Health</div>
-                <div class="stat-value" style="color: #00ff00;">99.9% OPTIMAL</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">LivenJet Index</div>
-                <div class="stat-value">₦ 4,201.50 <span class="trending-up">▲ 2.4%</span></div>
-            </div>
-        </div>
-        <p style="font-size: 8px; color: #444; margin-top: 15px;">© 2026 LIVENJET AEROSPACE & UTILITIES | ENCRYPTED TERMINAL</p>
+    <div class="bottom-nav">
+        <div class="nav-item active">🏠</div>
+        <div class="nav-item" onclick="notify('Info', 'Card feature coming soon!')">💳</div>
+        <div class="nav-item" onclick="notify('Info', 'Settings locked.')">⚙️</div>
     </div>
 
     <script>
@@ -120,61 +109,46 @@
 
         function updateHeader() {
             const now = new Date();
-            const hours = now.getHours();
-            const greeting = hours < 12 ? "Good Morning" : hours < 18 ? "Good Afternoon" : "Good Evening";
-            document.getElementById('live-greeting').innerText = greeting;
+            document.getElementById('live-greeting').innerText = now.getHours() < 12 ? "Good Morning" : "Good Afternoon";
             document.getElementById('live-clock').innerText = now.toLocaleTimeString();
         }
         setInterval(updateHeader, 1000);
         updateHeader();
+
+        function notify(title, msg) {
+            const toast = document.getElementById('notification-toast');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            toast.style.right = "20px";
+            setTimeout(() => { toast.style.right = "-300px"; }, 3000);
+        }
 
         function openService(service) {
             activeService = service;
             document.getElementById('payment-form').style.display = 'block';
             document.getElementById('pin-section').style.display = 'none';
             document.getElementById('form-title').innerText = "Vend " + service;
-            document.getElementById('id-input').placeholder = (service === 'Electricity') ? "Meter Number" : "Phone Number";
-            window.scrollTo({ top: 250, behavior: 'smooth' });
+            window.scrollTo({ top: 300, behavior: 'smooth' });
         }
 
         function showPin() {
-            const amount = document.getElementById('amount-input').value;
-            if (!amount || amount <= 0) return alert("Invalid Value Amount");
+            if (!document.getElementById('amount-input').value) return notify('Error', 'Enter amount');
             document.getElementById('payment-form').style.display = 'none';
             document.getElementById('pin-section').style.display = 'block';
         }
 
         function verifyAndPay() {
-            const pin = document.getElementById('pin-input').value;
+            if (document.getElementById('pin-input').value !== CORRECT_PIN) return notify('Denied', 'Wrong PIN');
             const amount = parseInt(document.getElementById('amount-input').value);
-            const idNumber = document.getElementById('id-input').value;
-
-            if (pin !== CORRECT_PIN) {
-                alert("ACCESS DENIED: INCORRECT PIN");
-                return;
-            }
-
-            if (amount > balance) {
-                alert("LIMIT EXCEEDED: INSUFFICIENT LIQUIDITY");
-                return;
-            }
-
             balance -= amount;
             document.getElementById('balance-display').innerText = "₦ " + balance.toLocaleString();
-
-            const list = document.getElementById('history-list');
+            
             const item = document.createElement('div');
             item.className = 'history-item';
-            item.innerHTML = `
-                <div style="text-align:left;">
-                    <div style="font-weight:bold; font-size:14px;">${activeService}</div>
-                    <div style="font-size:10px; color:#666;">ID: ${idNumber}</div>
-                </div>
-                <div style="color:#fff; font-weight:bold;">-₦${amount.toLocaleString()}</div>
-            `;
-            list.prepend(item);
+            item.innerHTML = `<span>${activeService}</span> <strong>-₦${amount}</strong>`;
+            document.getElementById('history-list').prepend(item);
 
-            alert("SUCCESS: TRANSACTION SEALED 🦅");
+            notify('Success', 'Transaction Authenticated');
             cancel();
         }
 
@@ -182,8 +156,6 @@
             document.getElementById('payment-form').style.display = 'none';
             document.getElementById('pin-section').style.display = 'none';
             document.getElementById('pin-input').value = "";
-            document.getElementById('amount-input').value = "";
-            document.getElementById('id-input').value = "";
         }
     </script>
 </body>
