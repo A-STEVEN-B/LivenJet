@@ -3,30 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Cyber Fortress</title>
+    <title>LivenJet | Omega OS</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; }
-        body { background-color: #000; color: var(--accent); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; user-select: none; transition: 0.5s; }
+        body { background-color: #000; color: var(--accent); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; user-select: none; transition: 0.5s; perspective: 1000px; }
         
-        /* --- SCREEN SHAKE & RED ALERT --- */
-        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-        #red-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.3); z-index: 7000; display: none; pointer-events: none; mix-blend-mode: overlay; }
+        /* --- CRT SCANLINES (NEW) --- */
+        .scanlines { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2)); background-size: 100% 4px; pointer-events: none; z-index: 9998; opacity: 0.3; }
 
-        /* --- BREACH MODAL (NEW) --- */
-        #breach-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .breach-box { border: 2px solid var(--red); padding: 20px; border-radius: 15px; width: 80%; background: #100; text-align: center; box-shadow: 0 0 50px var(--red); }
-        .defend-bar-bg { width: 100%; height: 20px; background: #300; margin: 20px 0; border: 1px solid var(--red); }
-        .defend-bar-fill { width: 0%; height: 100%; background: var(--red); transition: 0.1s; }
-        .defend-btn { background: var(--red); color: #fff; font-size: 20px; font-weight: bold; border: none; padding: 20px; width: 100%; border-radius: 10px; cursor: pointer; animation: pulse 0.5s infinite; }
-
-        /* --- BOOT SCREEN --- */
-        #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 20px; box-sizing: border-box; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
-        .boot-line { margin: 2px 0; animation: typeLine 0.1s; }
+        /* --- 3D TILT EFFECT (NEW) --- */
+        .tilt-card { transition: transform 0.1s; transform-style: preserve-3d; }
+        
+        /* --- TROPHY ROOM (NEW) --- */
+        .trophy-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .trophy { background: #111; border: 1px solid #333; border-radius: 10px; padding: 10px; opacity: 0.3; transition: 0.3s; }
+        .trophy.unlocked { opacity: 1; border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+        .trophy-icon { font-size: 24px; margin-bottom: 5px; }
+        .trophy-name { font-size: 8px; color: #888; text-transform: uppercase; }
 
         /* --- BIOMETRIC LOCK --- */
-        #launchpad { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
+        #launchpad { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
         .scanner-box { width: 100px; height: 100px; border: 2px solid #333; border-radius: 20px; position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); }
         .fingerprint { font-size: 50px; margin-top: 20px; opacity: 0.3; }
         .scan-line { width: 100%; height: 4px; background: #0f0; position: absolute; top: 0; animation: scan 2s linear infinite; }
@@ -133,13 +130,39 @@
         .msg-ai { background: #333; color: #fff; border-top-left-radius: 0; }
         .msg-user { background: var(--accent); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
         .fab-chat { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; }
+        
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+        #red-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.3); z-index: 7000; display: none; pointer-events: none; mix-blend-mode: overlay; }
+        #breach-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .breach-box { border: 2px solid var(--red); padding: 20px; border-radius: 15px; width: 80%; background: #100; text-align: center; box-shadow: 0 0 50px var(--red); }
+        .defend-bar-bg { width: 100%; height: 20px; background: #300; margin: 20px 0; border: 1px solid var(--red); }
+        .defend-bar-fill { width: 0%; height: 100%; background: var(--red); transition: 0.1s; }
+        .defend-btn { background: var(--red); color: #fff; font-size: 20px; font-weight: bold; border: none; padding: 20px; width: 100%; border-radius: 10px; cursor: pointer; animation: pulse 0.5s infinite; }
+        
+        #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 20px; box-sizing: border-box; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+        .boot-line { margin: 2px 0; animation: typeLine 0.1s; }
     </style>
 </head>
 <body>
 
-    <div id="boot-screen"></div>
-
+    <div class="scanlines"></div> <div id="boot-screen"></div>
     <div id="red-alert"></div>
+
+    <div id="trophy-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <h2 style="color:var(--gold);">ACHIEVEMENTS</h2>
+            <div class="trophy-grid">
+                <div class="trophy" id="badge-breach"><div class="trophy-icon">🛡️</div><div class="trophy-name">SURVIVOR</div></div>
+                <div class="trophy" id="badge-hack"><div class="trophy-icon">📡</div><div class="trophy-name">HACKER</div></div>
+                <div class="trophy" id="badge-mine"><div class="trophy-icon">⛏️</div><div class="trophy-name">MINER</div></div>
+                <div class="trophy" id="badge-rich"><div class="trophy-icon">💰</div><div class="trophy-name">TYCOON</div></div>
+                <div class="trophy" id="badge-god"><div class="trophy-icon">⚡</div><div class="trophy-name">GOD MODE</div></div>
+                <div class="trophy" id="badge-agent"><div class="trophy-icon">🕵️</div><div class="trophy-name">COMMANDER</div></div>
+            </div>
+            <button class="btn-full" onclick="toggleModal('trophy-overlay')">CLOSE</button>
+        </div>
+    </div>
 
     <div id="breach-overlay">
         <div class="breach-box">
@@ -154,10 +177,7 @@
         <div class="caller-icon">👤</div>
         <div style="font-size:20px; font-weight:bold; margin-bottom:5px;">UNKNOWN NUMBER</div>
         <div style="font-size:12px; color:#888;">INCOMING SECURE CALL...</div>
-        <div class="call-actions">
-            <button class="call-btn decline" onclick="endCall()">✕</button>
-            <button class="call-btn accept" onclick="answerCall()">📞</button>
-        </div>
+        <div class="call-actions"><button class="call-btn decline" onclick="endCall()">✕</button><button class="call-btn accept" onclick="answerCall()">📞</button></div>
     </div>
 
     <div id="drone-layer">🛸</div>
@@ -208,14 +228,14 @@
     <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>SEND MONEY</h2><div class="input-group"><label class="input-label">ACCOUNT</label><input type="number" class="app-input" id="send-acc" oninput="verifyAccount()"></div><div id="verify-box" style="display:none; background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:10px;"><p id="verified-name" style="color:var(--green); font-weight:bold; margin:0;">...</p></div><div class="input-group"><label class="input-label">AMOUNT</label><input type="number" class="app-input" id="send-amt"></div><button class="btn-full" onclick="processTransfer()">CONFIRM</button><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
     <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>SATELLITE</h2><div class="map-grid"><div class="radar-scan"></div><div class="map-dot" style="top:40%; left:30%;"></div></div><button class="btn-full" onclick="toggleModal('map-overlay')">CLOSE</button></div></div>
     <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:10px; background:#222;">SUPPORT <span onclick="toggleModal('chat-overlay')" style="float:right;">✕</span></div><div class="chat-body" id="chat-box"></div><div class="chat-input-area"><input type="text" class="chat-input" id="user-input"><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div></div></div>
-    <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--accent);">PASSPORT</h2><div style="width:60px; height:60px; background:#222; border:2px solid var(--accent); border-radius:50%; margin:10px auto; display:flex; align-items:center; justify-content:center; font-size:24px;" id="pass-avatar">SA</div><div class="pass-row"><span>NAME</span><span style="color:var(--accent);" id="pass-name">STEVEN</span></div><div class="pass-row"><span>IP</span><span style="color:var(--accent);" id="pass-ip">102.88.xx</span></div><button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
+    <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--accent);">PASSPORT</h2><div style="width:60px; height:60px; background:#222; border:2px solid var(--accent); border-radius:50%; margin:10px auto; display:flex; align-items:center; justify-content:center; font-size:24px;" id="pass-avatar">SA</div><div class="pass-row"><span>NAME</span><span style="color:var(--accent);" id="pass-name">STEVEN</span></div><div class="pass-row"><span>CLEARANCE</span><span style="color:var(--accent); cursor:pointer;" id="pass-lvl" onclick="openTrophies()">LEVEL 5 (TAP FOR AWARDS)</span></div><div class="pass-row"><span>IP</span><span style="color:var(--accent);" id="pass-ip">102.88.xx</span></div><button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
     <div id="receipt-overlay" class="modal-overlay"><div class="modal-card receipt-card"><h2 id="rec-title">SUCCESS</h2><div class="dashed-line"></div><div style="display:flex; justify-content:space-between;"><span>AMT</span><span id="rec-amt">₦ 0</span></div><div style="display:flex; justify-content:space-between;"><span>TO</span><span id="rec-to">...</span></div><button class="btn-full" style="background:#000; color:#fff;" onclick="closeReceipt()">DOWNLOAD</button></div></div>
 
     <div class="news-ticker"><div class="ticker-content">LIVENJET SATELLITE ONLINE ... BTC HITS $98,400 ... AGENTS DEPLOYED ... SYSTEM SECURE ...</div></div>
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">FORTRESS OS v29.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">OMEGA OS v30.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -231,10 +251,9 @@
         <div style="font-family: monospace; font-size: 10px; color: #888; height: 20px;" id="ai-msg">IDENTITY VERIFIED.</div>
 
         <div id="home" class="pillar active">
-            <div class="intel-card">
+            <div class="intel-card tilt-card">
                 <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY</p>
                 <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal" onclick="toggleStealth()">₦ 50,000.00</h2>
-                
                 <div class="action-grid">
                     <div class="action-btn" onclick="toggleModal('send-overlay')"><div class="action-icon">💸</div><div class="action-text">SEND</div></div>
                     <div class="action-btn" onclick="openScanner()"><div class="action-icon" style="color:#0f0;">📸</div><div class="action-text">SCAN</div></div>
@@ -248,11 +267,11 @@
         </div>
 
         <div id="util" class="pillar">
-            <div class="intel-card"><h3>SMART VEND</h3><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"><button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(1000, 'Power Unit', true)">⚡ 1,000</button><button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(2000, 'Data Plan', true)">📱 2,000</button></div></div>
+            <div class="intel-card tilt-card"><h3>SMART VEND</h3><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"><button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(1000, 'Power Unit', true)">⚡ 1,000</button><button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(2000, 'Data Plan', true)">📱 2,000</button></div></div>
         </div>
 
         <div id="logi" class="pillar">
-            <div class="intel-card">
+            <div class="intel-card tilt-card">
                 <h3>JET-TRACK</h3>
                 <div style="background:#222; height:6px; border-radius:5px; margin:15px 0;"><div style="width:80%; height:100%; background:var(--accent);"></div></div>
                 <p style="font-size:10px; text-align:right; color:var(--accent);">ARRIVING SOON</p>
@@ -266,10 +285,10 @@
         </div>
 
         <div id="fina" class="pillar">
-            <div class="intel-card" id="credit-card-ui" onclick="toggleFreeze()" style="cursor:pointer; border-color:#fff;">
+            <div class="intel-card tilt-card" id="credit-card-ui" onclick="toggleFreeze()" style="cursor:pointer; border-color:#fff;">
                 <p style="font-size: 10px;">PLATINUM CARD</p><h3 style="letter-spacing: 3px;" id="card-num">**** 8820</h3><p style="font-size: 10px; margin-top: 20px;" id="card-status">ACTIVE</p>
             </div>
-            <div class="intel-card">
+            <div class="intel-card tilt-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0;">PORTFOLIO</h3><span style="font-size:10px; color:#0f0;">+12.5%</span></div>
                 <div class="miner-box" id="miner-display">INITIALIZING...</div>
                 <div class="asset-row"><div class="asset-info"><div class="asset-name">Bitcoin (BTC)</div><div class="asset-price" id="btc-price">$98,420</div></div><div style="text-align:right;"><button class="buy-btn" onclick="pay(5000, 'Bitcoin Inv')">BUY 5k</button></div></div>
@@ -298,6 +317,27 @@
             }, 300);
         }
 
+        // --- 3D TILT EFFECT ---
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.tilt-card');
+            const x = (window.innerWidth / 2 - e.pageX) / 25;
+            const y = (window.innerHeight / 2 - e.pageY) / 25;
+            cards.forEach(card => { card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`; });
+        });
+
+        // --- ACHIEVEMENTS ---
+        const badges = { breach: false, hack: false, mine: false, rich: false, god: false, agent: false };
+        function checkAchievements() {
+            if(balance > 1000000 && !badges.rich) { badges.rich = true; msg("TROPHY UNLOCKED: TYCOON"); }
+            if(ljnCrypto > 5 && !badges.mine) { badges.mine = true; msg("TROPHY UNLOCKED: MINER"); }
+            // Update UI
+            for(const [key, val] of Object.entries(badges)) {
+                if(val) document.getElementById('badge-'+key).classList.add('unlocked');
+            }
+        }
+        function openTrophies() { toggleModal('passport-overlay'); toggleModal('trophy-overlay'); }
+
+        // --- CORE FUNCTIONS (Preserved) ---
         function buzz(d) { if(navigator.vibrate) navigator.vibrate(d); }
         function toggleModal(id) { buzz(30); const e = document.getElementById(id); e.style.display = (e.style.display==='flex')?'none':'flex'; }
         
@@ -315,113 +355,57 @@
         let btcPrice = 98420;
         let defensePower = 0;
 
-        // --- CYBER DEFENSE ---
         setInterval(() => {
-            if(Math.random() > 0.95 && !panicMode && document.getElementById('launchpad').style.display === 'none') {
-                triggerBreach();
-            }
-        }, 15000); // Check every 15s
+            if(Math.random() > 0.95 && !panicMode && document.getElementById('launchpad').style.display === 'none') triggerBreach();
+            const change = Math.floor(Math.random() * 200) - 100; btcPrice += change;
+            const el = document.getElementById('btc-price'); el.innerText = "$" + btcPrice.toLocaleString(); el.style.color = change > 0 ? "#0f0" : "red";
+            checkAchievements();
+        }, 15000);
 
-        function triggerBreach() {
-            buzz([500, 200, 500, 200, 500]);
-            document.body.classList.add('shake');
-            document.getElementById('red-alert').style.display = "block";
-            document.getElementById('breach-overlay').style.display = "flex";
-            defensePower = 0;
-            updateDefenseBar();
-            speak("System Breach Detected. Deploy Firewall immediately.");
-        }
-
-        function chargeFirewall() {
-            defensePower += 10;
-            buzz(50);
-            updateDefenseBar();
-            if(defensePower >= 100) {
-                // Success
-                document.getElementById('breach-overlay').style.display = "none";
-                document.getElementById('red-alert').style.display = "none";
-                document.body.classList.remove('shake');
-                balance += 10000;
-                updateDisplay();
-                msg("THREAT ELIMINATED. TRACED REWARD: ₦10,000");
-                speak("Threat Neutralized.");
-            }
-        }
-
-        function updateDefenseBar() {
-            document.getElementById('defend-bar').style.width = defensePower + "%";
-        }
-
-        // Fail condition simulation (optional complexity) logic is simplified here: if they don't tap fast enough in a real game we'd lower bar. For now, it waits for them to fill it.
-
-        // --- LIVE MARKET ---
-        setInterval(() => {
-            const change = Math.floor(Math.random() * 200) - 100;
-            btcPrice += change;
-            const el = document.getElementById('btc-price');
-            el.innerText = "$" + btcPrice.toLocaleString();
-            el.style.color = change > 0 ? "#0f0" : "red";
-        }, 3000);
-
-        // --- AGENT LOGIC ---
-        function deployAgent() {
-            const city = document.getElementById('agent-city').value;
-            if(balance >= 50000) {
-                balance -= 50000; updateDisplay(); addToLedger("Agent ("+city+")", 50000);
-                agents.push(city); updateAgentList(); toggleModal('agent-overlay'); msg("AGENT DEPLOYED"); buzz([100,50,100]);
-            } else { msg("INSUFFICIENT FUNDS"); }
-        }
-        function updateAgentList() {
-            const list = document.getElementById('agent-display'); list.innerHTML = "";
-            agents.forEach((city, index) => { list.innerHTML += `<div class="active-agent"><span>AGENT 00${index+1}</span><span class="agent-loc">${city.toUpperCase()}</span></div>`; });
-        }
-        setInterval(() => {
-            if(agents.length > 0) {
-                const earned = agents.length * 5000; balance += earned; updateDisplay(); msg(`AGENTS TRIBUTE: ₦${earned.toLocaleString()}`); buzz(20);
-            }
-        }, 30000);
-
-        // --- GHOST PROTOCOL ---
+        function triggerBreach() { buzz([500, 200, 500]); document.body.classList.add('shake'); document.getElementById('red-alert').style.display = "block"; document.getElementById('breach-overlay').style.display = "flex"; defensePower = 0; updateDefenseBar(); speak("System Breach Detected."); }
+        function chargeFirewall() { defensePower += 10; buzz(50); updateDefenseBar(); if(defensePower >= 100) { document.getElementById('breach-overlay').style.display = "none"; document.getElementById('red-alert').style.display = "none"; document.body.classList.remove('shake'); balance += 10000; updateDisplay(); msg("THREAT ELIMINATED. +₦10k"); speak("Threat Neutralized."); badges.breach = true; } }
+        function updateDefenseBar() { document.getElementById('defend-bar').style.width = defensePower + "%"; }
+        function deployAgent() { const city = document.getElementById('agent-city').value; if(balance >= 50000) { balance -= 50000; updateDisplay(); addToLedger("Agent ("+city+")", 50000); agents.push(city); updateAgentList(); toggleModal('agent-overlay'); msg("AGENT DEPLOYED"); buzz([100,50,100]); badges.agent = true; } else { msg("INSUFFICIENT FUNDS"); } }
+        function updateAgentList() { const list = document.getElementById('agent-display'); list.innerHTML = ""; agents.forEach((city, index) => { list.innerHTML += `<div class="active-agent"><span>AGENT 00${index+1}</span><span class="agent-loc">${city.toUpperCase()}</span></div>`; }); }
+        setInterval(() => { if(agents.length > 0) { const earned = agents.length * 5000; balance += earned; updateDisplay(); msg(`AGENTS TRIBUTE: ₦${earned.toLocaleString()}`); buzz(20); } }, 30000);
         setTimeout(() => { triggerCall(); }, 40000); 
         function triggerCall() { buzz([1000, 500, 1000]); document.getElementById('call-overlay').style.display = 'flex'; }
         function endCall() { document.getElementById('call-overlay').style.display = 'none'; }
         function answerCall() { document.getElementById('call-overlay').style.display = 'none'; speak("Good day, Chief. The funds have been secured."); msg("ENCRYPTED MSG RECEIVED"); }
-
-        // --- STANDARD FUNCTIONS ---
         function activatePanic() { buzz([100,50,100,50,500]); document.body.style.backgroundColor="#200"; toggleModal('settings-overlay'); tempBalance=balance; balance=0; panicMode=true; updateDisplay(); msg("⚠️ PANIC PROTOCOL ACTIVE"); }
         function restorePanic() { if(panicMode) { buzz(50); balance=tempBalance; document.body.style.backgroundColor="#000"; panicMode=false; updateDisplay(); msg("SYSTEM RESTORED"); } }
         function flyDrone() { const d=document.getElementById('drone-layer'); d.classList.remove('fly-anim'); void d.offsetWidth; d.classList.add('fly-anim'); buzz(100); }
         function openHack() { toggleModal('hack-overlay'); document.getElementById('hack-log').innerText="WAITING..."; document.getElementById('hack-cursor').classList.add('cursor-moving'); }
-        function lockSignal() { const c=document.getElementById('hack-cursor'); const rect=c.getBoundingClientRect(); const p=((rect.left-c.parentElement.getBoundingClientRect().left)/c.parentElement.getBoundingClientRect().width)*100; c.classList.remove('cursor-moving'); if(p>40&&p<60){ document.getElementById('hack-log').innerText="UPLINK ESTABLISHED"; miningSpeed=5.0; speak("Uplink Established."); setTimeout(()=>{toggleModal('hack-overlay');nav('fina');startMining()},1500); setTimeout(()=>{miningSpeed=0.5},60000); } else { document.getElementById('hack-log').innerText="SIGNAL LOST"; buzz(300); setTimeout(()=>{c.classList.add('cursor-moving')},1000); } }
+        function lockSignal() { const c=document.getElementById('hack-cursor'); const rect=c.getBoundingClientRect(); const p=((rect.left-c.parentElement.getBoundingClientRect().left)/c.parentElement.getBoundingClientRect().width)*100; c.classList.remove('cursor-moving'); if(p>40&&p<60){ document.getElementById('hack-log').innerText="UPLINK ESTABLISHED"; miningSpeed=5.0; speak("Uplink Established."); badges.hack = true; setTimeout(()=>{toggleModal('hack-overlay');nav('fina');startMining()},1500); setTimeout(()=>{miningSpeed=0.5},60000); } else { document.getElementById('hack-log').innerText="SIGNAL LOST"; buzz(300); setTimeout(()=>{c.classList.add('cursor-moving')},1000); } }
         function speak(text) { if('speechSynthesis' in window){ const u=new SpeechSynthesisUtterance(text); u.rate=1; u.pitch=0.8; window.speechSynthesis.speak(u); } }
         function openMarket() { toggleModal('market-overlay'); document.getElementById('market-bal').innerText=ljnCrypto.toFixed(2); }
         function buyItem(item, cost) { if(ljnCrypto>=cost){ ljnCrypto-=cost; msg("PURCHASE SUCCESSFUL"); document.getElementById('market-bal').innerText=ljnCrypto.toFixed(2); updateDisplay(); if(item==='halo'){document.getElementById('main-avatar').classList.add('avatar-glow');document.getElementById('pass-avatar').classList.add('avatar-glow');} if(item==='vpn'){document.getElementById('pass-ip').innerText="192.168.GHOST";document.getElementById('pass-ip').style.color="#0f0";} } else { msg("INSUFFICIENT LJN"); } }
-        function updateDisplay() { let d=balance; let s="₦ "; if(currency==="USD"){d=balance/rate; s="$ ";} document.getElementById('wallet-bal').innerText=s+d.toLocaleString(undefined,{minimumFractionDigits:2}); document.getElementById('pass-name').innerText=userName; let inits=userName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase(); document.getElementById('main-avatar').innerText=inits; document.getElementById('pass-avatar').innerText=inits; document.getElementById('ljn-bal').innerText=ljnCrypto.toFixed(4)+" LJN"; }
+        function updateDisplay() { let d=balance; let s="₦ "; if(currency==="USD"){d=balance/rate; s="$ ";} document.getElementById('wallet-bal').innerText=s+d.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2}); document.getElementById('pass-name').innerText=userName; let inits=userName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase(); document.getElementById('main-avatar').innerText=inits; document.getElementById('pass-avatar').innerText=inits; document.getElementById('ljn-bal').innerText=ljnCrypto.toFixed(4)+" LJN"; }
         function startMining() { if(isMining)return; isMining=true; const b=document.getElementById('mine-btn'); const box=document.getElementById('miner-display'); b.innerText="MINING..."; box.style.display="block"; let h=0; const i=setInterval(()=>{ h++; box.innerHTML=`<div class="hash-line">> HASH: ${Math.random().toString(36).substring(2,15)}...</div>`+box.innerHTML; if(h%5===0){ljnCrypto+=Math.random()*miningSpeed;updateDisplay();} if(h>20){clearInterval(i);isMining=false;b.innerText="START MINING";box.style.display="none";box.innerHTML="";msg("MINING COMPLETE");} },300); }
-        function godMode() { godModeCount++; buzz(20); if(godModeCount===5){balance+=10000000; updateDisplay(); msg("GOD MODE: ₦10M ADDED"); buzz([100,100,100]); godModeCount=0;} }
-        function toggleCurrency() { currency=currency==="NGN"?"USD":"NGN"; updateDisplay(); }
-        function addToLedger(name, amt, type="debit") { const l=document.getElementById('ledger-list'); l.innerHTML=`<div class="tx-row"><div class="tx-icon">💸</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt">-₦${amt.toLocaleString()}</div></div>`+l.innerHTML; }
-        function toggleFreeze() { const c=document.getElementById('credit-card-ui'); if(isCardFrozen){isCardFrozen=false; c.classList.remove('frozen'); msg("CARD UNLOCKED");}else{isCardFrozen=true; c.classList.add('frozen'); msg("CARD FROZEN");} }
+        function godMode() { godModeCount++; buzz(20); if(godModeCount===5){balance+=10000000; updateDisplay(); msg("GOD MODE: ₦10M ADDED"); buzz([100,100,100,100,100]); godModeCount=0; badges.god = true;} }
+        function toggleCurrency() { currency=currency==="NGN"?"USD":"NGN"; updateDisplay(); buzz(50); msg("CURRENCY: " + currency); }
+        function addToLedger(name, amt, type="debit") { const l=document.getElementById('ledger-list'); const row=document.createElement('div'); row.className='tx-row'; let color=type==="credit"?"#0f0":"#ff4444"; let sign=type==="credit"?"+":"-"; let icon=type==="credit"?"🏦":"💸"; row.innerHTML=`<div class="tx-icon">${icon}</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt" style="color:${color}">${sign}${amt.toLocaleString()}</div>`; l.insertBefore(row, l.firstChild); }
+        function toggleFreeze() { const c=document.getElementById('credit-card-ui'); const s=document.getElementById('card-status'); const n=document.getElementById('card-num'); buzz(100); if(isCardFrozen){isCardFrozen=false; c.classList.remove('frozen'); s.innerText="ACTIVE"; s.classList.remove('frozen-text'); n.innerText="**** 8820"; msg("CARD UNLOCKED");}else{isCardFrozen=true; c.classList.add('frozen'); s.innerText="FROZEN ❄️"; s.classList.add('frozen-text'); n.innerText="❄️❄️❄️ ❄️❄️❄️"; msg("CARD FROZEN");} }
         function bookFlight() { if(isCardFrozen){msg("CARD FROZEN");return;} pay(150000,"Private Jet"); }
-        function pay(amt, name, isUtil=false) { if(isCardFrozen){msg("CARD FROZEN");return;} if(balance<amt){msg("INSUFFICIENT FUNDS");return;} balance-=amt; updateDisplay(); addToLedger(name,amt); if(isUtil)flyDrone(); toggleModal('receipt-overlay'); document.getElementById('rec-amt').innerText="₦ "+amt.toLocaleString(); }
-        function saveSettings() { const n=document.getElementById('set-name').value; if(n){userName=n.toUpperCase(); updateDisplay(); toggleModal('settings-overlay');} }
-        function resetSystem() { if(confirm("RESET ALL?"))location.reload(); }
-        function toggleTheme(t) { const r=document.querySelector(':root'); if(t==='matrix')r.style.setProperty('--accent','#00ff00'); else r.style.setProperty('--accent','#FFD700'); }
-        function closeReceipt() { toggleModal('receipt-overlay'); }
-        function openScanner() { toggleModal('scan-overlay'); setTimeout(()=>{toggleModal('scan-overlay'); pay(3500,"Shoprite QR");},3000); }
-        function startLoanProcess() { toggleModal('loan-overlay'); document.getElementById('credit-scanner').style.display="block"; document.getElementById('credit-result').style.display="none"; setTimeout(()=>{document.getElementById('credit-scanner').style.display="none";document.getElementById('credit-result').style.display="block";},2500); }
-        function disburseLoan() { toggleModal('loan-overlay'); balance+=500000; updateDisplay(); addToLedger("Loan",500000); }
-        function verifyAccount() { const a=document.getElementById('send-acc').value; if(a.length===10){document.getElementById('verify-box').style.display='block'; document.getElementById('verified-name').innerText="VERIFYING..."; setTimeout(()=>{document.getElementById('verified-name').innerText="EMMANUEL CHIBUZOR";},1000);} }
-        function processTransfer() { const a=document.getElementById('send-amt').value; if(a){toggleModal('send-overlay'); pay(a,"Transfer");} }
-        function sendMsg() { const i=document.getElementById('user-input'); if(i.value){ document.getElementById('chat-box').innerHTML+=`<div class="msg msg-user">${i.value}</div>`; i.value=""; setTimeout(()=>{document.getElementById('chat-box').innerHTML+=`<div class="msg msg-ai">Received.</div>`;},1000); } }
-        function authenticate() { document.getElementById('auth-status').innerText="SCANNING..."; setTimeout(()=>{speak("Access Granted."); document.getElementById('launchpad').style.top="-100%"; document.getElementById('app-interface').style.display="block"; setTimeout(()=>{document.getElementById('app-interface').style.opacity="1"},100);},1000); }
-        function nav(id) { document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon')); document.getElementById(id).classList.add('active'); document.getElementById('n-'+id).classList.add('active-icon'); }
-        function toggleStealth() { buzz(20); const b=document.getElementById('wallet-bal'); if(isStealth){ updateDisplay(); isStealth=false; } else { b.innerText=currency==="USD"?"$ ****":"₦ ****"; isStealth=true; } }
+        function pay(amt, name, isUtil=false) { if(isCardFrozen){msg("CARD FROZEN"); buzz([50,50,50]); return;} if(balance<amt){msg("INSUFFICIENT FUNDS"); return;} buzz(50); balance-=amt; updateDisplay(); addToLedger(name,amt); if(isUtil)flyDrone(); toggleModal('receipt-overlay'); document.getElementById('rec-title').innerText="SUCCESS"; let dA=amt; let s="₦ "; if(currency==="USD"){dA=amt/rate; s="$ ";} document.getElementById('rec-amt').innerText=s+dA.toLocaleString(undefined,{minimumFractionDigits:2}); document.getElementById('rec-to').innerText=name; }
+        function saveSettings() { const n=document.getElementById('set-name').value; if(n){userName=n.toUpperCase(); updateDisplay(); msg("PROFILE UPDATED"); toggleModal('settings-overlay');} }
+        function resetSystem() { if(confirm("RESET ALL DATA?")) location.reload(); }
+        function toggleTheme(t) { const r=document.querySelector(':root'); if(t==='matrix')r.style.setProperty('--accent','#00ff00'); else r.style.setProperty('--accent','#FFD700'); buzz(50); }
+        function closeReceipt() { const b=document.querySelector('#receipt-overlay .btn-full'); b.innerText="DOWNLOADING..."; buzz(50); setTimeout(()=>{b.innerText="SAVED TO FILES"; setTimeout(()=>{toggleModal('receipt-overlay'); b.innerText="DOWNLOAD PDF";},1000);},1500); }
+        function openScanner() { toggleModal('scan-overlay'); document.getElementById('scan-status').innerText="SEARCHING..."; setTimeout(()=>{buzz(50); document.getElementById('scan-status').innerText="SHOPRITE IKEJA"; setTimeout(()=>{toggleModal('scan-overlay'); pay(3500,"Shoprite (QR)");},1500);},3000); }
+        function startLoanProcess() { toggleModal('loan-overlay'); document.getElementById('credit-scanner').style.display="block"; document.getElementById('credit-result').style.display="none"; buzz(50); setTimeout(()=>{document.getElementById('credit-scanner').style.display="none"; document.getElementById('credit-result').style.display="block"; buzz([50,50,50]);},2500); }
+        function disburseLoan() { toggleModal('loan-overlay'); balance+=500000; updateDisplay(); addToLedger("Credit Disbursal",500000,"credit"); setTimeout(()=>{toggleModal('receipt-overlay'); document.getElementById('rec-title').innerText="LOAN APPROVED"; document.getElementById('rec-amt').innerText="₦ 500,000"; document.getElementById('rec-to').innerText="Wallet Credited"; buzz(200);},500); }
+        function verifyAccount() { const a=document.getElementById('send-acc').value; if(a.length===10){document.getElementById('verify-box').style.display='block'; document.getElementById('verified-name').innerText="VERIFYING..."; setTimeout(()=>{buzz(50); document.getElementById('verified-name').innerText="EMMANUEL CHIBUZOR";},1000);} else {document.getElementById('verify-box').style.display='none';} }
+        function processTransfer() { const a=parseInt(document.getElementById('send-amt').value); const n=document.getElementById('verified-name').innerText; const b=document.getElementById('send-bank').value; if(!a||a<=0){msg("ENTER AMOUNT");return;} toggleModal('send-overlay'); pay(a,n+" ("+b+")"); }
+        function sendMsg() { const i=document.getElementById('user-input'); if(i.value){document.getElementById('chat-box').innerHTML+=`<div class="msg msg-user">${i.value}</div>`; setTimeout(()=>{document.getElementById('chat-box').innerHTML+=`<div class="msg msg-ai">Request received.</div>`;},1000); i.value="";} }
+        function authenticate() { buzz(100); document.getElementById('auth-status').innerText="SCANNING..."; setTimeout(()=>{buzz([100,50,100]); speak("Access Granted."); document.getElementById('launchpad').style.top="-100%"; document.getElementById('app-interface').style.display="block"; setTimeout(()=>{document.getElementById('app-interface').style.opacity="1"},100);},1000); }
+        function nav(id) { buzz(30); document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon')); document.getElementById(id).classList.add('active'); document.getElementById('n-'+id).classList.add('active-icon'); }
+        let isStealth=false;
+        function toggleStealth() { buzz(20); if(isStealth){updateDisplay(); isStealth=false;} else {const b=document.getElementById('wallet-bal'); b.innerText=currency==="USD"?"$ ****":"₦ ****"; isStealth=true;} }
         function msg(t) { const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
-        
-        function setGreeting() { const h = new Date().getHours(); let g = h < 12 ? "Good Morning" : h < 18 ? "Good Afternoon" : "Good Evening"; msg(g + ", Chief."); }
+        function setGreeting() { const h=new Date().getHours(); let g=h<12?"Good Morning":h<18?"Good Afternoon":"Good Evening"; msg(g+", Chief."); }
         setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString()},1000);
-        setTimeout(setGreeting, 1500); 
+        setTimeout(setGreeting, 1500);
     </script>
 </body>
 </html>
