@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Stealth Command</title>
+    <title>LivenJet | AI Concierge</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; }
@@ -18,28 +18,30 @@
         .auth-btn { background: var(--gold); border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 30px; cursor: pointer; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* --- MODALS (RECEIPT & PASSPORT) --- */
+        /* --- MODALS --- */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .modal-card { background: #111; border: 1px solid var(--gold); color: #fff; width: 80%; padding: 30px 20px; border-radius: 20px; position: relative; animation: slideUp 0.4s ease; text-align: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.15); }
+        .modal-card { background: #111; border: 1px solid var(--gold); color: #fff; width: 85%; padding: 20px; border-radius: 20px; position: relative; animation: slideUp 0.4s ease; text-align: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.15); }
         
         /* Receipt Specifics */
         .receipt-card { background: #fff; color: #000; border: none; }
-        .receipt-card::before { content: ""; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; background: #0f0; border-radius: 50%; box-shadow: 0 0 15px #0f0; z-index: 2; }
         .dashed-line { border-bottom: 2px dashed #ccc; margin: 20px 0; }
-        
-        /* Passport Specifics */
-        .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .pass-label { color: #888; }
-        .pass-val { color: var(--gold); font-family: monospace; }
-
         .btn-full { background: var(--gold); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* --- TRANSFER AVATARS --- */
-        .transfer-row { display: flex; justify-content: space-between; margin-top: 15px; gap: 10px; }
-        .agent { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .agent-img { width: 45px; height: 45px; background: #222; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: #fff; transition: 0.2s; }
-        .agent-img:active { transform: scale(0.9); background: var(--gold); color: #000; }
-        .agent-name { font-size: 9px; margin-top: 5px; color: #888; }
+        /* --- CHAT INTERFACE (NEW) --- */
+        .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; overflow: hidden; }
+        .chat-header { padding: 15px; background: #222; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; }
+        .chat-input-area { padding: 10px; background: #222; display: flex; gap: 10px; }
+        .chat-input { flex: 1; padding: 10px; border-radius: 20px; border: none; background: #333; color: #fff; outline: none; }
+        
+        .msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; font-size: 12px; max-width: 70%; animation: fadeMsg 0.3s; }
+        .msg-ai { background: #333; color: #fff; border-top-left-radius: 0; }
+        .msg-user { background: var(--gold); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
+        @keyframes fadeMsg { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Floating Chat Button */
+        .fab-chat { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
         /* --- MAIN APP --- */
         #app-interface { display: none; opacity: 0; transition: 1s; padding-bottom: 120px; overflow-y: scroll; height: 100vh; }
@@ -58,25 +60,45 @@
         .btn { background: var(--gold); border: none; padding: 15px; width: 100%; border-radius: 12px; margin-top: 10px; font-weight: bold; cursor: pointer; }
         .btn:active { transform: scale(0.98); opacity: 0.9; }
 
+        /* Transfer Row */
+        .transfer-row { display: flex; justify-content: space-between; margin-top: 15px; gap: 10px; }
+        .agent { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .agent-img { width: 45px; height: 45px; background: #222; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: #fff; }
+
         /* --- DOCK --- */
         .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(10,10,10,0.95); border: 1px solid #332; border-radius: 25px; display: flex; justify-content: space-around; padding: 18px 0; z-index: 1000; backdrop-filter: blur(10px); }
         .dock-item { font-size: 24px; opacity: 0.3; transition: 0.3s; cursor: pointer; }
         .active-icon { opacity: 1; color: var(--gold); transform: translateY(-5px); }
 
-        /* Top Bar Avatar */
-        .avatar-btn { width: 35px; height: 35px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: 40px; left: 20px; z-index: 2001; cursor: pointer; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+        /* Top Avatar */
+        .avatar-btn { width: 35px; height: 35px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: 40px; left: 20px; z-index: 2001; cursor: pointer; }
+        .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
     </style>
 </head>
 <body>
+
+    <div id="chat-overlay" class="modal-overlay">
+        <div class="modal-card chat-card">
+            <div class="chat-header">
+                <span style="font-weight:bold;">LIVENJET SUPPORT</span>
+                <span onclick="toggleModal('chat-overlay')" style="cursor:pointer;">✕</span>
+            </div>
+            <div class="chat-body" id="chat-box">
+                <div class="msg msg-ai">Hello Chief. How can I assist you today?</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="user-input" placeholder="Type request...">
+                <button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button>
+            </div>
+        </div>
+    </div>
 
     <div id="passport-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2 style="color:var(--gold); margin-top:0;">USER PASSPORT</h2>
             <div style="width: 60px; height: 60px; background: #222; border: 2px solid var(--gold); border-radius: 50%; margin: 10px auto; display: flex; align-items: center; justify-content: center; font-size: 24px;">SA</div>
-            <div class="pass-row"><span class="pass-label">OPERATOR</span><span class="pass-val">STEVEN ADEWOLE</span></div>
-            <div class="pass-row"><span class="pass-label">CLEARANCE</span><span class="pass-val">LEVEL 5 (OMNI)</span></div>
-            <div class="pass-row"><span class="pass-label">SERVER NODE</span><span class="pass-val">LAGOS-01</span></div>
-            <div class="pass-row"><span class="pass-label">ACCOUNT STATUS</span><span class="pass-val" style="color:#0f0;">ACTIVE</span></div>
+            <div class="pass-row"><span style="color:#888;">OPERATOR</span><span style="color:var(--gold);">STEVEN ADEWOLE</span></div>
+            <div class="pass-row"><span style="color:#888;">CLEARANCE</span><span style="color:var(--gold);">LEVEL 5</span></div>
             <button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE ID</button>
         </div>
     </div>
@@ -94,14 +116,13 @@
                 <span>BENEFICIARY</span>
                 <span style="font-family: monospace;" id="rec-to">Unknown</span>
             </div>
-            <div class="dashed-line"></div>
             <button class="btn-full" style="background:#000; color:#fff;" onclick="toggleModal('receipt-overlay')">CLOSE RECEIPT</button>
         </div>
     </div>
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">STEALTH INTERFACE v11.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">CONCIERGE EDITION v12.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -121,10 +142,10 @@
                 
                 <p style="font-size: 9px; color: #666; margin-top: 20px;">QUICK TRANSFER</p>
                 <div class="transfer-row">
-                    <div class="agent" onclick="pay(5000, 'Agent Sarah')"><div class="agent-img">SA</div><span class="agent-name">Sarah</span></div>
-                    <div class="agent" onclick="pay(2500, 'Pilot Mike')"><div class="agent-img">PM</div><span class="agent-name">Mike</span></div>
-                    <div class="agent" onclick="pay(10000, 'HQ Vault')"><div class="agent-img">HQ</div><span class="agent-name">HQ</span></div>
-                    <div class="agent" onclick="pay(1500, 'Logistics')"><div class="agent-img">LG</div><span class="agent-name">Logs</span></div>
+                    <div class="agent" onclick="pay(5000, 'Agent Sarah')"><div class="agent-img">SA</div></div>
+                    <div class="agent" onclick="pay(2500, 'Pilot Mike')"><div class="agent-img">PM</div></div>
+                    <div class="agent" onclick="pay(10000, 'HQ Vault')"><div class="agent-img">HQ</div></div>
+                    <div class="agent" onclick="pay(1500, 'Logistics')"><div class="agent-img">LG</div></div>
                 </div>
             </div>
             <button class="btn" onclick="msg('Syncing Global Accounts...')">SYNC NETWORK</button>
@@ -167,59 +188,68 @@
             <div id="n-logi" class="dock-item" onclick="nav('logi')">✈️</div>
             <div id="n-fina" class="dock-item" onclick="nav('fina')">💳</div>
         </div>
+        
+        <div class="fab-chat" onclick="toggleModal('chat-overlay')">💬</div>
     </div>
 
     <script>
-        // HAPTIC ENGINE
-        function buzz(duration) { if (navigator.vibrate) navigator.vibrate(duration); }
+        function buzz(d) { if(navigator.vibrate) navigator.vibrate(d); }
 
-        // STEALTH MODE
-        let isStealth = false;
-        function toggleStealth() {
-            buzz(20);
-            const bal = document.getElementById('wallet-bal');
-            if(isStealth) {
-                bal.innerText = "₦ 50,000.00";
-                isStealth = false;
-            } else {
-                bal.innerText = "₦ ****";
-                isStealth = true;
-            }
-        }
-
-        // MODAL SYSTEM
         function toggleModal(id) {
             buzz(30);
             const el = document.getElementById(id);
             el.style.display = (el.style.display === 'flex') ? 'none' : 'flex';
         }
 
-        // PAYMENT LOGIC
-        function pay(amount, name) {
-            buzz(50); 
-            const ai = document.getElementById('ai-msg');
-            ai.innerText = "SENDING TO " + name.toUpperCase() + "...";
-            ai.style.color = "#FFD700";
-
+        // CHAT LOGIC
+        function sendMsg() {
+            const input = document.getElementById('user-input');
+            const box = document.getElementById('chat-box');
+            if(input.value === "") return;
+            
+            // User Msg
+            const uMsg = document.createElement('div');
+            uMsg.className = 'msg msg-user';
+            uMsg.innerText = input.value;
+            box.appendChild(uMsg);
+            
+            // AI Reply
             setTimeout(() => {
-                buzz(200); 
-                toggleModal('receipt-overlay');
-                document.getElementById('rec-amt').innerText = "₦ " + amount.toLocaleString();
-                document.getElementById('rec-to').innerText = name;
-            }, 1500);
+                const aMsg = document.createElement('div');
+                aMsg.className = 'msg msg-ai';
+                aMsg.innerText = "Request received. Processing...";
+                box.appendChild(aMsg);
+                box.scrollTop = box.scrollHeight;
+                buzz(50);
+            }, 1000);
+            
+            input.value = "";
+            box.scrollTop = box.scrollHeight;
         }
 
-        // BIOMETRICS
+        // STEALTH & AUTH (EXISTING)
+        let isStealth = false;
+        function toggleStealth() {
+            buzz(20);
+            const b = document.getElementById('wallet-bal');
+            b.innerText = isStealth ? "₦ 50,000.00" : "₦ ****";
+            isStealth = !isStealth;
+        }
+
+        function pay(amount, name) {
+            buzz(50); 
+            toggleModal('receipt-overlay');
+            document.getElementById('rec-amt').innerText = "₦ " + amount.toLocaleString();
+            document.getElementById('rec-to').innerText = name;
+        }
+
         function authenticate() {
             buzz(100);
-            const status = document.getElementById('auth-status');
+            const s = document.getElementById('auth-status');
             document.querySelector('.auth-btn').style.display = 'none';
-            status.innerText = "SCANNING...";
-            status.style.color = "#FFD700";
+            s.innerText = "SCANNING..."; s.style.color = "#FFD700";
             setTimeout(() => {
-                buzz([100, 50, 100]); 
-                status.innerText = "ACCESS GRANTED";
-                status.style.color = "#0f0";
+                buzz([100,50,100]); s.innerText = "GRANTED"; s.style.color = "#0f0";
                 setTimeout(() => {
                     document.getElementById('launchpad').style.top = "-100%";
                     document.getElementById('app-interface').style.display = "block";
@@ -234,14 +264,12 @@
             document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active-icon'));
             document.getElementById(id).classList.add('active');
             document.getElementById('n-' + id).classList.add('active-icon');
-            msg("Accessing " + id.toUpperCase() + " Module...");
         }
 
-        function msg(text) {
-            const ai = document.getElementById('ai-msg');
-            ai.innerText = text;
-            ai.style.color = "#fff";
-            setTimeout(() => { ai.style.color = "#888"; }, 2000);
+        function msg(t) { 
+            const a = document.getElementById('ai-msg'); 
+            a.innerText = t; a.style.color = "#fff"; 
+            setTimeout(() => { a.style.color = "#888"; }, 2000); 
         }
 
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
