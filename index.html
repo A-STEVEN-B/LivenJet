@@ -111,13 +111,15 @@
         }
 
         setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
         }, 1000);
         
         // Random AI thoughts
         const thoughts = ["Scanning nodes...", "Satellite LJ-01 synced", "Encryption stable", "Network optimal"];
         setInterval(() => {
-            if(document.getElementById('ai-msg').innerText.includes('Switching') === false) {
+            const el = document.getElementById('ai-msg');
+            if(el.innerText.includes('Switching') === false) {
                 brain(thoughts[Math.floor(Math.random()*thoughts.length)]);
             }
         }, 8000);
