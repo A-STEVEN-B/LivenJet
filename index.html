@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Full Nexus</title>
+    <title>LivenJet | Stealth Command</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; }
@@ -16,13 +16,23 @@
         .scan-line { width: 100%; height: 4px; background: #0f0; position: absolute; top: 0; animation: scan 2s linear infinite; }
         @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
         .auth-btn { background: var(--gold); border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 30px; cursor: pointer; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* --- RECEIPT MODAL --- */
-        #receipt-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .receipt-card { background: #fff; color: #000; width: 80%; padding: 30px 20px; border-radius: 15px; position: relative; animation: slideUp 0.5s ease; text-align: center; }
+        /* --- MODALS (RECEIPT & PASSPORT) --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-card { background: #111; border: 1px solid var(--gold); color: #fff; width: 80%; padding: 30px 20px; border-radius: 20px; position: relative; animation: slideUp 0.4s ease; text-align: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.15); }
+        
+        /* Receipt Specifics */
+        .receipt-card { background: #fff; color: #000; border: none; }
         .receipt-card::before { content: ""; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; background: #0f0; border-radius: 50%; box-shadow: 0 0 15px #0f0; z-index: 2; }
         .dashed-line { border-bottom: 2px dashed #ccc; margin: 20px 0; }
-        .receipt-btn { background: #000; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        /* Passport Specifics */
+        .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .pass-label { color: #888; }
+        .pass-val { color: var(--gold); font-family: monospace; }
+
+        .btn-full { background: var(--gold); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
         /* --- TRANSFER AVATARS --- */
         .transfer-row { display: flex; justify-content: space-between; margin-top: 15px; gap: 10px; }
@@ -52,12 +62,27 @@
         .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(10,10,10,0.95); border: 1px solid #332; border-radius: 25px; display: flex; justify-content: space-around; padding: 18px 0; z-index: 1000; backdrop-filter: blur(10px); }
         .dock-item { font-size: 24px; opacity: 0.3; transition: 0.3s; cursor: pointer; }
         .active-icon { opacity: 1; color: var(--gold); transform: translateY(-5px); }
+
+        /* Top Bar Avatar */
+        .avatar-btn { width: 35px; height: 35px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: 40px; left: 20px; z-index: 2001; cursor: pointer; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
     </style>
 </head>
 <body>
 
-    <div id="receipt-overlay">
-        <div class="receipt-card">
+    <div id="passport-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <h2 style="color:var(--gold); margin-top:0;">USER PASSPORT</h2>
+            <div style="width: 60px; height: 60px; background: #222; border: 2px solid var(--gold); border-radius: 50%; margin: 10px auto; display: flex; align-items: center; justify-content: center; font-size: 24px;">SA</div>
+            <div class="pass-row"><span class="pass-label">OPERATOR</span><span class="pass-val">STEVEN ADEWOLE</span></div>
+            <div class="pass-row"><span class="pass-label">CLEARANCE</span><span class="pass-val">LEVEL 5 (OMNI)</span></div>
+            <div class="pass-row"><span class="pass-label">SERVER NODE</span><span class="pass-val">LAGOS-01</span></div>
+            <div class="pass-row"><span class="pass-label">ACCOUNT STATUS</span><span class="pass-val" style="color:#0f0;">ACTIVE</span></div>
+            <button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE ID</button>
+        </div>
+    </div>
+
+    <div id="receipt-overlay" class="modal-overlay">
+        <div class="modal-card receipt-card">
             <h2 style="margin: 10px 0;">PAYMENT SUCCESS</h2>
             <p style="color: #666; font-size: 12px;">Funds Transferred</p>
             <div class="dashed-line"></div>
@@ -70,13 +95,13 @@
                 <span style="font-family: monospace;" id="rec-to">Unknown</span>
             </div>
             <div class="dashed-line"></div>
-            <button class="receipt-btn" onclick="closeReceipt()">CLOSE RECEIPT</button>
+            <button class="btn-full" style="background:#000; color:#fff;" onclick="toggleModal('receipt-overlay')">CLOSE RECEIPT</button>
         </div>
     </div>
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">NEXUS SYSTEM v10.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">STEALTH INTERFACE v11.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -84,13 +109,15 @@
 
     <div id="app-interface">
         <div class="ticker-wrap">SYSTEM NODE: LOS-NGA-01 | <span id="clock"></span></div>
+        <div class="avatar-btn" onclick="toggleModal('passport-overlay')">SA</div>
+        
         <div class="neural-core"><div class="core-inner"></div></div>
         <div style="font-family: monospace; font-size: 10px; color: #888; height: 20px;" id="ai-msg">IDENTITY VERIFIED.</div>
 
         <div id="home" class="pillar active">
             <div class="intel-card">
-                <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY</p>
-                <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New';" id="wallet-bal">₦ 50,000.00</h2>
+                <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY (TAP TO HIDE)</p>
+                <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal" onclick="toggleStealth()">₦ 50,000.00</h2>
                 
                 <p style="font-size: 9px; color: #666; margin-top: 20px;">QUICK TRANSFER</p>
                 <div class="transfer-row">
@@ -144,8 +171,27 @@
 
     <script>
         // HAPTIC ENGINE
-        function buzz(duration) {
-            if (navigator.vibrate) navigator.vibrate(duration);
+        function buzz(duration) { if (navigator.vibrate) navigator.vibrate(duration); }
+
+        // STEALTH MODE
+        let isStealth = false;
+        function toggleStealth() {
+            buzz(20);
+            const bal = document.getElementById('wallet-bal');
+            if(isStealth) {
+                bal.innerText = "₦ 50,000.00";
+                isStealth = false;
+            } else {
+                bal.innerText = "₦ ****";
+                isStealth = true;
+            }
+        }
+
+        // MODAL SYSTEM
+        function toggleModal(id) {
+            buzz(30);
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === 'flex') ? 'none' : 'flex';
         }
 
         // PAYMENT LOGIC
@@ -157,16 +203,10 @@
 
             setTimeout(() => {
                 buzz(200); 
-                document.getElementById('receipt-overlay').style.display = 'flex';
+                toggleModal('receipt-overlay');
                 document.getElementById('rec-amt').innerText = "₦ " + amount.toLocaleString();
                 document.getElementById('rec-to').innerText = name;
             }, 1500);
-        }
-
-        function closeReceipt() {
-            buzz(50);
-            document.getElementById('receipt-overlay').style.display = 'none';
-            msg("Transaction Sealed.");
         }
 
         // BIOMETRICS
