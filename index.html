@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LivenJet | Platinum Access</title>
     <style>
-        body { background-color: #000; color: #FFD700; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; margin: 0; }
+        body { background-color: #000; color: #FFD700; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; margin: 0; overflow-x: hidden; }
         
         /* Premium Header */
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #0a0a0a; border-bottom: 1px solid #1a1a1a; margin: -20px -20px 20px -20px; }
         .user-profile { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 40px; height: 40px; background: #FFD700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; border: 2px solid #333; }
+        .avatar { width: 40px; height: 40px; background: #FFD700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; border: 2px solid #333; box-shadow: 0 0 10px rgba(255,215,0,0.2); }
         .verified-mark { color: #1DA1F2; font-size: 14px; }
 
         .logo { font-size: 55px; margin: 20px 0 5px 0; filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.3)); }
@@ -25,21 +25,26 @@
             margin: 25px auto; 
             max-width: 340px;
             position: relative;
-            overflow: hidden;
         }
-        .balance-card::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%); pointer-events: none; }
         
         .btn { background: #FFD700; color: #000; font-weight: bold; padding: 18px; width: 95%; border: none; border-radius: 15px; margin: 12px 0; cursor: pointer; transition: 0.3s; font-size: 14px; letter-spacing: 1px; }
-        .btn:hover { background: #fff; transform: translateY(-2px); }
+        .btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,215,0,0.3); }
 
         #payment-form, #pin-section { display: none; margin-top: 20px; background: #0a0a0a; padding: 25px; border-radius: 24px; border: 1px solid #FFD700; max-width: 340px; margin-left: auto; margin-right: auto; animation: slideUp 0.4s ease; }
         input { padding: 15px; width: 88%; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: white; font-size: 16px; text-align: center; }
-        input:focus { border-color: #FFD700; outline: none; }
         
-        .history-section { margin-top: 40px; text-align: left; max-width: 340px; margin: 40px auto; }
+        .history-section { margin-top: 40px; text-align: left; max-width: 340px; margin: 40px auto; min-height: 100px; }
         .history-label { color: #FFD700; font-size: 11px; font-weight: bold; letter-spacing: 2px; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 15px; display: block; }
         .history-item { background: #0a0a0a; margin-bottom: 8px; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #FFD700; }
-        
+
+        /* Market Footer Stats */
+        .stats-footer { margin-top: 50px; background: #0a0a0a; padding: 20px; border-radius: 20px 20px 0 0; border-top: 1px solid #1a1a1a; margin-bottom: -20px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-box { background: #000; padding: 10px; border-radius: 10px; border: 1px solid #222; text-align: left; }
+        .stat-label { font-size: 9px; color: #888; text-transform: uppercase; }
+        .stat-value { font-size: 14px; color: #fff; font-family: monospace; }
+        .trending-up { color: #00ff00; font-size: 10px; }
+
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -50,10 +55,10 @@
             <div class="avatar">AS</div>
             <div style="text-align: left;">
                 <div style="font-size: 12px; font-weight: bold; color: #fff;">Steven Adewole <span class="verified-mark">✔</span></div>
-                <div id="live-greeting" style="font-size: 10px; color: #888;">Initializing...</div>
+                <div id="live-greeting" style="font-size: 10px; color: #888;">Updating...</div>
             </div>
         </div>
-        <div id="live-clock" style="font-size: 11px; color: #FFD700; font-family: monospace;">00:00</div>
+        <div id="live-clock" style="font-size: 11px; color: #FFD700; font-family: monospace;">00:00:00</div>
     </div>
 
     <div class="logo">🦅</div>
@@ -65,7 +70,7 @@
         <h2 id="balance-display" style="font-size: 38px; margin: 12px 0; font-family: 'Courier New', monospace;">₦ 50,000.00</h2>
         <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
             <span style="color: #00ff00; font-size: 10px;">● SECURE</span>
-            <span style="color: #888; font-size: 10px;">● MERCURY v3.0</span>
+            <span style="color: #888; font-size: 10px;">● MERCURY v3.5</span>
         </div>
     </div>
 
@@ -91,8 +96,21 @@
 
     <div class="history-section">
         <span class="history-label">TRANSACTION LEDGER</span>
-        <div id="history-list">
+        <div id="history-list"></div>
+    </div>
+
+    <div class="stats-footer">
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="stat-label">System Health</div>
+                <div class="stat-value" style="color: #00ff00;">99.9% OPTIMAL</div>
             </div>
+            <div class="stat-box">
+                <div class="stat-label">LivenJet Index</div>
+                <div class="stat-value">₦ 4,201.50 <span class="trending-up">▲ 2.4%</span></div>
+            </div>
+        </div>
+        <p style="font-size: 8px; color: #444; margin-top: 15px;">© 2026 LIVENJET AEROSPACE & UTILITIES | ENCRYPTED TERMINAL</p>
     </div>
 
     <script>
@@ -105,7 +123,7 @@
             const hours = now.getHours();
             const greeting = hours < 12 ? "Good Morning" : hours < 18 ? "Good Afternoon" : "Good Evening";
             document.getElementById('live-greeting').innerText = greeting;
-            document.getElementById('live-clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            document.getElementById('live-clock').innerText = now.toLocaleTimeString();
         }
         setInterval(updateHeader, 1000);
         updateHeader();
@@ -116,7 +134,7 @@
             document.getElementById('pin-section').style.display = 'none';
             document.getElementById('form-title').innerText = "Vend " + service;
             document.getElementById('id-input').placeholder = (service === 'Electricity') ? "Meter Number" : "Phone Number";
-            window.scrollTo({ top: 200, behavior: 'smooth' });
+            window.scrollTo({ top: 250, behavior: 'smooth' });
         }
 
         function showPin() {
