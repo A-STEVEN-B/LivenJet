@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Wealth Reactor</title>
+    <title>LivenJet | The Black Market</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; }
@@ -25,11 +25,16 @@
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* --- QR SCANNER --- */
+        /* --- QR SCANNER & MAP --- */
         .camera-view { width: 100%; height: 250px; background: #222; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #444; }
         .laser-beam { width: 100%; height: 2px; background: red; position: absolute; top: 0; box-shadow: 0 0 10px red; animation: scan 1.5s linear infinite; }
+        .map-grid { width: 100%; height: 200px; background: radial-gradient(circle, #222 10%, #000 90%); border: 1px solid #333; margin-bottom: 15px; position: relative; overflow: hidden; border-radius: 10px; }
+        .radar-scan { width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(0, 255, 0, 0.2)); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: spin 3s linear infinite; }
+        .map-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--accent); animation: blink 1s infinite; }
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes blink { 50% { opacity: 0.5; } }
 
-        /* FORM INPUTS */
+        /* --- FORM INPUTS --- */
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
         .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
@@ -48,17 +53,11 @@
         .action-icon { font-size: 20px; margin-bottom: 5px; }
         .action-text { font-size: 10px; font-weight: bold; color: #ccc; }
 
-        /* --- INVESTMENT & MAP --- */
+        /* --- CHART & ASSETS --- */
         .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; }
         .chart-bar { width: 12%; background: #333; border-radius: 4px 4px 0 0; transition: 0.5s; animation: growBar 1s ease-out; }
         .chart-bar.active { background: var(--green); }
         @keyframes growBar { from { height: 0; } }
-        
-        .map-grid { width: 100%; height: 200px; background: radial-gradient(circle, #222 10%, #000 90%); border: 1px solid #333; margin-bottom: 15px; position: relative; overflow: hidden; border-radius: 10px; }
-        .radar-scan { width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(0, 255, 0, 0.2)); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: spin 3s linear infinite; }
-        .map-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--accent); animation: blink 1s infinite; }
-        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-        @keyframes blink { 50% { opacity: 0.5; } }
 
         /* --- CHAT --- */
         .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; }
@@ -70,9 +69,12 @@
         .msg-user { background: var(--accent); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
         .fab-chat { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; }
 
-        /* --- MINING TERMINAL (NEW) --- */
+        /* --- MINING & BLACK MARKET (NEW) --- */
         .miner-box { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-top: 15px; text-align: left; font-family: monospace; font-size: 10px; color: #0f0; height: 80px; overflow: hidden; display: none; }
         .hash-line { margin: 2px 0; }
+        .market-item { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding:15px 0; }
+        .market-btn { background:#333; color:#0f0; border:1px solid #0f0; padding:5px 10px; border-radius:5px; font-size:10px; cursor:pointer; }
+        .avatar-glow { box-shadow: 0 0 15px var(--gold), 0 0 30px var(--gold); border: 2px solid #fff !important; }
 
         /* --- MAIN APP --- */
         #app-interface { display: none; opacity: 0; transition: 1s; padding-bottom: 120px; overflow-y: scroll; height: 100vh; }
@@ -93,7 +95,7 @@
         .active-icon { opacity: 1; color: var(--accent); transform: translateY(-5px); }
         
         /* HEADER ICONS */
-        .avatar-btn { width: 35px; height: 35px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: 40px; left: 20px; z-index: 2001; cursor: pointer; }
+        .avatar-btn { width: 35px; height: 35px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: 40px; left: 20px; z-index: 2001; cursor: pointer; transition: 0.5s; }
         .currency-btn { width: 35px; height: 35px; background: #222; border: 1px solid var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: 40px; left: 65px; z-index: 2001; cursor: pointer; font-size: 10px; font-weight: bold; }
         .settings-btn { width: 35px; height: 35px; background: #222; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: 40px; right: 20px; z-index: 2001; cursor: pointer; font-size: 18px; }
         
@@ -117,6 +119,42 @@
     </style>
 </head>
 <body>
+
+    <div id="market-overlay" class="modal-overlay">
+        <div class="modal-card" style="border-color:#0f0;">
+            <h2 style="margin: 0 0 10px 0; color:#0f0;">LJN BLACK MARKET</h2>
+            <p style="font-size:10px; color:#888;">SPEND CRYPTO. UPGRADE SYSTEM.</p>
+            <div style="background:#000; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #333;">
+                LJN BALANCE: <span id="market-bal" style="color:#0f0; font-weight:bold;">0.00</span>
+            </div>
+            
+            <div class="market-item">
+                <div style="text-align:left;">
+                    <div style="color:#fff; font-weight:bold; font-size:12px;">GHOST VPN</div>
+                    <div style="color:#666; font-size:10px;">Masks IP Address</div>
+                </div>
+                <button class="market-btn" onclick="buyItem('vpn', 2.5)">BUY 2.5 LJN</button>
+            </div>
+            
+            <div class="market-item">
+                <div style="text-align:left;">
+                    <div style="color:#fff; font-weight:bold; font-size:12px;">NEURAL HALO</div>
+                    <div style="color:#666; font-size:10px;">Gold Avatar Glow</div>
+                </div>
+                <button class="market-btn" onclick="buyItem('halo', 5.0)">BUY 5.0 LJN</button>
+            </div>
+
+            <div class="market-item">
+                <div style="text-align:left;">
+                    <div style="color:#fff; font-weight:bold; font-size:12px;">LEVEL 6 ACCESS</div>
+                    <div style="color:#666; font-size:10px;">Upgrade Clearance</div>
+                </div>
+                <button class="market-btn" onclick="buyItem('lvl6', 50.0)">BUY 50.0 LJN</button>
+            </div>
+
+            <button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('market-overlay')">LEAVE MARKET</button>
+        </div>
+    </div>
 
     <div id="settings-overlay" class="modal-overlay">
         <div class="modal-card">
@@ -230,7 +268,8 @@
             <h2 style="color:var(--accent); margin-top:0;">USER PASSPORT</h2>
             <div style="width: 60px; height: 60px; background: #222; border: 2px solid var(--accent); border-radius: 50%; margin: 10px auto; display: flex; align-items: center; justify-content: center; font-size: 24px;" id="pass-avatar">SA</div>
             <div class="pass-row"><span style="color:#888;">OPERATOR</span><span style="color:var(--accent);" id="pass-name">STEVEN ADEWOLE</span></div>
-            <div class="pass-row"><span style="color:#888;">CLEARANCE</span><span style="color:var(--accent);">LEVEL 5</span></div>
+            <div class="pass-row"><span style="color:#888;">CLEARANCE</span><span style="color:var(--accent);" id="pass-lvl">LEVEL 5</span></div>
+            <div class="pass-row"><span style="color:#888;">IP ADDRESS</span><span style="color:var(--accent);" id="pass-ip">102.88.xx.xx</span></div>
             <button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE ID</button>
         </div>
     </div>
@@ -254,7 +293,7 @@
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">WEALTH REACTOR v23.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">VOICE OS v24.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -345,7 +384,10 @@
                 </div>
                 <div class="asset-row">
                     <div class="asset-info"><div class="asset-name">LivenJet (LJN)</div><div class="asset-price" id="ljn-bal">0.00 LJN</div></div>
-                    <div style="text-align:right;"><button class="buy-btn" onclick="startMining()" id="mine-btn">START MINING</button></div>
+                    <div style="text-align:right;">
+                        <button class="buy-btn" onclick="startMining()" id="mine-btn">START MINING</button>
+                        <button class="buy-btn" style="background:#0f0; color:#000; margin-top:5px;" onclick="openMarket()">MARKET</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -374,6 +416,47 @@
         let godModeCount = 0;
         let isMining = false;
         
+        // --- TTS VOICE ---
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1; utterance.pitch = 0.8;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // --- BLACK MARKET ---
+        function openMarket() {
+            toggleModal('market-overlay');
+            document.getElementById('market-bal').innerText = ljnCrypto.toFixed(2);
+        }
+
+        function buyItem(item, cost) {
+            if(ljnCrypto >= cost) {
+                ljnCrypto -= cost;
+                buzz([100,50,100]);
+                msg("PURCHASE SUCCESSFUL");
+                document.getElementById('market-bal').innerText = ljnCrypto.toFixed(2);
+                updateDisplay();
+                
+                if(item === 'halo') {
+                    document.getElementById('main-avatar').classList.add('avatar-glow');
+                    document.getElementById('pass-avatar').classList.add('avatar-glow');
+                }
+                if(item === 'vpn') {
+                    document.getElementById('pass-ip').innerText = "192.168.GHOST (SECURE)";
+                    document.getElementById('pass-ip').style.color = "#0f0";
+                }
+                if(item === 'lvl6') {
+                    document.getElementById('pass-lvl').innerText = "LEVEL 6 (GOD)";
+                    document.getElementById('pass-lvl').style.color = "#0f0";
+                }
+            } else {
+                msg("INSUFFICIENT LJN CRYPTO");
+                buzz(200);
+            }
+        }
+
         function updateDisplay() {
             let displayBal = balance;
             let symbol = "₦ ";
@@ -386,86 +469,27 @@
             document.getElementById('ljn-bal').innerText = ljnCrypto.toFixed(4) + " LJN";
         }
 
-        // --- MINING LOGIC ---
+        // --- MINING ---
         function startMining() {
-            if(isMining) return;
-            isMining = true;
+            if(isMining) return; isMining = true;
             const btn = document.getElementById('mine-btn');
             const box = document.getElementById('miner-display');
-            btn.innerText = "MINING...";
-            box.style.display = "block";
-            buzz(50);
-            
+            btn.innerText = "MINING..."; box.style.display = "block"; buzz(50);
             let hashes = 0;
             const interval = setInterval(() => {
-                hashes++;
-                const hash = Math.random().toString(36).substring(2, 15);
+                hashes++; const hash = Math.random().toString(36).substring(2, 15);
                 box.innerHTML = `<div class="hash-line">> HASH: ${hash}...</div>` + box.innerHTML;
-                if(hashes % 5 === 0) {
-                    let reward = Math.random() * 0.5;
-                    ljnCrypto += reward;
-                    updateDisplay();
-                    buzz(20);
-                }
-                if(hashes > 20) {
-                    clearInterval(interval);
-                    isMining = false;
-                    btn.innerText = "START MINING";
-                    box.style.display = "none";
-                    box.innerHTML = "INITIALIZING...";
-                    msg("MINING COMPLETE. LJN ADDED.");
-                    buzz([100,50,100]);
-                }
+                if(hashes % 5 === 0) { let reward = Math.random() * 0.5; ljnCrypto += reward; updateDisplay(); buzz(20); }
+                if(hashes > 20) { clearInterval(interval); isMining = false; btn.innerText = "START MINING"; box.style.display = "none"; box.innerHTML = "INITIALIZING..."; msg("MINING COMPLETE. LJN ADDED."); buzz([100,50,100]); }
             }, 300);
         }
 
-        // --- GOD MODE ---
-        function godMode() {
-            godModeCount++;
-            buzz(20);
-            if(godModeCount === 5) {
-                balance += 10000000;
-                updateDisplay();
-                msg("GOD MODE: ₦10M ADDED");
-                buzz([100,100,100,100,100]);
-                godModeCount = 0;
-            }
-        }
-
-        // --- CURRENCY TOGGLE ---
-        function toggleCurrency() {
-            if(currency === "NGN") { currency = "USD"; } else { currency = "NGN"; }
-            updateDisplay(); buzz(50); msg("CURRENCY: " + currency);
-        }
-
-        function addToLedger(name, amt, type="debit") {
-            const list = document.getElementById('ledger-list');
-            const row = document.createElement('div');
-            row.className = 'tx-row';
-            let color = type === "credit" ? "#0f0" : "#ff4444";
-            let sign = type === "credit" ? "+" : "-";
-            let icon = type === "credit" ? "🏦" : "💸";
-            row.innerHTML = `<div class="tx-icon">${icon}</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt" style="color:${color}">${sign}${amt.toLocaleString()}</div>`;
-            list.insertBefore(row, list.firstChild);
-        }
-
-        function toggleFreeze() {
-            const card = document.getElementById('credit-card-ui'); const status = document.getElementById('card-status'); const num = document.getElementById('card-num'); buzz(100);
-            if(isCardFrozen) { isCardFrozen = false; card.classList.remove('frozen'); status.innerText = "ACTIVE"; status.classList.remove('frozen-text'); num.innerText = "**** 8820"; msg("CARD UNLOCKED"); } 
-            else { isCardFrozen = true; card.classList.add('frozen'); status.innerText = "FROZEN ❄️"; status.classList.add('frozen-text'); num.innerText = "❄️❄️❄️ ❄️❄️❄️"; msg("CARD FROZEN"); }
-        }
+        function godMode() { godModeCount++; buzz(20); if(godModeCount === 5) { balance += 10000000; updateDisplay(); msg("GOD MODE: ₦10M ADDED"); buzz([100,100,100,100,100]); godModeCount = 0; } }
+        function toggleCurrency() { if(currency === "NGN") { currency = "USD"; } else { currency = "NGN"; } updateDisplay(); buzz(50); msg("CURRENCY: " + currency); }
+        function addToLedger(name, amt, type="debit") { const list = document.getElementById('ledger-list'); const row = document.createElement('div'); row.className = 'tx-row'; let color = type === "credit" ? "#0f0" : "#ff4444"; let sign = type === "credit" ? "+" : "-"; let icon = type === "credit" ? "🏦" : "💸"; row.innerHTML = `<div class="tx-icon">${icon}</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt" style="color:${color}">${sign}${amt.toLocaleString()}</div>`; list.insertBefore(row, list.firstChild); }
+        function toggleFreeze() { const card = document.getElementById('credit-card-ui'); const status = document.getElementById('card-status'); const num = document.getElementById('card-num'); buzz(100); if(isCardFrozen) { isCardFrozen = false; card.classList.remove('frozen'); status.innerText = "ACTIVE"; status.classList.remove('frozen-text'); num.innerText = "**** 8820"; msg("CARD UNLOCKED"); } else { isCardFrozen = true; card.classList.add('frozen'); status.innerText = "FROZEN ❄️"; status.classList.add('frozen-text'); num.innerText = "❄️❄️❄️ ❄️❄️❄️"; msg("CARD FROZEN"); } }
         function bookFlight() { if(isCardFrozen) { msg("CARD IS FROZEN ❄️"); return; } pay(150000, "Private Jet Booking"); }
-        function pay(amount, name) {
-            if(isCardFrozen) { msg("CARD IS FROZEN ❄️"); buzz([50,50,50]); return; }
-            if(balance < amount) { msg("INSUFFICIENT FUNDS"); return; }
-            buzz(50); balance -= amount; updateDisplay(); addToLedger(name, amount);
-            toggleModal('receipt-overlay'); document.getElementById('rec-title').innerText = "SUCCESS";
-            let displayAmt = amount; let symbol = "₦ "; if(currency === "USD") { displayAmt = amount / rate; symbol = "$ "; }
-            document.getElementById('rec-amt').innerText = symbol + displayAmt.toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById('rec-to').innerText = name;
-        }
-
-        // --- STANDARD FUNCTIONS ---
+        function pay(amount, name) { if(isCardFrozen) { msg("CARD IS FROZEN ❄️"); buzz([50,50,50]); return; } if(balance < amount) { msg("INSUFFICIENT FUNDS"); return; } buzz(50); balance -= amount; updateDisplay(); addToLedger(name, amount); toggleModal('receipt-overlay'); document.getElementById('rec-title').innerText = "SUCCESS"; let displayAmt = amount; let symbol = "₦ "; if(currency === "USD") { displayAmt = amount / rate; symbol = "$ "; } document.getElementById('rec-amt').innerText = symbol + displayAmt.toLocaleString(undefined, {minimumFractionDigits: 2}); document.getElementById('rec-to').innerText = name; }
         function saveSettings() { const newName = document.getElementById('set-name').value; if(newName) { userName = newName.toUpperCase(); updateDisplay(); msg("PROFILE UPDATED"); toggleModal('settings-overlay'); } }
         function resetSystem() { if(confirm("RESET ALL DATA?")) location.reload(); }
         function toggleTheme(type) { const r = document.querySelector(':root'); if(type === 'matrix') { r.style.setProperty('--accent', '#00ff00'); } else { r.style.setProperty('--accent', '#FFD700'); } buzz(50); }
@@ -476,24 +500,12 @@
         function verifyAccount() { const acc = document.getElementById('send-acc').value; if(acc.length===10){ document.getElementById('verify-box').style.display='block'; document.getElementById('verified-name').innerText="VERIFYING..."; setTimeout(()=>{ buzz(50); document.getElementById('verified-name').innerText="EMMANUEL CHIBUZOR"; },1000); } else { document.getElementById('verify-box').style.display='none'; } }
         function processTransfer() { const amt=parseInt(document.getElementById('send-amt').value); const name=document.getElementById('verified-name').innerText; const bank=document.getElementById('send-bank').value; if(!amt||amt<=0){msg("ENTER AMOUNT");return;} toggleModal('send-overlay'); pay(amt, name+" ("+bank+")"); }
         function sendMsg() { const i=document.getElementById('user-input'); const b=document.getElementById('chat-box'); if(i.value==="")return; b.innerHTML+=`<div class="msg msg-user">${i.value}</div>`; setTimeout(()=>{ b.innerHTML+=`<div class="msg msg-ai">Request received.</div>`; b.scrollTop=b.scrollHeight; buzz(50);},1000); i.value=""; b.scrollTop=b.scrollHeight; }
-        function authenticate() { buzz(100); const s=document.getElementById('auth-status'); document.querySelector('.auth-btn').style.display='none'; s.innerText="SCANNING..."; s.style.color="var(--accent)"; setTimeout(()=>{ buzz([100,50,100]); s.innerText="GRANTED"; s.style.color="#0f0"; setTimeout(()=>{ document.getElementById('launchpad').style.top="-100%"; document.getElementById('app-interface').style.display="block"; setTimeout(()=>{document.getElementById('app-interface').style.opacity="1"},100); },800); },1000); }
+        function authenticate() { buzz(100); const s=document.getElementById('auth-status'); document.querySelector('.auth-btn').style.display='none'; s.innerText="SCANNING..."; s.style.color="var(--accent)"; setTimeout(()=>{ buzz([100,50,100]); s.innerText="GRANTED"; s.style.color="#0f0"; speak("Access Granted. Welcome back, Chief."); setTimeout(()=>{ document.getElementById('launchpad').style.top="-100%"; document.getElementById('app-interface').style.display="block"; setTimeout(()=>{document.getElementById('app-interface').style.opacity="1"},100); },800); },1000); }
         function nav(id) { buzz(30); document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon')); document.getElementById(id).classList.add('active'); document.getElementById('n-'+id).classList.add('active-icon'); }
         let isStealth=false;
         function toggleStealth() { buzz(20); const b=document.getElementById('wallet-bal'); if(isStealth){ updateDisplay(); isStealth=false; } else { b.innerText=currency==="USD"?"$ ****":"₦ ****"; isStealth=true; } }
         function msg(t) { const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
-        
-        // --- TIME GREETING ---
-        function setGreeting() {
-            const h = new Date().getHours();
-            let g = "Welcome";
-            if(h < 12) g = "Good Morning";
-            else if(h < 18) g = "Good Afternoon";
-            else g = "Good Evening";
-            msg(g + ", Chief.");
-        }
-
         setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString()},1000);
-        setTimeout(setGreeting, 1500); // Greet after launch
     </script>
 </body>
 </html>
