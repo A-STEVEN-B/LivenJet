@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Orbital Uplink</title>
+    <title>LivenJet | Living World</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; }
@@ -25,13 +25,15 @@
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* --- HACK GAME (NEW) --- */
-        .hack-bar-container { width: 100%; height: 30px; background: #222; border: 1px solid #444; border-radius: 15px; position: relative; overflow: hidden; margin: 30px 0; }
-        .hack-zone { width: 40px; height: 100%; background: rgba(0, 255, 0, 0.3); border-left: 1px solid #0f0; border-right: 1px solid #0f0; position: absolute; left: 50%; transform: translateX(-50%); }
-        .hack-cursor { width: 4px; height: 100%; background: #fff; position: absolute; left: 0; box-shadow: 0 0 10px #fff; }
-        .cursor-moving { animation: moveCursor 1s linear infinite alternate; }
-        @keyframes moveCursor { 0% { left: 0%; } 100% { left: 98%; } }
-        
+        /* --- DRONE & NEWS (NEW) --- */
+        #drone-layer { position: fixed; top: 20%; left: -100px; z-index: 6000; font-size: 40px; transition: 0.1s; pointer-events: none; }
+        .fly-anim { animation: flyOver 3s linear forwards; }
+        @keyframes flyOver { 0% { left: -100px; transform: rotate(10deg); } 50% { left: 50%; transform: rotate(0deg); } 100% { left: 120%; transform: rotate(-10deg); } }
+
+        .news-ticker { position: fixed; bottom: 85px; width: 100%; background: #111; border-top: 1px solid #333; padding: 5px 0; overflow: hidden; white-space: nowrap; z-index: 900; }
+        .ticker-content { display: inline-block; padding-left: 100%; animation: scroll 20s linear infinite; color: #888; font-size: 10px; font-family: monospace; }
+        @keyframes scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+
         /* --- QR & MAP --- */
         .camera-view { width: 100%; height: 250px; background: #222; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #444; }
         .laser-beam { width: 100%; height: 2px; background: red; position: absolute; top: 0; box-shadow: 0 0 10px red; animation: scan 1.5s linear infinite; }
@@ -52,6 +54,13 @@
         .credit-score { font-size: 40px; font-weight: bold; color: #fff; }
         .credit-label { font-size: 10px; color: var(--green); text-transform: uppercase; letter-spacing: 2px; }
         @keyframes spin-load { 0% { transform: rotate(-90deg); border-top-color: transparent; } 100% { transform: rotate(0deg); border-top-color: var(--accent); } }
+
+        /* --- HACK GAME --- */
+        .hack-bar-container { width: 100%; height: 30px; background: #222; border: 1px solid #444; border-radius: 15px; position: relative; overflow: hidden; margin: 30px 0; }
+        .hack-zone { width: 40px; height: 100%; background: rgba(0, 255, 0, 0.3); border-left: 1px solid #0f0; border-right: 1px solid #0f0; position: absolute; left: 50%; transform: translateX(-50%); }
+        .hack-cursor { width: 4px; height: 100%; background: #fff; position: absolute; left: 0; box-shadow: 0 0 10px #fff; }
+        .cursor-moving { animation: moveCursor 1s linear infinite alternate; }
+        @keyframes moveCursor { 0% { left: 0%; } 100% { left: 98%; } }
 
         /* --- ACTION GRID --- */
         .action-grid { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
@@ -125,18 +134,14 @@
 </head>
 <body>
 
+    <div id="drone-layer">🛸</div>
+
     <div id="hack-overlay" class="modal-overlay">
         <div class="modal-card" style="border-color:red;">
             <h2 style="margin: 0 0 10px 0; color:red;">SATELLITE UPLINK</h2>
             <p style="font-size:10px; color:#888;">BYPASS SECURITY TO BOOST MINING</p>
-            
-            <div class="hack-bar-container">
-                <div class="hack-zone"></div>
-                <div class="hack-cursor cursor-moving" id="hack-cursor"></div>
-            </div>
-            
+            <div class="hack-bar-container"><div class="hack-zone"></div><div class="hack-cursor cursor-moving" id="hack-cursor"></div></div>
             <div style="font-family:monospace; color:#fff; font-size:12px; margin:20px 0;" id="hack-log">WAITING FOR SIGNAL...</div>
-            
             <button class="btn-full" style="background:red;" onclick="lockSignal()">LOCK SIGNAL</button>
             <button class="btn-full" style="background:#222; border:1px solid #333; color:#fff;" onclick="toggleModal('hack-overlay')">ABORT</button>
         </div>
@@ -232,16 +237,22 @@
         </div>
     </div>
 
+    <div class="news-ticker">
+        <div class="ticker-content">
+            LIVENJET SATELLITE ONLINE ... BTC HITS $98,400 ... LAGOS TRAFFIC ALERT: LEKKI-EPE CLEAR ... NEW SECURITY PROTOCOLS ACTIVE ... WEATHER: 32°C ... SYSTEM UPDATE v26.0 READY ... 
+        </div>
+    </div>
+
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">UPLINK OS v25.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">LIVING WORLD v26.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
     </div>
 
     <div id="app-interface">
-        <div class="ticker-wrap">SYSTEM NODE: LOS-NGA-01 | <span id="clock"></span></div>
+        <div class="ticker-wrap">SYSTEM NODE: LOS-NGA-01 | <span>32°C ☀️</span> | <span id="clock"></span></div>
         <div class="avatar-btn" onclick="toggleModal('passport-overlay')" id="main-avatar">SA</div>
         <div class="currency-btn" onclick="toggleCurrency()">₦ / $</div>
         <div class="settings-btn" onclick="toggleModal('settings-overlay')">⚙️</div>
@@ -273,8 +284,8 @@
             <div class="intel-card">
                 <h3>SMART VEND</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                    <button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(1000, 'Power Unit')">⚡ 1,000</button>
-                    <button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(2000, 'Data Plan')">📱 2,000</button>
+                    <button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(1000, 'Power Unit', true)">⚡ 1,000</button>
+                    <button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(2000, 'Data Plan', true)">📱 2,000</button>
                 </div>
             </div>
         </div>
@@ -330,53 +341,33 @@
         let isMining = false;
         let miningSpeed = 0.5;
         
-        // --- HACK GAME LOGIC ---
-        function openHack() {
-            toggleModal('hack-overlay');
-            document.getElementById('hack-log').innerText = "WAITING FOR SIGNAL...";
-            document.getElementById('hack-log').style.color = "#fff";
-            document.getElementById('hack-cursor').classList.add('cursor-moving');
+        // --- DRONE LOGIC ---
+        function flyDrone() {
+            const drone = document.getElementById('drone-layer');
+            drone.classList.remove('fly-anim');
+            void drone.offsetWidth; // Trigger reflow
+            drone.classList.add('fly-anim');
+            buzz(100);
         }
 
+        // --- HACK GAME ---
+        function openHack() { toggleModal('hack-overlay'); document.getElementById('hack-log').innerText = "WAITING FOR SIGNAL..."; document.getElementById('hack-log').style.color = "#fff"; document.getElementById('hack-cursor').classList.add('cursor-moving'); }
         function lockSignal() {
             const cursor = document.getElementById('hack-cursor');
             const log = document.getElementById('hack-log');
             const rect = cursor.getBoundingClientRect();
             const container = cursor.parentElement.getBoundingClientRect();
-            const relativeX = rect.left - container.left;
-            const percent = (relativeX / container.width) * 100;
-
-            cursor.classList.remove('cursor-moving'); // Stop animation
-            
-            // Green zone is roughly 40% to 60% (center 20%)
+            const percent = ((rect.left - container.left) / container.width) * 100;
+            cursor.classList.remove('cursor-moving'); 
             if (percent > 40 && percent < 60) {
-                log.innerText = "ACCESS GRANTED. UPLINK ESTABLISHED.";
-                log.style.color = "#0f0";
-                miningSpeed = 5.0; // Boost speed
-                buzz([100, 100, 100]);
-                speak("Uplink Established. Mining boosted.");
-                setTimeout(() => {
-                    toggleModal('hack-overlay');
-                    nav('fina'); // Go to finance to see result
-                    startMining();
-                }, 1500);
-                setTimeout(() => { miningSpeed = 0.5; msg("UPLINK DISCONNECTED"); }, 60000); // Reset after 60s
-            } else {
-                log.innerText = "SIGNAL LOST. TRY AGAIN.";
-                log.style.color = "red";
-                buzz(300);
-                setTimeout(() => { cursor.classList.add('cursor-moving'); log.innerText="WAITING..."; log.style.color="#fff"; }, 1000);
-            }
+                log.innerText = "ACCESS GRANTED. UPLINK ESTABLISHED."; log.style.color = "#0f0"; miningSpeed = 5.0; buzz([100, 100, 100]); speak("Uplink Established.");
+                setTimeout(() => { toggleModal('hack-overlay'); nav('fina'); startMining(); }, 1500);
+                setTimeout(() => { miningSpeed = 0.5; msg("UPLINK DISCONNECTED"); }, 60000);
+            } else { log.innerText = "SIGNAL LOST. TRY AGAIN."; log.style.color = "red"; buzz(300); setTimeout(() => { cursor.classList.add('cursor-moving'); log.innerText="WAITING..."; log.style.color="#fff"; }, 1000); }
         }
 
         // --- TTS VOICE ---
-        function speak(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 1; utterance.pitch = 0.8;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
+        function speak(text) { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(text); u.rate = 1; u.pitch = 0.8; window.speechSynthesis.speak(u); } }
 
         // --- BLACK MARKET ---
         function openMarket() { toggleModal('market-overlay'); document.getElementById('market-bal').innerText = ljnCrypto.toFixed(2); }
@@ -417,7 +408,13 @@
         function addToLedger(name, amt, type="debit") { const list = document.getElementById('ledger-list'); const row = document.createElement('div'); row.className = 'tx-row'; let color = type === "credit" ? "#0f0" : "#ff4444"; let sign = type === "credit" ? "+" : "-"; let icon = type === "credit" ? "🏦" : "💸"; row.innerHTML = `<div class="tx-icon">${icon}</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt" style="color:${color}">${sign}${amt.toLocaleString()}</div>`; list.insertBefore(row, list.firstChild); }
         function toggleFreeze() { const card = document.getElementById('credit-card-ui'); const status = document.getElementById('card-status'); const num = document.getElementById('card-num'); buzz(100); if(isCardFrozen) { isCardFrozen = false; card.classList.remove('frozen'); status.innerText = "ACTIVE"; status.classList.remove('frozen-text'); num.innerText = "**** 8820"; msg("CARD UNLOCKED"); } else { isCardFrozen = true; card.classList.add('frozen'); status.innerText = "FROZEN ❄️"; status.classList.add('frozen-text'); num.innerText = "❄️❄️❄️ ❄️❄️❄️"; msg("CARD FROZEN"); } }
         function bookFlight() { if(isCardFrozen) { msg("CARD IS FROZEN ❄️"); return; } pay(150000, "Private Jet Booking"); }
-        function pay(amount, name) { if(isCardFrozen) { msg("CARD IS FROZEN ❄️"); buzz([50,50,50]); return; } if(balance < amount) { msg("INSUFFICIENT FUNDS"); return; } buzz(50); balance -= amount; updateDisplay(); addToLedger(name, amount); toggleModal('receipt-overlay'); document.getElementById('rec-title').innerText = "SUCCESS"; let displayAmt = amount; let symbol = "₦ "; if(currency === "USD") { displayAmt = amount / rate; symbol = "$ "; } document.getElementById('rec-amt').innerText = symbol + displayAmt.toLocaleString(undefined, {minimumFractionDigits: 2}); document.getElementById('rec-to').innerText = name; }
+        function pay(amount, name, isUtility = false) { 
+            if(isCardFrozen) { msg("CARD IS FROZEN ❄️"); buzz([50,50,50]); return; } 
+            if(balance < amount) { msg("INSUFFICIENT FUNDS"); return; } 
+            buzz(50); balance -= amount; updateDisplay(); addToLedger(name, amount); 
+            if(isUtility) flyDrone(); // TRIGGER DRONE
+            toggleModal('receipt-overlay'); document.getElementById('rec-title').innerText = "SUCCESS"; let displayAmt = amount; let symbol = "₦ "; if(currency === "USD") { displayAmt = amount / rate; symbol = "$ "; } document.getElementById('rec-amt').innerText = symbol + displayAmt.toLocaleString(undefined, {minimumFractionDigits: 2}); document.getElementById('rec-to').innerText = name; 
+        }
         function saveSettings() { const newName = document.getElementById('set-name').value; if(newName) { userName = newName.toUpperCase(); updateDisplay(); msg("PROFILE UPDATED"); toggleModal('settings-overlay'); } }
         function resetSystem() { if(confirm("RESET ALL DATA?")) location.reload(); }
         function toggleTheme(type) { const r = document.querySelector(':root'); if(type === 'matrix') { r.style.setProperty('--accent', '#00ff00'); } else { r.style.setProperty('--accent', '#FFD700'); } buzz(50); }
