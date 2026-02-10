@@ -3,13 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Conquest OS</title>
+    <title>LivenJet | Cyber Fortress</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; }
         body { background-color: #000; color: var(--accent); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; user-select: none; transition: 0.5s; }
         
-        /* --- BOOT SCREEN (NEW) --- */
+        /* --- SCREEN SHAKE & RED ALERT --- */
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+        #red-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.3); z-index: 7000; display: none; pointer-events: none; mix-blend-mode: overlay; }
+
+        /* --- BREACH MODAL (NEW) --- */
+        #breach-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .breach-box { border: 2px solid var(--red); padding: 20px; border-radius: 15px; width: 80%; background: #100; text-align: center; box-shadow: 0 0 50px var(--red); }
+        .defend-bar-bg { width: 100%; height: 20px; background: #300; margin: 20px 0; border: 1px solid var(--red); }
+        .defend-bar-fill { width: 0%; height: 100%; background: var(--red); transition: 0.1s; }
+        .defend-btn { background: var(--red); color: #fff; font-size: 20px; font-weight: bold; border: none; padding: 20px; width: 100%; border-radius: 10px; cursor: pointer; animation: pulse 0.5s infinite; }
+
+        /* --- BOOT SCREEN --- */
         #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 20px; box-sizing: border-box; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
         .boot-line { margin: 2px 0; animation: typeLine 0.1s; }
 
@@ -36,7 +48,7 @@
         .radar-scan { width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(0, 255, 0, 0.2)); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: spin 3s linear infinite; }
         .map-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--accent); animation: blink 1s infinite; }
         
-        /* --- AGENT LIST (NEW) --- */
+        /* --- AGENT LIST --- */
         .agent-list { text-align: left; max-height: 100px; overflow-y: auto; margin-top: 10px; }
         .active-agent { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #222; font-size: 10px; }
         .agent-loc { color: var(--green); }
@@ -127,6 +139,17 @@
 
     <div id="boot-screen"></div>
 
+    <div id="red-alert"></div>
+
+    <div id="breach-overlay">
+        <div class="breach-box">
+            <h1 style="color:var(--red); font-size:24px; margin:0;">⚠️ SYSTEM BREACH</h1>
+            <p style="color:#fff; font-size:12px;">HACKER DETECTED! FUNDS AT RISK!</p>
+            <div class="defend-bar-bg"><div class="defend-bar-fill" id="defend-bar"></div></div>
+            <button class="defend-btn" onclick="chargeFirewall()">DEPLOY FIREWALL</button>
+        </div>
+    </div>
+
     <div id="call-overlay">
         <div class="caller-icon">👤</div>
         <div style="font-size:20px; font-weight:bold; margin-bottom:5px;">UNKNOWN NUMBER</div>
@@ -148,6 +171,7 @@
             <button class="btn-full" style="background:#222; border:1px solid #333; color:#fff;" onclick="toggleModal('hack-overlay')">ABORT</button>
         </div>
     </div>
+    
     <div id="market-overlay" class="modal-overlay">
         <div class="modal-card" style="border-color:#0f0;">
             <h2 style="color:#0f0;">BLACK MARKET</h2>
@@ -157,6 +181,7 @@
             <button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('market-overlay')">CLOSE</button>
         </div>
     </div>
+    
     <div id="agent-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2>DEPLOY AGENT</h2>
@@ -166,15 +191,18 @@
             <button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('agent-overlay')">CANCEL</button>
         </div>
     </div>
+    
     <div id="settings-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2>CONTROL CENTER</h2>
             <div class="input-group"><label class="input-label">DISPLAY NAME</label><input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE"></div>
+            <div class="input-group"><label class="input-label">SYSTEM THEME</label><div style="display:flex; gap:10px;"><button class="btn" style="margin:0; flex:1;" onclick="toggleTheme('gold')">GOLD</button><button class="btn" style="margin:0; flex:1; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button></div></div>
             <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:10px; color:#888;">PANIC PROTOCOL</span><button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="activatePanic()">💀</button></div>
             <button class="btn-full" onclick="saveSettings()">SAVE</button>
             <button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button>
         </div>
     </div>
+    
     <div id="scan-overlay" class="modal-overlay"><div class="modal-card"><h2>SCAN & PAY</h2><div class="camera-view"><div class="laser-beam"></div></div><p id="scan-status" style="color:var(--accent); font-size:12px; margin-top:15px; height:15px;"></p><button class="btn-full" onclick="toggleModal('scan-overlay')">CANCEL</button></div></div>
     <div id="loan-overlay" class="modal-overlay"><div class="modal-card"><h2>CREDIT SCAN</h2><div id="credit-scanner" style="display:block;"><p style="font-size:10px; color:#888;">SCANNING...</p><div style="width:100%; height:4px; background:#222; margin:20px 0;"><div style="width:100%; height:100%; background:var(--accent); animation:growBar 2s;"></div></div></div><div id="credit-result" style="display:none;"><div class="credit-meter"><div class="credit-score">780</div></div><h1 style="margin:0; font-size:30px; color:var(--green);">₦ 500,000</h1><button class="btn-full" onclick="disburseLoan()">ACCEPT</button></div></div></div>
     <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>SEND MONEY</h2><div class="input-group"><label class="input-label">ACCOUNT</label><input type="number" class="app-input" id="send-acc" oninput="verifyAccount()"></div><div id="verify-box" style="display:none; background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:10px;"><p id="verified-name" style="color:var(--green); font-weight:bold; margin:0;">...</p></div><div class="input-group"><label class="input-label">AMOUNT</label><input type="number" class="app-input" id="send-amt"></div><button class="btn-full" onclick="processTransfer()">CONFIRM</button><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
@@ -187,7 +215,7 @@
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">CONQUEST OS v28.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">FORTRESS OS v29.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -206,6 +234,7 @@
             <div class="intel-card">
                 <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY</p>
                 <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal" onclick="toggleStealth()">₦ 50,000.00</h2>
+                
                 <div class="action-grid">
                     <div class="action-btn" onclick="toggleModal('send-overlay')"><div class="action-icon">💸</div><div class="action-text">SEND</div></div>
                     <div class="action-btn" onclick="openScanner()"><div class="action-icon" style="color:#0f0;">📸</div><div class="action-text">SCAN</div></div>
@@ -215,6 +244,7 @@
                 <p style="font-size: 9px; color: #666; margin-top: 20px;">RECENT ACTIVITY</p>
                 <div class="ledger-box" id="ledger-list"><div class="tx-row"><div class="tx-icon">🚕</div><div class="tx-details"><p class="tx-title">Uber Ride</p><p class="tx-date">Just Now</p></div><div class="tx-amt">-2,500</div></div></div>
             </div>
+            <button class="btn" onclick="msg('Syncing Global Accounts...')">SYNC NETWORK</button>
         </div>
 
         <div id="util" class="pillar">
@@ -226,15 +256,9 @@
                 <h3>JET-TRACK</h3>
                 <div style="background:#222; height:6px; border-radius:5px; margin:15px 0;"><div style="width:80%; height:100%; background:var(--accent);"></div></div>
                 <p style="font-size:10px; text-align:right; color:var(--accent);">ARRIVING SOON</p>
-                
                 <div style="margin-top:20px; border-top:1px solid #333; padding-top:10px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="font-size:12px; font-weight:bold;">ACTIVE AGENTS</span>
-                        <span style="font-size:10px; color:#0f0; cursor:pointer;" onclick="toggleModal('agent-overlay')">+ DEPLOY</span>
-                    </div>
-                    <div class="agent-list" id="agent-display">
-                        <div style="color:#666; font-size:10px; text-align:center; padding:10px;">NO AGENTS DEPLOYED</div>
-                    </div>
+                    <div style="display:flex; justify-content:space-between;"><span style="font-size:12px; font-weight:bold;">ACTIVE AGENTS</span><span style="font-size:10px; color:#0f0; cursor:pointer;" onclick="toggleModal('agent-overlay')">+ DEPLOY</span></div>
+                    <div class="agent-list" id="agent-display"><div style="color:#666; font-size:10px; text-align:center; padding:10px;">NO AGENTS DEPLOYED</div></div>
                 </div>
             </div>
             <button class="btn" onclick="toggleModal('map-overlay')">LIVE MAP</button>
@@ -248,6 +272,7 @@
             <div class="intel-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0;">PORTFOLIO</h3><span style="font-size:10px; color:#0f0;">+12.5%</span></div>
                 <div class="miner-box" id="miner-display">INITIALIZING...</div>
+                <div class="asset-row"><div class="asset-info"><div class="asset-name">Bitcoin (BTC)</div><div class="asset-price" id="btc-price">$98,420</div></div><div style="text-align:right;"><button class="buy-btn" onclick="pay(5000, 'Bitcoin Inv')">BUY 5k</button></div></div>
                 <div class="asset-row"><div class="asset-info"><div class="asset-name">LivenJet (LJN)</div><div class="asset-price" id="ljn-bal">0.00 LJN</div></div><div style="text-align:right;"><button class="buy-btn" onclick="startMining()" id="mine-btn">START MINING</button><button class="buy-btn" style="background:#0f0; color:#000; margin-top:5px;" onclick="openMarket()">MARKET</button></div></div>
             </div>
         </div>
@@ -263,19 +288,13 @@
     </div>
 
     <script>
-        // --- BOOT SEQUENCE ---
         window.onload = function() {
             const boot = document.getElementById('boot-screen');
             const lines = ["INITIALIZING KERNEL...", "LOADING ASSETS...", "CONNECTING TO SATELLITE...", "BIOMETRICS ONLINE...", "WELCOME TO LIVENJET."];
             let i = 0;
             const interval = setInterval(() => {
-                if(i < lines.length) {
-                    boot.innerHTML += `<div class='boot-line'>${lines[i]}</div>`;
-                    i++;
-                } else {
-                    clearInterval(interval);
-                    setTimeout(() => { boot.style.display = 'none'; document.getElementById('launchpad').style.display = 'flex'; }, 800);
-                }
+                if(i < lines.length) { boot.innerHTML += `<div class='boot-line'>${lines[i]}</div>`; i++; } 
+                else { clearInterval(interval); setTimeout(() => { boot.style.display = 'none'; document.getElementById('launchpad').style.display = 'flex'; }, 800); }
             }, 300);
         }
 
@@ -290,53 +309,87 @@
         let godModeCount = 0;
         let isMining = false;
         let miningSpeed = 0.5;
-        let agents = []; // Store active agents
+        let agents = [];
+        let panicMode = false;
+        let tempBalance = 0;
+        let btcPrice = 98420;
+        let defensePower = 0;
+
+        // --- CYBER DEFENSE ---
+        setInterval(() => {
+            if(Math.random() > 0.95 && !panicMode && document.getElementById('launchpad').style.display === 'none') {
+                triggerBreach();
+            }
+        }, 15000); // Check every 15s
+
+        function triggerBreach() {
+            buzz([500, 200, 500, 200, 500]);
+            document.body.classList.add('shake');
+            document.getElementById('red-alert').style.display = "block";
+            document.getElementById('breach-overlay').style.display = "flex";
+            defensePower = 0;
+            updateDefenseBar();
+            speak("System Breach Detected. Deploy Firewall immediately.");
+        }
+
+        function chargeFirewall() {
+            defensePower += 10;
+            buzz(50);
+            updateDefenseBar();
+            if(defensePower >= 100) {
+                // Success
+                document.getElementById('breach-overlay').style.display = "none";
+                document.getElementById('red-alert').style.display = "none";
+                document.body.classList.remove('shake');
+                balance += 10000;
+                updateDisplay();
+                msg("THREAT ELIMINATED. TRACED REWARD: ₦10,000");
+                speak("Threat Neutralized.");
+            }
+        }
+
+        function updateDefenseBar() {
+            document.getElementById('defend-bar').style.width = defensePower + "%";
+        }
+
+        // Fail condition simulation (optional complexity) logic is simplified here: if they don't tap fast enough in a real game we'd lower bar. For now, it waits for them to fill it.
+
+        // --- LIVE MARKET ---
+        setInterval(() => {
+            const change = Math.floor(Math.random() * 200) - 100;
+            btcPrice += change;
+            const el = document.getElementById('btc-price');
+            el.innerText = "$" + btcPrice.toLocaleString();
+            el.style.color = change > 0 ? "#0f0" : "red";
+        }, 3000);
 
         // --- AGENT LOGIC ---
         function deployAgent() {
             const city = document.getElementById('agent-city').value;
             if(balance >= 50000) {
-                balance -= 50000;
-                updateDisplay();
-                addToLedger("Agent Deployment ("+city+")", 50000);
-                agents.push(city);
-                updateAgentList();
-                toggleModal('agent-overlay');
-                msg("AGENT DEPLOYED TO " + city.toUpperCase());
-                buzz([100,50,100]);
-            } else {
-                msg("INSUFFICIENT FUNDS (₦50k REQ)");
-            }
+                balance -= 50000; updateDisplay(); addToLedger("Agent ("+city+")", 50000);
+                agents.push(city); updateAgentList(); toggleModal('agent-overlay'); msg("AGENT DEPLOYED"); buzz([100,50,100]);
+            } else { msg("INSUFFICIENT FUNDS"); }
         }
-
         function updateAgentList() {
-            const list = document.getElementById('agent-display');
-            list.innerHTML = "";
-            agents.forEach((city, index) => {
-                list.innerHTML += `<div class="active-agent"><span>AGENT 00${index+1}</span><span class="agent-loc">${city.toUpperCase()}</span></div>`;
-            });
+            const list = document.getElementById('agent-display'); list.innerHTML = "";
+            agents.forEach((city, index) => { list.innerHTML += `<div class="active-agent"><span>AGENT 00${index+1}</span><span class="agent-loc">${city.toUpperCase()}</span></div>`; });
         }
-
-        // PASSIVE INCOME LOOP
         setInterval(() => {
             if(agents.length > 0) {
-                const earned = agents.length * 5000;
-                balance += earned;
-                updateDisplay();
-                msg(`AGENTS SENT TRIBUTE: ₦${earned.toLocaleString()}`);
-                buzz(20);
+                const earned = agents.length * 5000; balance += earned; updateDisplay(); msg(`AGENTS TRIBUTE: ₦${earned.toLocaleString()}`); buzz(20);
             }
-        }, 30000); // Every 30 seconds
+        }, 30000);
 
         // --- GHOST PROTOCOL ---
-        setTimeout(() => { triggerCall(); }, 20000); 
+        setTimeout(() => { triggerCall(); }, 40000); 
         function triggerCall() { buzz([1000, 500, 1000]); document.getElementById('call-overlay').style.display = 'flex'; }
         function endCall() { document.getElementById('call-overlay').style.display = 'none'; }
         function answerCall() { document.getElementById('call-overlay').style.display = 'none'; speak("Good day, Chief. The funds have been secured."); msg("ENCRYPTED MSG RECEIVED"); }
 
         // --- STANDARD FUNCTIONS ---
-        function activatePanic() { buzz([100,50,100,50,500]); document.body.style.backgroundColor="#200"; toggleModal('settings-overlay'); balance=0; updateDisplay(); msg("⚠️ PANIC PROTOCOL ACTIVE"); }
-        function restorePanic() { if(balance===0) { buzz(50); balance=50000; document.body.style.backgroundColor="#000"; updateDisplay(); msg("SYSTEM RESTORED"); } }
+        function activatePanic() { buzz([100,50,100,50,500]); document.body.style.backgroundColor="#200"; toggleModal('settings-overlay'); tempBalance=balance; balance=0; panicMode=true; updateDisplay(); msg("⚠️ PANIC PROTOCOL ACTIVE"); }
+        function restorePanic() { if(panicMode) { buzz(50); balance=tempBalance; document.body.style.backgroundColor="#000"; panicMode=false; updateDisplay(); msg("SYSTEM RESTORED"); } }
         function flyDrone() { const d=document.getElementById('drone-layer'); d.classList.remove('fly-anim'); void d.offsetWidth; d.classList.add('fly-anim'); buzz(100); }
         function openHack() { toggleModal('hack-overlay'); document.getElementById('hack-log').innerText="WAITING..."; document.getElementById('hack-cursor').classList.add('cursor-moving'); }
         function lockSignal() { const c=document.getElementById('hack-cursor'); const rect=c.getBoundingClientRect(); const p=((rect.left-c.parentElement.getBoundingClientRect().left)/c.parentElement.getBoundingClientRect().width)*100; c.classList.remove('cursor-moving'); if(p>40&&p<60){ document.getElementById('hack-log').innerText="UPLINK ESTABLISHED"; miningSpeed=5.0; speak("Uplink Established."); setTimeout(()=>{toggleModal('hack-overlay');nav('fina');startMining()},1500); setTimeout(()=>{miningSpeed=0.5},60000); } else { document.getElementById('hack-log').innerText="SIGNAL LOST"; buzz(300); setTimeout(()=>{c.classList.add('cursor-moving')},1000); } }
@@ -347,7 +400,7 @@
         function startMining() { if(isMining)return; isMining=true; const b=document.getElementById('mine-btn'); const box=document.getElementById('miner-display'); b.innerText="MINING..."; box.style.display="block"; let h=0; const i=setInterval(()=>{ h++; box.innerHTML=`<div class="hash-line">> HASH: ${Math.random().toString(36).substring(2,15)}...</div>`+box.innerHTML; if(h%5===0){ljnCrypto+=Math.random()*miningSpeed;updateDisplay();} if(h>20){clearInterval(i);isMining=false;b.innerText="START MINING";box.style.display="none";box.innerHTML="";msg("MINING COMPLETE");} },300); }
         function godMode() { godModeCount++; buzz(20); if(godModeCount===5){balance+=10000000; updateDisplay(); msg("GOD MODE: ₦10M ADDED"); buzz([100,100,100]); godModeCount=0;} }
         function toggleCurrency() { currency=currency==="NGN"?"USD":"NGN"; updateDisplay(); }
-        function addToLedger(name, amt) { const l=document.getElementById('ledger-list'); l.innerHTML=`<div class="tx-row"><div class="tx-icon">💸</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt">-₦${amt.toLocaleString()}</div></div>`+l.innerHTML; }
+        function addToLedger(name, amt, type="debit") { const l=document.getElementById('ledger-list'); l.innerHTML=`<div class="tx-row"><div class="tx-icon">💸</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt">-₦${amt.toLocaleString()}</div></div>`+l.innerHTML; }
         function toggleFreeze() { const c=document.getElementById('credit-card-ui'); if(isCardFrozen){isCardFrozen=false; c.classList.remove('frozen'); msg("CARD UNLOCKED");}else{isCardFrozen=true; c.classList.add('frozen'); msg("CARD FROZEN");} }
         function bookFlight() { if(isCardFrozen){msg("CARD FROZEN");return;} pay(150000,"Private Jet"); }
         function pay(amt, name, isUtil=false) { if(isCardFrozen){msg("CARD FROZEN");return;} if(balance<amt){msg("INSUFFICIENT FUNDS");return;} balance-=amt; updateDisplay(); addToLedger(name,amt); if(isUtil)flyDrone(); toggleModal('receipt-overlay'); document.getElementById('rec-amt').innerText="₦ "+amt.toLocaleString(); }
@@ -363,8 +416,12 @@
         function sendMsg() { const i=document.getElementById('user-input'); if(i.value){ document.getElementById('chat-box').innerHTML+=`<div class="msg msg-user">${i.value}</div>`; i.value=""; setTimeout(()=>{document.getElementById('chat-box').innerHTML+=`<div class="msg msg-ai">Received.</div>`;},1000); } }
         function authenticate() { document.getElementById('auth-status').innerText="SCANNING..."; setTimeout(()=>{speak("Access Granted."); document.getElementById('launchpad').style.top="-100%"; document.getElementById('app-interface').style.display="block"; setTimeout(()=>{document.getElementById('app-interface').style.opacity="1"},100);},1000); }
         function nav(id) { document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon')); document.getElementById(id).classList.add('active'); document.getElementById('n-'+id).classList.add('active-icon'); }
+        function toggleStealth() { buzz(20); const b=document.getElementById('wallet-bal'); if(isStealth){ updateDisplay(); isStealth=false; } else { b.innerText=currency==="USD"?"$ ****":"₦ ****"; isStealth=true; } }
         function msg(t) { const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
+        
+        function setGreeting() { const h = new Date().getHours(); let g = h < 12 ? "Good Morning" : h < 18 ? "Good Afternoon" : "Good Evening"; msg(g + ", Chief."); }
         setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString()},1000);
+        setTimeout(setGreeting, 1500); 
     </script>
 </body>
 </html>
