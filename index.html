@@ -5,157 +5,177 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LivenJet | Apex Terminal</title>
     <style>
-        body { background-color: #000; color: #FFD700; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; margin: 0; overflow-x: hidden; padding-bottom: 100px; }
+        :root { --gold: #FFD700; --dark: #0a0a0a; --glass: rgba(255, 215, 0, 0.05); }
+        body { background-color: #000; color: var(--gold); font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; margin: 0; overflow-x: hidden; padding-bottom: 120px; }
         
-        /* Premium Header */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #0a0a0a; border-bottom: 1px solid #1a1a1a; margin: -20px -20px 20px -20px; }
+        /* Header & Profile */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--dark); border-bottom: 1px solid #1a1a1a; margin: -20px -20px 20px -20px; }
         .user-profile { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 40px; height: 40px; background: #FFD700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; border: 2px solid #333; }
-        .verified-mark { color: #1DA1F2; font-size: 14px; }
-
-        .logo { font-size: 55px; margin: 20px 0 5px 0; filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.3)); }
-        h1 { letter-spacing: 5px; font-size: 24px; margin: 0; font-weight: 800; }
+        .avatar { width: 42px; height: 42px; background: var(--gold); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; transform: rotate(-5deg); box-shadow: 0 0 15px rgba(255,215,0,0.3); }
         
+        /* Branding */
+        .logo { font-size: 55px; margin: 20px 0 5px 0; filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4)); animation: pulse 3s infinite; }
+        h1 { letter-spacing: 6px; font-size: 26px; margin: 0; font-weight: 900; }
+        
+        /* Main Card */
         .balance-card { 
-            background: linear-gradient(135deg, rgba(255,215,0,0.05) 0%, rgba(0,0,0,1) 100%); 
-            border: 1px solid #FFD700; 
-            border-radius: 24px; 
-            padding: 30px; 
+            background: linear-gradient(135deg, var(--glass) 0%, #000 100%); 
+            border: 1px solid var(--gold); 
+            border-radius: 28px; 
+            padding: 35px; 
             margin: 25px auto; 
             max-width: 340px;
+            backdrop-filter: blur(10px);
         }
         
-        .btn { background: #FFD700; color: #000; font-weight: bold; padding: 18px; width: 95%; border: none; border-radius: 15px; margin: 12px 0; cursor: pointer; transition: 0.3s; font-size: 14px; }
-        .btn:hover { background: #fff; transform: translateY(-2px); }
+        /* Visual Chart Simulation */
+        .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 60px; margin-top: 20px; gap: 5px; }
+        .chart-bar { width: 12%; background: #222; border-radius: 4px 4px 0 0; transition: height 0.5s ease; position: relative; }
+        .chart-bar.active { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
 
-        #payment-form, #pin-section { display: none; margin-top: 20px; background: #0a0a0a; padding: 25px; border-radius: 24px; border: 1px solid #FFD700; max-width: 340px; margin-left: auto; margin-right: auto; animation: slideUp 0.4s ease; }
-        input { padding: 15px; width: 88%; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: white; font-size: 16px; text-align: center; }
-        
-        .history-item { background: #0a0a0a; margin-bottom: 8px; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #FFD700; }
+        /* Actions */
+        .btn { background: var(--gold); color: #000; font-weight: bold; padding: 18px; width: 95%; border: none; border-radius: 16px; margin: 12px 0; cursor: pointer; transition: 0.3s; font-size: 14px; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.96); }
 
-        /* Custom Notification Toast */
-        #notification-toast {
-            position: fixed; top: 20px; right: -300px; width: 250px; background: #111; border: 1px solid #FFD700;
-            color: #fff; padding: 15px; border-radius: 12px; transition: 0.5s; z-index: 1000; text-align: left;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        #payment-form, #pin-section { display: none; margin-top: 20px; background: var(--dark); padding: 30px; border-radius: 28px; border: 1px solid var(--gold); max-width: 340px; margin: 20px auto; animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        input { padding: 16px; width: 88%; margin: 10px 0; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; font-size: 18px; text-align: center; }
 
-        /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0a; border-top: 1px solid #1a1a1a; display: flex; justify-content: space-around; padding: 15px 0; z-index: 999; }
-        .nav-item { color: #555; font-size: 20px; cursor: pointer; }
-        .nav-item.active { color: #FFD700; }
+        /* Notification */
+        #notification { position: fixed; top: 30px; right: -350px; width: 280px; background: #111; border-left: 5px solid var(--gold); color: #fff; padding: 20px; border-radius: 12px; transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 1000; text-align: left; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* Bottom Menu */
+        .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 350px; background: rgba(10,10,10,0.9); border: 1px solid #222; backdrop-filter: blur(15px); border-radius: 24px; display: flex; justify-content: space-around; padding: 15px 0; z-index: 999; }
+        .dock-item { font-size: 22px; filter: grayscale(1); transition: 0.3s; cursor: pointer; }
+        .dock-item.active { filter: grayscale(0); transform: translateY(-5px); }
+
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div id="notification-toast">
-        <strong id="toast-title" style="color:#FFD700;">Success</strong><br>
-        <span id="toast-msg" style="font-size: 12px;">Transaction complete.</span>
+    <div id="notification">
+        <div id="nt-title" style="font-weight:bold; color:var(--gold);">SYSTEM</div>
+        <div id="nt-msg" style="font-size:12px;">Authentication required.</div>
     </div>
 
     <div class="top-bar">
         <div class="user-profile">
-            <div class="avatar">AS</div>
+            <div class="avatar">SA</div>
             <div style="text-align: left;">
-                <div style="font-size: 12px; font-weight: bold; color: #fff;">Steven Adewole <span class="verified-mark">✔</span></div>
-                <div id="live-greeting" style="font-size: 10px; color: #888;">Hello...</div>
+                <div style="font-size: 13px; font-weight: bold; color: #fff;">Steven Adewole <span style="color:#1DA1F2;">✔</span></div>
+                <div id="greeting" style="font-size: 10px; color: #666;">Terminal Active</div>
             </div>
         </div>
-        <div id="live-clock" style="font-size: 11px; color: #FFD700; font-family: monospace;">00:00:00</div>
+        <div id="clock" style="font-size: 11px; font-family: monospace;">00:00:00</div>
     </div>
 
     <div class="logo">🦅</div>
     <h1>LIVENJET</h1>
     
     <div class="balance-card">
-        <p style="color: #888; font-size: 11px; margin: 0; letter-spacing: 1px;">TOTAL ASSET VALUE</p>
-        <h2 id="balance-display" style="font-size: 38px; margin: 12px 0; font-family: 'Courier New', monospace;">₦ 50,000.00</h2>
-        <span style="color: #00ff00; font-size: 10px;">● SECURE MERCURY v4.0</span>
+        <p style="color: #666; font-size: 10px; margin: 0; letter-spacing: 2px;">VAULT LIQUIDITY</p>
+        <h2 id="balance" style="font-size: 40px; margin: 10px 0; font-family: 'Courier New', monospace;">₦ 50,000.00</h2>
+        
+        <div class="chart-container" id="chart">
+            <div class="chart-bar" style="height: 30%;"></div>
+            <div class="chart-bar" style="height: 50%;"></div>
+            <div class="chart-bar" style="height: 40%;"></div>
+            <div class="chart-bar" style="height: 70%;"></div>
+            <div class="chart-bar" style="height: 20%;"></div>
+            <div class="chart-bar" style="height: 45%;"></div>
+        </div>
+        <p style="font-size: 9px; color: #444; margin-top: 10px;">ACTIVITY MONITOR (LIVE)</p>
     </div>
 
-    <button class="btn" onclick="openService('Electricity')">⚡ VEND POWER</button>
-    <button class="btn" onclick="openService('Airtime')">📱 VEND AIRTIME</button>
+    <div style="padding: 0 10px;">
+        <button class="btn" onclick="openGate('Electricity')">⚡ SECURE POWER VEND</button>
+        <button class="btn" onclick="openGate('Airtime')">📱 SECURE DATA VEND</button>
+    </div>
 
     <div id="payment-form">
-        <h3 id="form-title" style="margin-top:0;">Vend Service</h3>
-        <input type="number" id="amount-input" placeholder="Value (₦)">
-        <input type="text" id="id-input" placeholder="ID Number">
-        <button class="btn" onclick="showPin()">CONTINUE</button>
+        <h3 id="form-title" style="margin-top:0;">Vend Request</h3>
+        <input type="number" id="amt" placeholder="Amount (₦)">
+        <input type="text" id="dest" placeholder="Destination ID">
+        <button class="btn" onclick="goToPin()">CONTINUE</button>
     </div>
 
     <div id="pin-section">
-        <h3 style="color: #FFD700; margin-top:0;">AUTHORIZE</h3>
-        <input type="password" id="pin-input" maxlength="4" placeholder="****" style="font-size: 28px; letter-spacing: 12px; border: 1px solid #FFD700;">
-        <button class="btn" style="background: #00ff00;" onclick="verifyAndPay()">CONFIRM</button>
+        <h3 style="color:var(--gold); margin:0;">VERIFY IDENTITY</h3>
+        <p style="font-size:11px; color:#666;">Default PIN: 1234</p>
+        <input type="password" id="pin" maxlength="4" placeholder="****" style="font-size: 32px; letter-spacing: 15px; border-color: var(--gold);">
+        <button class="btn" style="background: #00ff00;" onclick="finalize()">AUTHORIZE</button>
+        <p onclick="closeAll()" style="color:#f44; font-size:11px; cursor:pointer;">ABORT</p>
     </div>
 
-    <div style="max-width:340px; margin: 40px auto; text-align: left;">
-        <span style="color:#FFD700; font-size:11px; font-weight:bold;">LEDGER</span>
-        <div id="history-list"></div>
-    </div>
-
-    <div class="bottom-nav">
-        <div class="nav-item active">🏠</div>
-        <div class="nav-item" onclick="notify('Info', 'Card feature coming soon!')">💳</div>
-        <div class="nav-item" onclick="notify('Info', 'Settings locked.')">⚙️</div>
+    <div class="dock">
+        <div class="dock-item active">🏛️</div>
+        <div class="dock-item" onclick="sendNT('Info', 'Vault lock active')">🔐</div>
+        <div class="dock-item" onclick="sendNT('Market', 'LJN +3.1%')">📊</div>
+        <div class="dock-item" onclick="sendNT('User', 'Level 4 Clearance')">👤</div>
     </div>
 
     <script>
-        let balance = 50000;
-        let activeService = "";
-        const CORRECT_PIN = "1234";
+        let bal = 50000;
+        let service = "";
 
-        function updateHeader() {
-            const now = new Date();
-            document.getElementById('live-greeting').innerText = now.getHours() < 12 ? "Good Morning" : "Good Afternoon";
-            document.getElementById('live-clock').innerText = now.toLocaleTimeString();
+        function updateUI() {
+            const h = new Date().getHours();
+            document.getElementById('greeting').innerText = h < 12 ? "Good Morning, Steven" : h < 18 ? "Good Afternoon, Steven" : "Good Evening, Steven";
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
         }
-        setInterval(updateHeader, 1000);
-        updateHeader();
+        setInterval(updateUI, 1000);
+        updateUI();
 
-        function notify(title, msg) {
-            const toast = document.getElementById('notification-toast');
-            document.getElementById('toast-title').innerText = title;
-            document.getElementById('toast-msg').innerText = msg;
-            toast.style.right = "20px";
-            setTimeout(() => { toast.style.right = "-300px"; }, 3000);
+        function sendNT(title, msg) {
+            const nt = document.getElementById('notification');
+            document.getElementById('nt-title').innerText = title.toUpperCase();
+            document.getElementById('nt-msg').innerText = msg;
+            nt.style.right = "20px";
+            setTimeout(() => { nt.style.right = "-350px"; }, 3500);
         }
 
-        function openService(service) {
-            activeService = service;
+        function openGate(s) {
+            service = s;
             document.getElementById('payment-form').style.display = 'block';
             document.getElementById('pin-section').style.display = 'none';
-            document.getElementById('form-title').innerText = "Vend " + service;
-            window.scrollTo({ top: 300, behavior: 'smooth' });
+            document.getElementById('form-title').innerText = "Vending " + s;
+            window.scrollTo({top: 400, behavior: 'smooth'});
         }
 
-        function showPin() {
-            if (!document.getElementById('amount-input').value) return notify('Error', 'Enter amount');
+        function goToPin() {
+            if(!document.getElementById('amt').value) return sendNT('Error', 'Amount field empty');
             document.getElementById('payment-form').style.display = 'none';
             document.getElementById('pin-section').style.display = 'block';
         }
 
-        function verifyAndPay() {
-            if (document.getElementById('pin-input').value !== CORRECT_PIN) return notify('Denied', 'Wrong PIN');
-            const amount = parseInt(document.getElementById('amount-input').value);
-            balance -= amount;
-            document.getElementById('balance-display').innerText = "₦ " + balance.toLocaleString();
+        function finalize() {
+            if(document.getElementById('pin').value !== '1234') return sendNT('Security', 'Access Denied: Invalid PIN');
             
-            const item = document.createElement('div');
-            item.className = 'history-item';
-            item.innerHTML = `<span>${activeService}</span> <strong>-₦${amount}</strong>`;
-            document.getElementById('history-list').prepend(item);
+            const a = parseInt(document.getElementById('amt').value);
+            if(a > bal) return sendNT('Balance', 'Insufficient Liquidity');
 
-            notify('Success', 'Transaction Authenticated');
-            cancel();
+            bal -= a;
+            document.getElementById('balance').innerText = "₦ " + bal.toLocaleString();
+            
+            // Randomize chart on purchase
+            const bars = document.querySelectorAll('.chart-bar');
+            bars.forEach(b => {
+                b.style.height = Math.floor(Math.random() * 80 + 10) + "%";
+                b.classList.add('active');
+                setTimeout(() => b.classList.remove('active'), 1000);
+            });
+
+            sendNT('Success', 'Transaction encrypted and sealed');
+            closeAll();
         }
 
-        function cancel() {
+        function closeAll() {
             document.getElementById('payment-form').style.display = 'none';
             document.getElementById('pin-section').style.display = 'none';
-            document.getElementById('pin-input').value = "";
+            document.getElementById('pin').value = "";
+            document.getElementById('amt').value = "";
+            document.getElementById('dest').value = "";
         }
     </script>
 </body>
