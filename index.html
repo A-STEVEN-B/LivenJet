@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Universal Transfer</title>
+    <title>LivenJet | Infinity Credit</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; }
@@ -29,10 +29,15 @@
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
         .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
-        .app-input:focus { border-color: var(--accent); }
         select.app-input { appearance: none; }
 
-        /* --- NEW ACTION GRID --- */
+        /* --- CREDIT METER (NEW) --- */
+        .credit-meter { width: 150px; height: 150px; border-radius: 50%; border: 10px solid #222; border-top: 10px solid var(--accent); margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: spin-load 2s ease-out; position: relative; }
+        .credit-score { font-size: 40px; font-weight: bold; color: #fff; }
+        .credit-label { font-size: 10px; color: var(--green); text-transform: uppercase; letter-spacing: 2px; }
+        @keyframes spin-load { 0% { transform: rotate(-90deg); border-top-color: transparent; } 100% { transform: rotate(0deg); border-top-color: var(--accent); } }
+
+        /* --- ACTION GRID --- */
         .action-grid { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
         .action-btn { flex: 1; background: #1a1a1a; border-radius: 12px; padding: 15px 5px; cursor: pointer; border: 1px solid #333; transition: 0.2s; }
         .action-btn:active { background: #333; transform: scale(0.95); }
@@ -94,16 +99,37 @@
         .tx-title { font-size: 12px; color: #fff; margin: 0; font-weight: bold; }
         .tx-date { font-size: 10px; color: #666; margin: 0; }
         .tx-amt { font-size: 12px; font-weight: bold; color: #ff4444; }
+        .tx-amt.credit { color: #00ff00; } /* Green for money coming in */
 
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
 
+    <div id="loan-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <h2 style="margin: 0 0 20px 0;">CREDIT SCAN</h2>
+            
+            <div id="credit-scanner" style="display:block;">
+                <p style="font-size:10px; color:#888;">ANALYZING FINANCIAL HISTORY...</p>
+                <div style="width:100%; height:4px; background:#222; margin:20px 0;"><div style="width:100%; height:100%; background:var(--accent); animation:growBar 2s;"></div></div>
+            </div>
+
+            <div id="credit-result" style="display:none;">
+                <div class="credit-meter">
+                    <div class="credit-score">780</div>
+                    <div class="credit-label">EXCELLENT</div>
+                </div>
+                <p style="font-size:12px; color:#fff;">APPROVED LIMIT</p>
+                <h1 style="margin:0; font-size:30px; color:var(--green);">₦ 500,000</h1>
+                <button class="btn-full" onclick="disburseLoan()">ACCEPT OFFER</button>
+            </div>
+        </div>
+    </div>
+
     <div id="send-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2 style="margin: 0 0 20px 0;">SEND MONEY</h2>
-            
             <div class="input-group">
                 <label class="input-label">BANK NAME</label>
                 <select class="app-input" id="send-bank">
@@ -111,25 +137,20 @@
                     <option>GTBank</option>
                     <option>Zenith Bank</option>
                     <option>Access Bank</option>
-                    <option>Kuda MFB</option>
                 </select>
             </div>
-            
             <div class="input-group">
                 <label class="input-label">ACCOUNT NUMBER</label>
                 <input type="number" class="app-input" id="send-acc" placeholder="10-digit number" oninput="verifyAccount()">
             </div>
-            
             <div id="verify-box" style="display:none; margin-bottom:15px; background:#1a1a1a; padding:10px; border-radius:8px;">
                 <p style="font-size:10px; color:#888; margin:0;">VERIFIED NAME</p>
                 <p style="font-weight:bold; color:var(--green); margin:5px 0;" id="verified-name">LOADING...</p>
             </div>
-
             <div class="input-group">
                 <label class="input-label">AMOUNT (₦)</label>
                 <input type="number" class="app-input" id="send-amt" placeholder="0.00">
             </div>
-
             <button class="btn-full" onclick="processTransfer()">CONFIRM TRANSFER</button>
             <button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('send-overlay')">CANCEL</button>
         </div>
@@ -185,7 +206,7 @@
 
     <div id="receipt-overlay" class="modal-overlay">
         <div class="modal-card receipt-card">
-            <h2 style="margin: 10px 0;">SUCCESS</h2>
+            <h2 style="margin: 10px 0;" id="rec-title">SUCCESS</h2>
             <p style="color: #666; font-size: 12px;">Transaction Completed</p>
             <div class="dashed-line"></div>
             <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px;">
@@ -193,7 +214,7 @@
                 <span style="font-weight: bold;" id="rec-amt">₦ 0.00</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 14px;">
-                <span>BENEFICIARY</span>
+                <span>DETAILS</span>
                 <span style="font-family: monospace;" id="rec-to">Unknown</span>
             </div>
             <button class="btn-full" style="background:#000; color:#fff;" onclick="toggleModal('receipt-overlay')">CLOSE RECEIPT</button>
@@ -202,7 +223,7 @@
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;" onclick="toggleTheme()">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">TRANSFER HUB v17.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">CREDIT SYSTEM v18.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -226,9 +247,9 @@
                         <div class="action-icon">💸</div>
                         <div class="action-text">SEND</div>
                     </div>
-                    <div class="action-btn" onclick="nav('util')">
-                        <div class="action-icon">💡</div>
-                        <div class="action-text">BILLS</div>
+                    <div class="action-btn" onclick="startLoanProcess()">
+                        <div class="action-icon" style="color:var(--green);">🏦</div>
+                        <div class="action-text" style="color:#fff;">LOANS</div>
                     </div>
                     <div class="action-btn" onclick="nav('fina')">
                         <div class="action-icon">📈</div>
@@ -314,12 +335,45 @@
             document.getElementById('wallet-bal').innerText = "₦ " + balance.toLocaleString() + ".00";
         }
 
-        function addToLedger(name, amt) {
+        function addToLedger(name, amt, type="debit") {
             const list = document.getElementById('ledger-list');
             const row = document.createElement('div');
             row.className = 'tx-row';
-            row.innerHTML = `<div class="tx-icon">💸</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt">-₦${amt.toLocaleString()}</div>`;
+            let color = type === "credit" ? "#0f0" : "#ff4444";
+            let sign = type === "credit" ? "+" : "-";
+            let icon = type === "credit" ? "🏦" : "💸";
+            
+            row.innerHTML = `<div class="tx-icon">${icon}</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt" style="color:${color}">${sign}₦${amt.toLocaleString()}</div>`;
             list.insertBefore(row, list.firstChild);
+        }
+
+        // LOAN LOGIC
+        function startLoanProcess() {
+            toggleModal('loan-overlay');
+            document.getElementById('credit-scanner').style.display = "block";
+            document.getElementById('credit-result').style.display = "none";
+            buzz(50);
+            
+            setTimeout(() => {
+                document.getElementById('credit-scanner').style.display = "none";
+                document.getElementById('credit-result').style.display = "block";
+                buzz([50,50,50]);
+            }, 2500);
+        }
+
+        function disburseLoan() {
+            toggleModal('loan-overlay');
+            balance = balance + 500000; // ADD LOAN
+            updateDisplay();
+            addToLedger("Credit Disbursal", 500000, "credit");
+            
+            setTimeout(() => {
+                toggleModal('receipt-overlay');
+                document.getElementById('rec-title').innerText = "LOAN APPROVED";
+                document.getElementById('rec-amt').innerText = "₦ 500,000";
+                document.getElementById('rec-to').innerText = "Wallet Credited";
+                buzz(200);
+            }, 500);
         }
 
         // AUTO-VERIFY ACCOUNT NAME
@@ -327,33 +381,24 @@
             const acc = document.getElementById('send-acc').value;
             const box = document.getElementById('verify-box');
             const nameEl = document.getElementById('verified-name');
-            
             if(acc.length === 10) {
                 box.style.display = 'block';
                 nameEl.innerText = "VERIFYING...";
                 setTimeout(() => {
                     buzz(50);
-                    // Generate random name for realism
                     const names = ["EMMANUEL CHIBUZOR", "AISHAT MOHAMMED", "TUNDE BAKARE", "CHIOMA OKORO"];
                     nameEl.innerText = names[Math.floor(Math.random() * names.length)];
                 }, 1000);
-            } else {
-                box.style.display = 'none';
-            }
+            } else { box.style.display = 'none'; }
         }
 
-        // PROCESS MANUAL TRANSFER
         function processTransfer() {
             const amt = parseInt(document.getElementById('send-amt').value);
             const name = document.getElementById('verified-name').innerText;
             const bank = document.getElementById('send-bank').value;
-            
             if(!amt || amt <= 0) { msg("ENTER AMOUNT"); return; }
-            
             toggleModal('send-overlay');
             pay(amt, name + " (" + bank + ")");
-            
-            // Reset form
             document.getElementById('send-acc').value = "";
             document.getElementById('send-amt').value = "";
             document.getElementById('verify-box').style.display = "none";
@@ -366,6 +411,7 @@
             updateDisplay();
             addToLedger(name, amount);
             toggleModal('receipt-overlay');
+            document.getElementById('rec-title').innerText = "SUCCESS";
             document.getElementById('rec-amt').innerText = "₦ " + amount.toLocaleString();
             document.getElementById('rec-to').innerText = name;
         }
