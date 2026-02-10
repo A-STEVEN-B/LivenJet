@@ -3,27 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Ghost Protocol</title>
+    <title>LivenJet | Conquest OS</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; }
         body { background-color: #000; color: var(--accent); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; user-select: none; transition: 0.5s; }
         
+        /* --- BOOT SCREEN (NEW) --- */
+        #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 20px; box-sizing: border-box; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+        .boot-line { margin: 2px 0; animation: typeLine 0.1s; }
+
         /* --- BIOMETRIC LOCK --- */
-        #launchpad { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
+        #launchpad { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
         .scanner-box { width: 100px; height: 100px; border: 2px solid #333; border-radius: 20px; position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); }
         .fingerprint { font-size: 50px; margin-top: 20px; opacity: 0.3; }
         .scan-line { width: 100%; height: 4px; background: #0f0; position: absolute; top: 0; animation: scan 2s linear infinite; }
         @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
         .auth-btn { background: var(--accent); border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 30px; cursor: pointer; animation: pulse 2s infinite; }
-
-        /* --- CALL OVERLAY (NEW) --- */
-        #call-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .caller-icon { width: 100px; height: 100px; background: #222; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; animation: pulse 1s infinite; }
-        .call-actions { display: flex; gap: 40px; margin-top: 50px; }
-        .call-btn { width: 70px; height: 70px; border-radius: 50%; border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .accept { background: #0f0; box-shadow: 0 0 20px #0f0; }
-        .decline { background: #f00; box-shadow: 0 0 20px #f00; }
 
         /* --- MODALS --- */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
@@ -33,6 +29,32 @@
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
+        /* --- ELEMENTS --- */
+        .camera-view { width: 100%; height: 250px; background: #222; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #444; }
+        .laser-beam { width: 100%; height: 2px; background: red; position: absolute; top: 0; box-shadow: 0 0 10px red; animation: scan 1.5s linear infinite; }
+        .map-grid { width: 100%; height: 200px; background: radial-gradient(circle, #222 10%, #000 90%); border: 1px solid #333; margin-bottom: 15px; position: relative; overflow: hidden; border-radius: 10px; }
+        .radar-scan { width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(0, 255, 0, 0.2)); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: spin 3s linear infinite; }
+        .map-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--accent); animation: blink 1s infinite; }
+        
+        /* --- AGENT LIST (NEW) --- */
+        .agent-list { text-align: left; max-height: 100px; overflow-y: auto; margin-top: 10px; }
+        .active-agent { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #222; font-size: 10px; }
+        .agent-loc { color: var(--green); }
+
+        .action-grid { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
+        .action-btn { flex: 1; background: #1a1a1a; border-radius: 12px; padding: 15px 5px; cursor: pointer; border: 1px solid #333; transition: 0.2s; }
+        .action-btn:active { background: #333; transform: scale(0.95); }
+        .action-icon { font-size: 20px; margin-bottom: 5px; }
+        .action-text { font-size: 10px; font-weight: bold; color: #ccc; }
+
+        /* --- CALL OVERLAY --- */
+        #call-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .caller-icon { width: 100px; height: 100px; background: #222; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; animation: pulse 1s infinite; }
+        .call-actions { display: flex; gap: 40px; margin-top: 50px; }
+        .call-btn { width: 70px; height: 70px; border-radius: 50%; border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .accept { background: #0f0; box-shadow: 0 0 20px #0f0; }
+        .decline { background: #f00; box-shadow: 0 0 20px #f00; }
+
         /* --- DRONE & NEWS --- */
         #drone-layer { position: fixed; top: 20%; left: -100px; z-index: 6000; font-size: 40px; transition: 0.1s; pointer-events: none; }
         .fly-anim { animation: flyOver 3s linear forwards; }
@@ -41,79 +63,23 @@
         .ticker-content { display: inline-block; padding-left: 100%; animation: scroll 20s linear infinite; color: #888; font-size: 10px; font-family: monospace; }
         @keyframes scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
-        /* --- QR & MAP --- */
-        .camera-view { width: 100%; height: 250px; background: #222; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #444; }
-        .laser-beam { width: 100%; height: 2px; background: red; position: absolute; top: 0; box-shadow: 0 0 10px red; animation: scan 1.5s linear infinite; }
-        .map-grid { width: 100%; height: 200px; background: radial-gradient(circle, #222 10%, #000 90%); border: 1px solid #333; margin-bottom: 15px; position: relative; overflow: hidden; border-radius: 10px; }
-        .radar-scan { width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(0, 255, 0, 0.2)); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: spin 3s linear infinite; }
-        .map-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--accent); animation: blink 1s infinite; }
-        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-        @keyframes blink { 50% { opacity: 0.5; } }
-
-        /* --- INPUTS --- */
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
-        .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
-        select.app-input { appearance: none; }
-
-        /* --- CREDIT METER --- */
-        .credit-meter { width: 150px; height: 150px; border-radius: 50%; border: 10px solid #222; border-top: 10px solid var(--accent); margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: spin-load 2s ease-out; position: relative; }
-        .credit-score { font-size: 40px; font-weight: bold; color: #fff; }
-        .credit-label { font-size: 10px; color: var(--green); text-transform: uppercase; letter-spacing: 2px; }
-        @keyframes spin-load { 0% { transform: rotate(-90deg); border-top-color: transparent; } 100% { transform: rotate(0deg); border-top-color: var(--accent); } }
-
-        /* --- HACK GAME --- */
-        .hack-bar-container { width: 100%; height: 30px; background: #222; border: 1px solid #444; border-radius: 15px; position: relative; overflow: hidden; margin: 30px 0; }
-        .hack-zone { width: 40px; height: 100%; background: rgba(0, 255, 0, 0.3); border-left: 1px solid #0f0; border-right: 1px solid #0f0; position: absolute; left: 50%; transform: translateX(-50%); }
-        .hack-cursor { width: 4px; height: 100%; background: #fff; position: absolute; left: 0; box-shadow: 0 0 10px #fff; }
-        .cursor-moving { animation: moveCursor 1s linear infinite alternate; }
-        @keyframes moveCursor { 0% { left: 0%; } 100% { left: 98%; } }
-
-        /* --- ACTION GRID --- */
-        .action-grid { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
-        .action-btn { flex: 1; background: #1a1a1a; border-radius: 12px; padding: 15px 5px; cursor: pointer; border: 1px solid #333; transition: 0.2s; }
-        .action-btn:active { background: #333; transform: scale(0.95); }
-        .action-icon { font-size: 20px; margin-bottom: 5px; }
-        .action-text { font-size: 10px; font-weight: bold; color: #ccc; }
-
-        /* --- CHART & ASSETS --- */
-        .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; }
-        .chart-bar { width: 12%; background: #333; border-radius: 4px 4px 0 0; transition: 0.5s; animation: growBar 1s ease-out; }
-        .chart-bar.active { background: var(--green); }
-        @keyframes growBar { from { height: 0; } }
-
-        /* --- MINING & MARKET --- */
-        .miner-box { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-top: 15px; text-align: left; font-family: monospace; font-size: 10px; color: #0f0; height: 80px; overflow: hidden; display: none; }
-        .hash-line { margin: 2px 0; }
-        .market-item { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding:15px 0; }
-        .market-btn { background:#333; color:#0f0; border:1px solid #0f0; padding:5px 10px; border-radius:5px; font-size:10px; cursor:pointer; }
-        .avatar-glow { box-shadow: 0 0 15px var(--gold), 0 0 30px var(--gold); border: 2px solid #fff !important; }
-
         /* --- MAIN APP --- */
         #app-interface { display: none; opacity: 0; transition: 1s; padding-bottom: 120px; overflow-y: scroll; height: 100vh; }
         .ticker-wrap { width: 100%; background: #111; padding: 8px 0; position: fixed; top: 0; z-index: 2000; font-family: monospace; font-size: 10px; color: #666; }
         .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 60px auto 20px; position: relative; animation: core-pulse 3s infinite; cursor: pointer; }
         .core-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40%; height: 40%; background: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--accent); }
         @keyframes core-pulse { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } }
-
         .pillar { display: none; padding: 20px; animation: slideIn 0.4s ease; }
         .active { display: block; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
-        
         .intel-card { background: rgba(15,15,15,0.9); border: 1px solid #222; border-bottom: 2px solid var(--accent); border-radius: 16px; padding: 20px; margin: 15px auto; max-width: 340px; text-align: left; transition: 0.3s; }
         .btn { background: var(--accent); border: none; padding: 15px; width: 100%; border-radius: 12px; margin-top: 10px; font-weight: bold; cursor: pointer; }
-        
         .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(10,10,10,0.95); border: 1px solid #332; border-radius: 25px; display: flex; justify-content: space-around; padding: 18px 0; z-index: 1000; backdrop-filter: blur(10px); }
         .dock-item { font-size: 24px; opacity: 0.3; transition: 0.3s; cursor: pointer; }
         .active-icon { opacity: 1; color: var(--accent); transform: translateY(-5px); }
-        
-        /* HEADER ICONS */
         .avatar-btn { width: 35px; height: 35px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: 40px; left: 20px; z-index: 2001; cursor: pointer; transition: 0.5s; }
         .currency-btn { width: 35px; height: 35px; background: #222; border: 1px solid var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: 40px; left: 65px; z-index: 2001; cursor: pointer; font-size: 10px; font-weight: bold; }
         .settings-btn { width: 35px; height: 35px; background: #222; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: 40px; right: 20px; z-index: 2001; cursor: pointer; font-size: 18px; }
-        
-        .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        
         .ledger-box { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; padding-right: 5px; }
         .tx-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; animation: fadeIn 0.5s; }
         .tx-icon { width: 30px; height: 30px; background: #222; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 10px; }
@@ -121,12 +87,32 @@
         .tx-title { font-size: 12px; color: #fff; margin: 0; font-weight: bold; }
         .tx-date { font-size: 10px; color: #666; margin: 0; }
         .tx-amt { font-size: 12px; font-weight: bold; color: #ff4444; }
-        .tx-amt.credit { color: #00ff00; }
-
         .frozen { border-color: var(--ice) !important; background: linear-gradient(145deg, #002, #000) !important; box-shadow: 0 0 20px var(--ice) !important; }
         .frozen-text { color: var(--ice) !important; text-shadow: 0 0 10px var(--ice); }
-
-        /* CHAT STYLES */
+        
+        /* GENERAL STYLES */
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
+        .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
+        .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .credit-meter { width: 150px; height: 150px; border-radius: 50%; border: 10px solid #222; border-top: 10px solid var(--accent); margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: spin-load 2s ease-out; position: relative; }
+        .credit-score { font-size: 40px; font-weight: bold; color: #fff; }
+        .credit-label { font-size: 10px; color: var(--green); text-transform: uppercase; letter-spacing: 2px; }
+        .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; }
+        .chart-bar { width: 12%; background: #333; border-radius: 4px 4px 0 0; transition: 0.5s; animation: growBar 1s ease-out; }
+        .chart-bar.active { background: var(--green); }
+        .miner-box { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-top: 15px; text-align: left; font-family: monospace; font-size: 10px; color: #0f0; height: 80px; overflow: hidden; display: none; }
+        .hash-line { margin: 2px 0; }
+        .market-item { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding:15px 0; }
+        .market-btn { background:#333; color:#0f0; border:1px solid #0f0; padding:5px 10px; border-radius:5px; font-size:10px; cursor:pointer; }
+        .avatar-glow { box-shadow: 0 0 15px var(--gold), 0 0 30px var(--gold); border: 2px solid #fff !important; }
+        .hack-bar-container { width: 100%; height: 30px; background: #222; border: 1px solid #444; border-radius: 15px; position: relative; overflow: hidden; margin: 30px 0; }
+        .hack-zone { width: 40px; height: 100%; background: rgba(0, 255, 0, 0.3); border-left: 1px solid #0f0; border-right: 1px solid #0f0; position: absolute; left: 50%; transform: translateX(-50%); }
+        .hack-cursor { width: 4px; height: 100%; background: #fff; position: absolute; left: 0; box-shadow: 0 0 10px #fff; }
+        .cursor-moving { animation: moveCursor 1s linear infinite alternate; }
+        @keyframes moveCursor { 0% { left: 0%; } 100% { left: 98%; } }
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; }
         .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; }
         .chat-input-area { padding: 10px; background: #222; display: flex; gap: 10px; }
@@ -135,12 +121,11 @@
         .msg-ai { background: #333; color: #fff; border-top-left-radius: 0; }
         .msg-user { background: var(--accent); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
         .fab-chat { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
+
+    <div id="boot-screen"></div>
 
     <div id="call-overlay">
         <div class="caller-icon">👤</div>
@@ -157,124 +142,59 @@
     <div id="hack-overlay" class="modal-overlay">
         <div class="modal-card" style="border-color:red;">
             <h2 style="margin: 0 0 10px 0; color:red;">SATELLITE UPLINK</h2>
-            <p style="font-size:10px; color:#888;">BYPASS SECURITY TO BOOST MINING</p>
             <div class="hack-bar-container"><div class="hack-zone"></div><div class="hack-cursor cursor-moving" id="hack-cursor"></div></div>
             <div style="font-family:monospace; color:#fff; font-size:12px; margin:20px 0;" id="hack-log">WAITING FOR SIGNAL...</div>
             <button class="btn-full" style="background:red;" onclick="lockSignal()">LOCK SIGNAL</button>
             <button class="btn-full" style="background:#222; border:1px solid #333; color:#fff;" onclick="toggleModal('hack-overlay')">ABORT</button>
         </div>
     </div>
-
     <div id="market-overlay" class="modal-overlay">
         <div class="modal-card" style="border-color:#0f0;">
-            <h2 style="margin: 0 0 10px 0; color:#0f0;">LJN BLACK MARKET</h2>
-            <p style="font-size:10px; color:#888;">SPEND CRYPTO. UPGRADE SYSTEM.</p>
+            <h2 style="color:#0f0;">BLACK MARKET</h2>
             <div style="background:#000; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #333;">LJN BALANCE: <span id="market-bal" style="color:#0f0; font-weight:bold;">0.00</span></div>
-            <div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">GHOST VPN</div><div style="color:#666; font-size:10px;">Masks IP Address</div></div><button class="market-btn" onclick="buyItem('vpn', 2.5)">BUY 2.5 LJN</button></div>
-            <div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">NEURAL HALO</div><div style="color:#666; font-size:10px;">Gold Avatar Glow</div></div><button class="market-btn" onclick="buyItem('halo', 5.0)">BUY 5.0 LJN</button></div>
-            <div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">LEVEL 6 ACCESS</div><div style="color:#666; font-size:10px;">Upgrade Clearance</div></div><button class="market-btn" onclick="buyItem('lvl6', 50.0)">BUY 50.0 LJN</button></div>
-            <button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('market-overlay')">LEAVE MARKET</button>
+            <div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">GHOST VPN</div></div><button class="market-btn" onclick="buyItem('vpn', 2.5)">2.5 LJN</button></div>
+            <div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">NEURAL HALO</div></div><button class="market-btn" onclick="buyItem('halo', 5.0)">5.0 LJN</button></div>
+            <button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('market-overlay')">CLOSE</button>
         </div>
     </div>
-
+    <div id="agent-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <h2>DEPLOY AGENT</h2>
+            <div class="input-group"><label class="input-label">TARGET CITY</label><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>New York</option><option>Tokyo</option></select></div>
+            <p style="font-size:12px; color:var(--accent);">COST: ₦50,000</p>
+            <button class="btn-full" onclick="deployAgent()">AUTHORIZE DEPLOYMENT</button>
+            <button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('agent-overlay')">CANCEL</button>
+        </div>
+    </div>
     <div id="settings-overlay" class="modal-overlay">
         <div class="modal-card">
-            <h2 style="margin: 0 0 20px 0;">CONTROL CENTER</h2>
+            <h2>CONTROL CENTER</h2>
             <div class="input-group"><label class="input-label">DISPLAY NAME</label><input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE"></div>
-            <div class="input-group"><label class="input-label">SYSTEM THEME</label><div style="display:flex; gap:10px;"><button class="btn" style="margin:0; flex:1;" onclick="toggleTheme('gold')">GOLD</button><button class="btn" style="margin:0; flex:1; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button></div></div>
-            <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:10px; color:#888;">PANIC PROTOCOL</span>
-                <button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="activatePanic()">💀</button>
-            </div>
-            <button class="btn-full" onclick="saveSettings()">SAVE CHANGES</button>
-            <button class="btn-outline" style="border-color:#ff4444; color:#ff4444;" onclick="resetSystem()">FACTORY RESET</button>
+            <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:10px; color:#888;">PANIC PROTOCOL</span><button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="activatePanic()">💀</button></div>
+            <button class="btn-full" onclick="saveSettings()">SAVE</button>
             <button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button>
         </div>
     </div>
+    <div id="scan-overlay" class="modal-overlay"><div class="modal-card"><h2>SCAN & PAY</h2><div class="camera-view"><div class="laser-beam"></div></div><p id="scan-status" style="color:var(--accent); font-size:12px; margin-top:15px; height:15px;"></p><button class="btn-full" onclick="toggleModal('scan-overlay')">CANCEL</button></div></div>
+    <div id="loan-overlay" class="modal-overlay"><div class="modal-card"><h2>CREDIT SCAN</h2><div id="credit-scanner" style="display:block;"><p style="font-size:10px; color:#888;">SCANNING...</p><div style="width:100%; height:4px; background:#222; margin:20px 0;"><div style="width:100%; height:100%; background:var(--accent); animation:growBar 2s;"></div></div></div><div id="credit-result" style="display:none;"><div class="credit-meter"><div class="credit-score">780</div></div><h1 style="margin:0; font-size:30px; color:var(--green);">₦ 500,000</h1><button class="btn-full" onclick="disburseLoan()">ACCEPT</button></div></div></div>
+    <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>SEND MONEY</h2><div class="input-group"><label class="input-label">ACCOUNT</label><input type="number" class="app-input" id="send-acc" oninput="verifyAccount()"></div><div id="verify-box" style="display:none; background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:10px;"><p id="verified-name" style="color:var(--green); font-weight:bold; margin:0;">...</p></div><div class="input-group"><label class="input-label">AMOUNT</label><input type="number" class="app-input" id="send-amt"></div><button class="btn-full" onclick="processTransfer()">CONFIRM</button><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
+    <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>SATELLITE</h2><div class="map-grid"><div class="radar-scan"></div><div class="map-dot" style="top:40%; left:30%;"></div></div><button class="btn-full" onclick="toggleModal('map-overlay')">CLOSE</button></div></div>
+    <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:10px; background:#222;">SUPPORT <span onclick="toggleModal('chat-overlay')" style="float:right;">✕</span></div><div class="chat-body" id="chat-box"></div><div class="chat-input-area"><input type="text" class="chat-input" id="user-input"><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div></div></div>
+    <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--accent);">PASSPORT</h2><div style="width:60px; height:60px; background:#222; border:2px solid var(--accent); border-radius:50%; margin:10px auto; display:flex; align-items:center; justify-content:center; font-size:24px;" id="pass-avatar">SA</div><div class="pass-row"><span>NAME</span><span style="color:var(--accent);" id="pass-name">STEVEN</span></div><div class="pass-row"><span>IP</span><span style="color:var(--accent);" id="pass-ip">102.88.xx</span></div><button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
+    <div id="receipt-overlay" class="modal-overlay"><div class="modal-card receipt-card"><h2 id="rec-title">SUCCESS</h2><div class="dashed-line"></div><div style="display:flex; justify-content:space-between;"><span>AMT</span><span id="rec-amt">₦ 0</span></div><div style="display:flex; justify-content:space-between;"><span>TO</span><span id="rec-to">...</span></div><button class="btn-full" style="background:#000; color:#fff;" onclick="closeReceipt()">DOWNLOAD</button></div></div>
 
-    <div id="scan-overlay" class="modal-overlay">
-        <div class="modal-card">
-            <h2 style="margin: 0 0 20px 0;">SCAN & PAY</h2>
-            <div class="camera-view"><div class="laser-beam"></div><p style="margin-top:130px; font-size:10px; color:#888;">ALIGN QR CODE</p></div>
-            <p id="scan-status" style="color:var(--accent); font-size:12px; margin-top:15px; height:15px;"></p>
-            <button class="btn-full" onclick="toggleModal('scan-overlay')">CANCEL</button>
-        </div>
-    </div>
-
-    <div id="loan-overlay" class="modal-overlay">
-        <div class="modal-card">
-            <h2 style="margin: 0 0 20px 0;">CREDIT SCAN</h2>
-            <div id="credit-scanner" style="display:block;"><p style="font-size:10px; color:#888;">ANALYZING FINANCIAL HISTORY...</p><div style="width:100%; height:4px; background:#222; margin:20px 0;"><div style="width:100%; height:100%; background:var(--accent); animation:growBar 2s;"></div></div></div>
-            <div id="credit-result" style="display:none;"><div class="credit-meter"><div class="credit-score">780</div><div class="credit-label">EXCELLENT</div></div><p style="font-size:12px; color:#fff;">APPROVED LIMIT</p><h1 style="margin:0; font-size:30px; color:var(--green);">₦ 500,000</h1><button class="btn-full" onclick="disburseLoan()">ACCEPT OFFER</button></div>
-        </div>
-    </div>
-
-    <div id="send-overlay" class="modal-overlay">
-        <div class="modal-card">
-            <h2 style="margin: 0 0 20px 0;">SEND MONEY</h2>
-            <div class="input-group"><label class="input-label">BANK NAME</label><select class="app-input" id="send-bank"><option>OPay Digital Services</option><option>GTBank</option><option>Zenith Bank</option><option>Access Bank</option></select></div>
-            <div class="input-group"><label class="input-label">ACCOUNT NUMBER</label><input type="number" class="app-input" id="send-acc" placeholder="10-digit number" oninput="verifyAccount()"></div>
-            <div id="verify-box" style="display:none; margin-bottom:15px; background:#1a1a1a; padding:10px; border-radius:8px;"><p style="font-size:10px; color:#888; margin:0;">VERIFIED NAME</p><p style="font-weight:bold; color:var(--green); margin:5px 0;" id="verified-name">LOADING...</p></div>
-            <div class="input-group"><label class="input-label">AMOUNT</label><input type="number" class="app-input" id="send-amt" placeholder="0.00"></div>
-            <button class="btn-full" onclick="processTransfer()">CONFIRM TRANSFER</button><button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('send-overlay')">CANCEL</button>
-        </div>
-    </div>
-
-    <div id="map-overlay" class="modal-overlay">
-        <div class="modal-card">
-            <h2 style="margin: 0 0 10px 0;">SATELLITE VIEW</h2>
-            <div class="map-grid"><div class="radar-scan"></div><div class="map-dot" style="top: 40%; left: 30%;"></div><div class="map-dot" style="top: 60%; left: 70%; animation-delay: 0.5s;"></div></div>
-            <p style="font-size: 10px; color: #aaa;">TRACKING FLIGHT #LJ-992</p>
-            <button class="btn-full" onclick="toggleModal('map-overlay')">CLOSE RADAR</button>
-        </div>
-    </div>
-
-    <div id="chat-overlay" class="modal-overlay">
-        <div class="modal-card chat-card">
-            <div style="padding: 10px; background: #222; display: flex; justify-content: space-between;"><span style="font-weight:bold;">HQ SUPPORT</span><span onclick="toggleModal('chat-overlay')" style="cursor:pointer;">✕</span></div>
-            <div class="chat-body" id="chat-box"><div class="msg msg-ai">Hello Chief. Systems online.</div></div>
-            <div class="chat-input-area"><input type="text" class="chat-input" id="user-input" placeholder="Type request..."><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div>
-        </div>
-    </div>
-
-    <div id="passport-overlay" class="modal-overlay">
-        <div class="modal-card">
-            <h2 style="color:var(--accent); margin-top:0;">USER PASSPORT</h2>
-            <div style="width: 60px; height: 60px; background: #222; border: 2px solid var(--accent); border-radius: 50%; margin: 10px auto; display: flex; align-items: center; justify-content: center; font-size: 24px;" id="pass-avatar">SA</div>
-            <div class="pass-row"><span style="color:#888;">OPERATOR</span><span style="color:var(--accent);" id="pass-name">STEVEN ADEWOLE</span></div>
-            <div class="pass-row"><span style="color:#888;">CLEARANCE</span><span style="color:var(--accent);" id="pass-lvl">LEVEL 5</span></div>
-            <div class="pass-row"><span style="color:#888;">IP ADDRESS</span><span style="color:var(--accent);" id="pass-ip">102.88.xx.xx</span></div>
-            <button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE ID</button>
-        </div>
-    </div>
-
-    <div id="receipt-overlay" class="modal-overlay">
-        <div class="modal-card receipt-card">
-            <h2 style="margin: 10px 0;" id="rec-title">SUCCESS</h2>
-            <p style="color: #666; font-size: 12px;">Transaction Completed</p>
-            <div class="dashed-line"></div>
-            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px;"><span>AMOUNT</span><span style="font-weight: bold;" id="rec-amt">₦ 0.00</span></div>
-            <div style="display: flex; justify-content: space-between; font-size: 14px;"><span>DETAILS</span><span style="font-family: monospace;" id="rec-to">Unknown</span></div>
-            <button class="btn-full" style="background:#000; color:#fff;" onclick="closeReceipt()">DOWNLOAD PDF</button>
-        </div>
-    </div>
-
-    <div class="news-ticker">
-        <div class="ticker-content">
-            LIVENJET SATELLITE ONLINE ... BTC HITS $98,400 ... LAGOS TRAFFIC ALERT: LEKKI-EPE CLEAR ... NEW SECURITY PROTOCOLS ACTIVE ... WEATHER: 32°C ... SYSTEM UPDATE v27.0 READY ... 
-        </div>
-    </div>
+    <div class="news-ticker"><div class="ticker-content">LIVENJET SATELLITE ONLINE ... BTC HITS $98,400 ... AGENTS DEPLOYED ... SYSTEM SECURE ...</div></div>
 
     <div id="launchpad">
-        <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">GHOST PROTOCOL v27.0</p>
+        <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">CONQUEST OS v28.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
     </div>
 
     <div id="app-interface">
-        <div class="ticker-wrap"><span onclick="restorePanic()" style="cursor:pointer;">SYSTEM NODE: LOS-NGA-01</span> | <span>32°C ☀️</span> | <span id="clock"></span></div>
+        <div class="ticker-wrap"><span onclick="restorePanic()">SYSTEM NODE: LOS-01</span> | 32°C ☀️ | <span id="clock"></span></div>
         <div class="avatar-btn" onclick="toggleModal('passport-overlay')" id="main-avatar">SA</div>
         <div class="currency-btn" onclick="toggleCurrency()">₦ / $</div>
         <div class="settings-btn" onclick="toggleModal('settings-overlay')">⚙️</div>
@@ -286,55 +206,48 @@
             <div class="intel-card">
                 <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY</p>
                 <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal" onclick="toggleStealth()">₦ 50,000.00</h2>
-                
                 <div class="action-grid">
                     <div class="action-btn" onclick="toggleModal('send-overlay')"><div class="action-icon">💸</div><div class="action-text">SEND</div></div>
                     <div class="action-btn" onclick="openScanner()"><div class="action-icon" style="color:#0f0;">📸</div><div class="action-text">SCAN</div></div>
                     <div class="action-btn" onclick="startLoanProcess()"><div class="action-icon">🏦</div><div class="action-text">LOANS</div></div>
                     <div class="action-btn" onclick="msg('Deposit via USSD *991#')"><div class="action-icon">➕</div><div class="action-text">ADD</div></div>
                 </div>
-
                 <p style="font-size: 9px; color: #666; margin-top: 20px;">RECENT ACTIVITY</p>
-                <div class="ledger-box" id="ledger-list">
-                    <div class="tx-row"><div class="tx-icon">🚕</div><div class="tx-details"><p class="tx-title">Uber Ride</p><p class="tx-date">Today, 10:30 AM</p></div><div class="tx-amt">-2,500</div></div>
-                </div>
+                <div class="ledger-box" id="ledger-list"><div class="tx-row"><div class="tx-icon">🚕</div><div class="tx-details"><p class="tx-title">Uber Ride</p><p class="tx-date">Just Now</p></div><div class="tx-amt">-2,500</div></div></div>
             </div>
-            <button class="btn" onclick="msg('Syncing Global Accounts...')">SYNC NETWORK</button>
         </div>
 
         <div id="util" class="pillar">
-            <div class="intel-card">
-                <h3>SMART VEND</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                    <button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(1000, 'Power Unit', true)">⚡ 1,000</button>
-                    <button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(2000, 'Data Plan', true)">📱 2,000</button>
-                </div>
-            </div>
+            <div class="intel-card"><h3>SMART VEND</h3><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"><button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(1000, 'Power Unit', true)">⚡ 1,000</button><button class="btn" style="margin:0; background:#222; color:#fff;" onclick="pay(2000, 'Data Plan', true)">📱 2,000</button></div></div>
         </div>
 
         <div id="logi" class="pillar">
             <div class="intel-card">
                 <h3>JET-TRACK</h3>
-                <p style="font-size: 12px; color: #888;">#LJ-992 ✈ LHR</p>
-                <div style="background: #222; height: 6px; border-radius: 5px; margin: 15px 0;"><div style="width: 80%; height: 100%; background: var(--accent);"></div></div>
-                <p style="font-size: 10px; text-align: right; color: var(--accent);">ARRIVING SOON</p>
+                <div style="background:#222; height:6px; border-radius:5px; margin:15px 0;"><div style="width:80%; height:100%; background:var(--accent);"></div></div>
+                <p style="font-size:10px; text-align:right; color:var(--accent);">ARRIVING SOON</p>
+                
+                <div style="margin-top:20px; border-top:1px solid #333; padding-top:10px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="font-size:12px; font-weight:bold;">ACTIVE AGENTS</span>
+                        <span style="font-size:10px; color:#0f0; cursor:pointer;" onclick="toggleModal('agent-overlay')">+ DEPLOY</span>
+                    </div>
+                    <div class="agent-list" id="agent-display">
+                        <div style="color:#666; font-size:10px; text-align:center; padding:10px;">NO AGENTS DEPLOYED</div>
+                    </div>
+                </div>
             </div>
             <button class="btn" onclick="toggleModal('map-overlay')">LIVE MAP</button>
-            <button class="btn" style="background:#222; color:#fff; border:1px solid #444;" onclick="bookFlight()">BOOK PRIVATE JET (150k)</button>
             <button class="btn" style="background:#000; border:1px solid red; color:red; margin-top:10px;" onclick="openHack()">OVERRIDE SATELLITE</button>
         </div>
 
         <div id="fina" class="pillar">
             <div class="intel-card" id="credit-card-ui" onclick="toggleFreeze()" style="cursor:pointer; border-color:#fff;">
-                <p style="font-size: 10px;">PLATINUM CARD (TAP TO FREEZE)</p>
-                <h3 style="letter-spacing: 3px;" id="card-num">**** 8820</h3>
-                <p style="font-size: 10px; margin-top: 20px;" id="card-status">ACTIVE</p>
+                <p style="font-size: 10px;">PLATINUM CARD</p><h3 style="letter-spacing: 3px;" id="card-num">**** 8820</h3><p style="font-size: 10px; margin-top: 20px;" id="card-status">ACTIVE</p>
             </div>
-
             <div class="intel-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0;">PORTFOLIO</h3><span style="font-size:10px; color:#0f0;">+12.5%</span></div>
                 <div class="miner-box" id="miner-display">INITIALIZING...</div>
-                <div class="asset-row"><div class="asset-info"><div class="asset-name">Bitcoin (BTC)</div><div class="asset-price">$98,420</div></div><div style="text-align:right;"><button class="buy-btn" onclick="pay(5000, 'Bitcoin Inv')">BUY 5k</button></div></div>
                 <div class="asset-row"><div class="asset-info"><div class="asset-name">LivenJet (LJN)</div><div class="asset-price" id="ljn-bal">0.00 LJN</div></div><div style="text-align:right;"><button class="buy-btn" onclick="startMining()" id="mine-btn">START MINING</button><button class="buy-btn" style="background:#0f0; color:#000; margin-top:5px;" onclick="openMarket()">MARKET</button></div></div>
             </div>
         </div>
@@ -350,10 +263,25 @@
     </div>
 
     <script>
+        // --- BOOT SEQUENCE ---
+        window.onload = function() {
+            const boot = document.getElementById('boot-screen');
+            const lines = ["INITIALIZING KERNEL...", "LOADING ASSETS...", "CONNECTING TO SATELLITE...", "BIOMETRICS ONLINE...", "WELCOME TO LIVENJET."];
+            let i = 0;
+            const interval = setInterval(() => {
+                if(i < lines.length) {
+                    boot.innerHTML += `<div class='boot-line'>${lines[i]}</div>`;
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => { boot.style.display = 'none'; document.getElementById('launchpad').style.display = 'flex'; }, 800);
+                }
+            }, 300);
+        }
+
         function buzz(d) { if(navigator.vibrate) navigator.vibrate(d); }
         function toggleModal(id) { buzz(30); const e = document.getElementById(id); e.style.display = (e.style.display==='flex')?'none':'flex'; }
         
-        // --- REAL MATH & LOGIC ---
         let balance = 50000;
         let ljnCrypto = 0.00;
         let userName = "STEVEN ADEWOLE";
@@ -362,138 +290,81 @@
         let godModeCount = 0;
         let isMining = false;
         let miningSpeed = 0.5;
-        let panicMode = false;
-        let tempBalance = 0;
-        
-        // --- GHOST PROTOCOL (CALL) ---
-        setTimeout(() => { triggerCall(); }, 15000); // Call after 15s
-        function triggerCall() {
-            buzz([1000, 500, 1000]); // Ring pattern
-            document.getElementById('call-overlay').style.display = 'flex';
-        }
-        function endCall() { document.getElementById('call-overlay').style.display = 'none'; }
-        function answerCall() {
-            document.getElementById('call-overlay').style.display = 'none';
-            speak("Good day, Chief. The funds have been secured. Proceed with the operation.");
-            msg("ENCRYPTED MSG RECEIVED");
-        }
+        let agents = []; // Store active agents
 
-        // --- PANIC MODE ---
-        function activatePanic() {
-            buzz([100, 50, 100, 50, 500]); // Alarm pattern
-            document.body.style.backgroundColor = "#200"; // Red Tint
-            toggleModal('settings-overlay'); // Close settings
-            tempBalance = balance;
-            balance = 0;
-            panicMode = true;
-            updateDisplay();
-            msg("⚠️ PANIC PROTOCOL ACTIVE");
-        }
-        function restorePanic() {
-            if(panicMode) {
-                buzz(50);
-                balance = tempBalance;
-                document.body.style.backgroundColor = "#000";
-                panicMode = false;
+        // --- AGENT LOGIC ---
+        function deployAgent() {
+            const city = document.getElementById('agent-city').value;
+            if(balance >= 50000) {
+                balance -= 50000;
                 updateDisplay();
-                msg("SYSTEM RESTORED");
+                addToLedger("Agent Deployment ("+city+")", 50000);
+                agents.push(city);
+                updateAgentList();
+                toggleModal('agent-overlay');
+                msg("AGENT DEPLOYED TO " + city.toUpperCase());
+                buzz([100,50,100]);
+            } else {
+                msg("INSUFFICIENT FUNDS (₦50k REQ)");
             }
         }
 
-        // --- DRONE LOGIC ---
-        function flyDrone() {
-            const drone = document.getElementById('drone-layer');
-            drone.classList.remove('fly-anim');
-            void drone.offsetWidth;
-            drone.classList.add('fly-anim');
-            buzz(100);
+        function updateAgentList() {
+            const list = document.getElementById('agent-display');
+            list.innerHTML = "";
+            agents.forEach((city, index) => {
+                list.innerHTML += `<div class="active-agent"><span>AGENT 00${index+1}</span><span class="agent-loc">${city.toUpperCase()}</span></div>`;
+            });
         }
 
-        // --- HACK GAME ---
-        function openHack() { toggleModal('hack-overlay'); document.getElementById('hack-log').innerText = "WAITING FOR SIGNAL..."; document.getElementById('hack-log').style.color = "#fff"; document.getElementById('hack-cursor').classList.add('cursor-moving'); }
-        function lockSignal() {
-            const cursor = document.getElementById('hack-cursor');
-            const log = document.getElementById('hack-log');
-            const rect = cursor.getBoundingClientRect();
-            const container = cursor.parentElement.getBoundingClientRect();
-            const percent = ((rect.left - container.left) / container.width) * 100;
-            cursor.classList.remove('cursor-moving'); 
-            if (percent > 40 && percent < 60) {
-                log.innerText = "ACCESS GRANTED. UPLINK ESTABLISHED."; log.style.color = "#0f0"; miningSpeed = 5.0; buzz([100, 100, 100]); speak("Uplink Established.");
-                setTimeout(() => { toggleModal('hack-overlay'); nav('fina'); startMining(); }, 1500);
-                setTimeout(() => { miningSpeed = 0.5; msg("UPLINK DISCONNECTED"); }, 60000);
-            } else { log.innerText = "SIGNAL LOST. TRY AGAIN."; log.style.color = "red"; buzz(300); setTimeout(() => { cursor.classList.add('cursor-moving'); log.innerText="WAITING..."; log.style.color="#fff"; }, 1000); }
-        }
+        // PASSIVE INCOME LOOP
+        setInterval(() => {
+            if(agents.length > 0) {
+                const earned = agents.length * 5000;
+                balance += earned;
+                updateDisplay();
+                msg(`AGENTS SENT TRIBUTE: ₦${earned.toLocaleString()}`);
+                buzz(20);
+            }
+        }, 30000); // Every 30 seconds
 
-        // --- TTS VOICE ---
-        function speak(text) { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(text); u.rate = 1; u.pitch = 0.8; window.speechSynthesis.speak(u); } }
+        // --- GHOST PROTOCOL ---
+        setTimeout(() => { triggerCall(); }, 20000); 
+        function triggerCall() { buzz([1000, 500, 1000]); document.getElementById('call-overlay').style.display = 'flex'; }
+        function endCall() { document.getElementById('call-overlay').style.display = 'none'; }
+        function answerCall() { document.getElementById('call-overlay').style.display = 'none'; speak("Good day, Chief. The funds have been secured."); msg("ENCRYPTED MSG RECEIVED"); }
 
-        // --- BLACK MARKET ---
-        function openMarket() { toggleModal('market-overlay'); document.getElementById('market-bal').innerText = ljnCrypto.toFixed(2); }
-        function buyItem(item, cost) {
-            if(ljnCrypto >= cost) {
-                ljnCrypto -= cost; buzz([100,50,100]); msg("PURCHASE SUCCESSFUL"); document.getElementById('market-bal').innerText = ljnCrypto.toFixed(2); updateDisplay();
-                if(item === 'halo') { document.getElementById('main-avatar').classList.add('avatar-glow'); document.getElementById('pass-avatar').classList.add('avatar-glow'); }
-                if(item === 'vpn') { document.getElementById('pass-ip').innerText = "192.168.GHOST (SECURE)"; document.getElementById('pass-ip').style.color = "#0f0"; }
-                if(item === 'lvl6') { document.getElementById('pass-lvl').innerText = "LEVEL 6 (GOD)"; document.getElementById('pass-lvl').style.color = "#0f0"; }
-            } else { msg("INSUFFICIENT LJN CRYPTO"); buzz(200); }
-        }
-
-        function updateDisplay() {
-            let displayBal = balance; let symbol = "₦ "; if(currency === "USD") { displayBal = balance / rate; symbol = "$ "; }
-            document.getElementById('wallet-bal').innerText = symbol + displayBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('pass-name').innerText = userName;
-            let initials = userName.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-            document.getElementById('main-avatar').innerText = initials; document.getElementById('pass-avatar').innerText = initials;
-            document.getElementById('ljn-bal').innerText = ljnCrypto.toFixed(4) + " LJN";
-        }
-
-        // --- MINING ---
-        function startMining() {
-            if(isMining) return; isMining = true;
-            const btn = document.getElementById('mine-btn'); const box = document.getElementById('miner-display');
-            btn.innerText = "MINING..."; box.style.display = "block"; buzz(50);
-            let hashes = 0;
-            const interval = setInterval(() => {
-                hashes++; const hash = Math.random().toString(36).substring(2, 15);
-                box.innerHTML = `<div class="hash-line">> HASH: ${hash}...</div>` + box.innerHTML;
-                if(hashes % 5 === 0) { let reward = Math.random() * miningSpeed; ljnCrypto += reward; updateDisplay(); buzz(20); }
-                if(hashes > 20) { clearInterval(interval); isMining = false; btn.innerText = "START MINING"; box.style.display = "none"; box.innerHTML = "INITIALIZING..."; msg("MINING COMPLETE."); buzz([100,50,100]); }
-            }, 300);
-        }
-
-        function godMode() { godModeCount++; buzz(20); if(godModeCount === 5) { balance += 10000000; updateDisplay(); msg("GOD MODE: ₦10M ADDED"); buzz([100,100,100,100,100]); godModeCount = 0; } }
-        function toggleCurrency() { if(currency === "NGN") { currency = "USD"; } else { currency = "NGN"; } updateDisplay(); buzz(50); msg("CURRENCY: " + currency); }
-        function addToLedger(name, amt, type="debit") { const list = document.getElementById('ledger-list'); const row = document.createElement('div'); row.className = 'tx-row'; let color = type === "credit" ? "#0f0" : "#ff4444"; let sign = type === "credit" ? "+" : "-"; let icon = type === "credit" ? "🏦" : "💸"; row.innerHTML = `<div class="tx-icon">${icon}</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt" style="color:${color}">${sign}${amt.toLocaleString()}</div>`; list.insertBefore(row, list.firstChild); }
-        function toggleFreeze() { const card = document.getElementById('credit-card-ui'); const status = document.getElementById('card-status'); const num = document.getElementById('card-num'); buzz(100); if(isCardFrozen) { isCardFrozen = false; card.classList.remove('frozen'); status.innerText = "ACTIVE"; status.classList.remove('frozen-text'); num.innerText = "**** 8820"; msg("CARD UNLOCKED"); } else { isCardFrozen = true; card.classList.add('frozen'); status.innerText = "FROZEN ❄️"; status.classList.add('frozen-text'); num.innerText = "❄️❄️❄️ ❄️❄️❄️"; msg("CARD FROZEN"); } }
-        function bookFlight() { if(isCardFrozen) { msg("CARD IS FROZEN ❄️"); return; } pay(150000, "Private Jet Booking"); }
-        function pay(amount, name, isUtility = false) { 
-            if(isCardFrozen) { msg("CARD IS FROZEN ❄️"); buzz([50,50,50]); return; } 
-            if(balance < amount) { msg("INSUFFICIENT FUNDS"); return; } 
-            buzz(50); balance -= amount; updateDisplay(); addToLedger(name, amount); 
-            if(isUtility) flyDrone(); 
-            toggleModal('receipt-overlay'); document.getElementById('rec-title').innerText = "SUCCESS"; let displayAmt = amount; let symbol = "₦ "; if(currency === "USD") { displayAmt = amount / rate; symbol = "$ "; } document.getElementById('rec-amt').innerText = symbol + displayAmt.toLocaleString(undefined, {minimumFractionDigits: 2}); document.getElementById('rec-to').innerText = name; 
-        }
-        function saveSettings() { const newName = document.getElementById('set-name').value; if(newName) { userName = newName.toUpperCase(); updateDisplay(); msg("PROFILE UPDATED"); toggleModal('settings-overlay'); } }
-        function resetSystem() { if(confirm("RESET ALL DATA?")) location.reload(); }
-        function toggleTheme(type) { const r = document.querySelector(':root'); if(type === 'matrix') { r.style.setProperty('--accent', '#00ff00'); } else { r.style.setProperty('--accent', '#FFD700'); } buzz(50); }
-        function closeReceipt() { const btn = document.querySelector('#receipt-overlay .btn-full'); btn.innerText = "DOWNLOADING..."; buzz(50); setTimeout(() => { btn.innerText = "SAVED TO FILES"; setTimeout(() => { toggleModal('receipt-overlay'); btn.innerText = "DOWNLOAD PDF"; }, 1000); }, 1500); }
-        function openScanner() { toggleModal('scan-overlay'); document.getElementById('scan-status').innerText = "SEARCHING..."; setTimeout(() => { buzz(50); document.getElementById('scan-status').innerText = "SHOPRITE IKEJA"; setTimeout(() => { toggleModal('scan-overlay'); pay(3500, "Shoprite (QR)"); }, 1500); }, 3000); }
-        function startLoanProcess() { toggleModal('loan-overlay'); document.getElementById('credit-scanner').style.display = "block"; document.getElementById('credit-result').style.display = "none"; buzz(50); setTimeout(() => { document.getElementById('credit-scanner').style.display = "none"; document.getElementById('credit-result').style.display = "block"; buzz([50,50,50]); }, 2500); }
-        function disburseLoan() { toggleModal('loan-overlay'); balance += 500000; updateDisplay(); addToLedger("Credit Disbursal", 500000, "credit"); setTimeout(() => { toggleModal('receipt-overlay'); document.getElementById('rec-title').innerText = "LOAN APPROVED"; document.getElementById('rec-amt').innerText = "₦ 500,000"; document.getElementById('rec-to').innerText = "Wallet Credited"; buzz(200); }, 500); }
-        function verifyAccount() { const acc = document.getElementById('send-acc').value; if(acc.length===10){ document.getElementById('verify-box').style.display='block'; document.getElementById('verified-name').innerText="VERIFYING..."; setTimeout(()=>{ buzz(50); document.getElementById('verified-name').innerText="EMMANUEL CHIBUZOR"; },1000); } else { document.getElementById('verify-box').style.display='none'; } }
-        function processTransfer() { const amt=parseInt(document.getElementById('send-amt').value); const name=document.getElementById('verified-name').innerText; const bank=document.getElementById('send-bank').value; if(!amt||amt<=0){msg("ENTER AMOUNT");return;} toggleModal('send-overlay'); pay(amt, name+" ("+bank+")"); }
-        function sendMsg() { const i=document.getElementById('user-input'); const b=document.getElementById('chat-box'); if(i.value==="")return; b.innerHTML+=`<div class="msg msg-user">${i.value}</div>`; setTimeout(()=>{ b.innerHTML+=`<div class="msg msg-ai">Request received.</div>`; b.scrollTop=b.scrollHeight; buzz(50);},1000); i.value=""; b.scrollTop=b.scrollHeight; }
-        function authenticate() { buzz(100); const s=document.getElementById('auth-status'); document.querySelector('.auth-btn').style.display='none'; s.innerText="SCANNING..."; s.style.color="var(--accent)"; setTimeout(()=>{ buzz([100,50,100]); s.innerText="GRANTED"; s.style.color="#0f0"; speak("Access Granted. Welcome back, Chief."); setTimeout(()=>{ document.getElementById('launchpad').style.top="-100%"; document.getElementById('app-interface').style.display="block"; setTimeout(()=>{document.getElementById('app-interface').style.opacity="1"},100); },800); },1000); }
-        function nav(id) { buzz(30); document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon')); document.getElementById(id).classList.add('active'); document.getElementById('n-'+id).classList.add('active-icon'); }
-        let isStealth=false;
-        function toggleStealth() { buzz(20); const b=document.getElementById('wallet-bal'); if(isStealth){ updateDisplay(); isStealth=false; } else { b.innerText=currency==="USD"?"$ ****":"₦ ****"; isStealth=true; } }
+        // --- STANDARD FUNCTIONS ---
+        function activatePanic() { buzz([100,50,100,50,500]); document.body.style.backgroundColor="#200"; toggleModal('settings-overlay'); balance=0; updateDisplay(); msg("⚠️ PANIC PROTOCOL ACTIVE"); }
+        function restorePanic() { if(balance===0) { buzz(50); balance=50000; document.body.style.backgroundColor="#000"; updateDisplay(); msg("SYSTEM RESTORED"); } }
+        function flyDrone() { const d=document.getElementById('drone-layer'); d.classList.remove('fly-anim'); void d.offsetWidth; d.classList.add('fly-anim'); buzz(100); }
+        function openHack() { toggleModal('hack-overlay'); document.getElementById('hack-log').innerText="WAITING..."; document.getElementById('hack-cursor').classList.add('cursor-moving'); }
+        function lockSignal() { const c=document.getElementById('hack-cursor'); const rect=c.getBoundingClientRect(); const p=((rect.left-c.parentElement.getBoundingClientRect().left)/c.parentElement.getBoundingClientRect().width)*100; c.classList.remove('cursor-moving'); if(p>40&&p<60){ document.getElementById('hack-log').innerText="UPLINK ESTABLISHED"; miningSpeed=5.0; speak("Uplink Established."); setTimeout(()=>{toggleModal('hack-overlay');nav('fina');startMining()},1500); setTimeout(()=>{miningSpeed=0.5},60000); } else { document.getElementById('hack-log').innerText="SIGNAL LOST"; buzz(300); setTimeout(()=>{c.classList.add('cursor-moving')},1000); } }
+        function speak(text) { if('speechSynthesis' in window){ const u=new SpeechSynthesisUtterance(text); u.rate=1; u.pitch=0.8; window.speechSynthesis.speak(u); } }
+        function openMarket() { toggleModal('market-overlay'); document.getElementById('market-bal').innerText=ljnCrypto.toFixed(2); }
+        function buyItem(item, cost) { if(ljnCrypto>=cost){ ljnCrypto-=cost; msg("PURCHASE SUCCESSFUL"); document.getElementById('market-bal').innerText=ljnCrypto.toFixed(2); updateDisplay(); if(item==='halo'){document.getElementById('main-avatar').classList.add('avatar-glow');document.getElementById('pass-avatar').classList.add('avatar-glow');} if(item==='vpn'){document.getElementById('pass-ip').innerText="192.168.GHOST";document.getElementById('pass-ip').style.color="#0f0";} } else { msg("INSUFFICIENT LJN"); } }
+        function updateDisplay() { let d=balance; let s="₦ "; if(currency==="USD"){d=balance/rate; s="$ ";} document.getElementById('wallet-bal').innerText=s+d.toLocaleString(undefined,{minimumFractionDigits:2}); document.getElementById('pass-name').innerText=userName; let inits=userName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase(); document.getElementById('main-avatar').innerText=inits; document.getElementById('pass-avatar').innerText=inits; document.getElementById('ljn-bal').innerText=ljnCrypto.toFixed(4)+" LJN"; }
+        function startMining() { if(isMining)return; isMining=true; const b=document.getElementById('mine-btn'); const box=document.getElementById('miner-display'); b.innerText="MINING..."; box.style.display="block"; let h=0; const i=setInterval(()=>{ h++; box.innerHTML=`<div class="hash-line">> HASH: ${Math.random().toString(36).substring(2,15)}...</div>`+box.innerHTML; if(h%5===0){ljnCrypto+=Math.random()*miningSpeed;updateDisplay();} if(h>20){clearInterval(i);isMining=false;b.innerText="START MINING";box.style.display="none";box.innerHTML="";msg("MINING COMPLETE");} },300); }
+        function godMode() { godModeCount++; buzz(20); if(godModeCount===5){balance+=10000000; updateDisplay(); msg("GOD MODE: ₦10M ADDED"); buzz([100,100,100]); godModeCount=0;} }
+        function toggleCurrency() { currency=currency==="NGN"?"USD":"NGN"; updateDisplay(); }
+        function addToLedger(name, amt) { const l=document.getElementById('ledger-list'); l.innerHTML=`<div class="tx-row"><div class="tx-icon">💸</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt">-₦${amt.toLocaleString()}</div></div>`+l.innerHTML; }
+        function toggleFreeze() { const c=document.getElementById('credit-card-ui'); if(isCardFrozen){isCardFrozen=false; c.classList.remove('frozen'); msg("CARD UNLOCKED");}else{isCardFrozen=true; c.classList.add('frozen'); msg("CARD FROZEN");} }
+        function bookFlight() { if(isCardFrozen){msg("CARD FROZEN");return;} pay(150000,"Private Jet"); }
+        function pay(amt, name, isUtil=false) { if(isCardFrozen){msg("CARD FROZEN");return;} if(balance<amt){msg("INSUFFICIENT FUNDS");return;} balance-=amt; updateDisplay(); addToLedger(name,amt); if(isUtil)flyDrone(); toggleModal('receipt-overlay'); document.getElementById('rec-amt').innerText="₦ "+amt.toLocaleString(); }
+        function saveSettings() { const n=document.getElementById('set-name').value; if(n){userName=n.toUpperCase(); updateDisplay(); toggleModal('settings-overlay');} }
+        function resetSystem() { if(confirm("RESET ALL?"))location.reload(); }
+        function toggleTheme(t) { const r=document.querySelector(':root'); if(t==='matrix')r.style.setProperty('--accent','#00ff00'); else r.style.setProperty('--accent','#FFD700'); }
+        function closeReceipt() { toggleModal('receipt-overlay'); }
+        function openScanner() { toggleModal('scan-overlay'); setTimeout(()=>{toggleModal('scan-overlay'); pay(3500,"Shoprite QR");},3000); }
+        function startLoanProcess() { toggleModal('loan-overlay'); document.getElementById('credit-scanner').style.display="block"; document.getElementById('credit-result').style.display="none"; setTimeout(()=>{document.getElementById('credit-scanner').style.display="none";document.getElementById('credit-result').style.display="block";},2500); }
+        function disburseLoan() { toggleModal('loan-overlay'); balance+=500000; updateDisplay(); addToLedger("Loan",500000); }
+        function verifyAccount() { const a=document.getElementById('send-acc').value; if(a.length===10){document.getElementById('verify-box').style.display='block'; document.getElementById('verified-name').innerText="VERIFYING..."; setTimeout(()=>{document.getElementById('verified-name').innerText="EMMANUEL CHIBUZOR";},1000);} }
+        function processTransfer() { const a=document.getElementById('send-amt').value; if(a){toggleModal('send-overlay'); pay(a,"Transfer");} }
+        function sendMsg() { const i=document.getElementById('user-input'); if(i.value){ document.getElementById('chat-box').innerHTML+=`<div class="msg msg-user">${i.value}</div>`; i.value=""; setTimeout(()=>{document.getElementById('chat-box').innerHTML+=`<div class="msg msg-ai">Received.</div>`;},1000); } }
+        function authenticate() { document.getElementById('auth-status').innerText="SCANNING..."; setTimeout(()=>{speak("Access Granted."); document.getElementById('launchpad').style.top="-100%"; document.getElementById('app-interface').style.display="block"; setTimeout(()=>{document.getElementById('app-interface').style.opacity="1"},100);},1000); }
+        function nav(id) { document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon')); document.getElementById(id).classList.add('active'); document.getElementById('n-'+id).classList.add('active-icon'); }
         function msg(t) { const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
-        
-        // TIME GREETING
-        function setGreeting() { const h = new Date().getHours(); let g = h < 12 ? "Good Morning" : h < 18 ? "Good Afternoon" : "Good Evening"; msg(g + ", Chief."); }
         setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString()},1000);
-        setTimeout(setGreeting, 1500); 
     </script>
 </body>
 </html>
