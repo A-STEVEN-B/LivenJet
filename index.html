@@ -3,153 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Nexus OS</title>
+    <title>LivenJet | Omni-Nexus</title>
     <style>
-        :root { --gold: #FFD700; --dark: #0a0a0a; --glass: rgba(255, 215, 0, 0.05); --status: #00ff00; }
+        :root { --gold: #FFD700; --dark: #050505; --neon: #00f2ff; }
         body { background-color: #000; color: var(--gold); font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; margin: 0; overflow-x: hidden; padding-bottom: 120px; }
         
-        /* Boot Animation */
-        #boot-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .loader { width: 50px; height: 50px; border: 3px solid #111; border-top: 3px solid var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+        /* Particle Background Simulation */
+        .bg-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%); z-index: -1; }
 
-        /* Top Bar */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--dark); border-bottom: 1px solid #1a1a1a; margin: -20px -20px 20px -20px; }
-        .user-profile { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 42px; height: 42px; background: var(--gold); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; box-shadow: 0 0 15px rgba(255,215,0,0.3); }
-        
-        /* Containers */
-        .pillar-container { display: none; animation: slideUp 0.5s ease-out; }
+        /* Boot Interface */
+        #boot-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .scan-line { width: 100%; height: 2px; background: var(--gold); position: absolute; top: 0; animation: scan 2s linear infinite; opacity: 0.3; }
+
+        /* Navigation & Header */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(10,10,10,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid #222; margin: -20px -20px 20px -20px; }
+        .avatar { width: 42px; height: 42px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; box-shadow: 0 0 20px rgba(255,215,0,0.4); }
+
+        /* Main UI Pillars */
+        .pillar-container { display: none; animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .active-pillar { display: block; }
 
-        /* Card Designs */
+        /* War Room Cards */
         .card-ui { 
-            background: linear-gradient(135deg, #111 0%, #000 100%); 
-            border: 1px solid var(--gold); 
-            border-radius: 20px; padding: 25px; margin: 20px auto; max-width: 320px;
-            text-align: left; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: rgba(15,15,15,0.9); border: 1px solid #333; 
+            border-left: 4px solid var(--gold); border-radius: 12px; 
+            padding: 25px; margin: 20px auto; max-width: 340px;
+            text-align: left; transition: 0.3s;
         }
+        .card-ui:hover { border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.1); }
 
-        .status-pill { background: rgba(0,255,0,0.1); color: var(--status); font-size: 10px; font-weight: bold; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--status); display: inline-block; margin-bottom: 10px; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px; color: #888; }
+        .stat-val { color: #fff; font-weight: bold; }
 
         /* Buttons */
-        .btn { background: var(--gold); color: #000; font-weight: bold; padding: 16px; width: 95%; border: none; border-radius: 14px; margin: 10px 0; cursor: pointer; transition: 0.2s; font-size: 13px; letter-spacing: 1px; }
-        .btn:hover { background: #fff; transform: scale(1.02); }
+        .btn { background: var(--gold); color: #000; font-weight: bold; padding: 18px; width: 100%; border: none; border-radius: 12px; margin: 15px 0; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; font-size: 12px; }
+        .btn:active { transform: scale(0.98); opacity: 0.8; }
 
-        /* Navigation Dock */
-        .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 400px; background: rgba(10,10,10,0.95); border: 1px solid #222; border-radius: 24px; display: flex; justify-content: space-around; padding: 18px 0; z-index: 1000; backdrop-filter: blur(15px); }
-        .dock-item { font-size: 24px; opacity: 0.2; cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .dock-item.active { opacity: 1; transform: translateY(-12px); color: var(--gold); filter: drop-shadow(0 0 8px var(--gold)); }
+        /* Master Dock */
+        .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(5,5,5,0.9); border: 1px solid #222; border-radius: 30px; display: flex; justify-content: space-around; padding: 20px 0; z-index: 1000; }
+        .dock-item { font-size: 24px; opacity: 0.2; cursor: pointer; transition: 0.3s; }
+        .dock-item.active { opacity: 1; transform: translateY(-10px) scale(1.2); color: var(--gold); }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scan { from { top: 0; } to { top: 100%; } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
 
+    <div class="bg-glow"></div>
+
     <div id="boot-screen">
-        <div class="loader"></div>
-        <p style="margin-top:20px; letter-spacing: 5px; font-size: 10px; color: var(--gold);">INITIALIZING LIVENJET OS...</p>
+        <div class="scan-line"></div>
+        <h1 style="letter-spacing: 15px; margin: 0;">LIVENJET</h1>
+        <p style="color: #444; font-size: 10px; margin-top: 10px;">NEURAL INTERFACE CONNECTING...</p>
     </div>
 
     <div class="top-bar">
-        <div class="user-profile">
+        <div style="display: flex; align-items: center; gap: 12px;">
             <div class="avatar">SA</div>
             <div style="text-align: left;">
-                <div style="font-size: 12px; font-weight: bold; color: #fff;">Steven Adewole <span style="color:#1DA1F2;">✔</span></div>
-                <div id="sys-msg" style="font-size: 10px; color: #666;">Nexus v7.0 Online</div>
+                <p style="margin: 0; font-size: 12px; font-weight: bold; color: #fff;">STEVEN ADEWOLE</p>
+                <p id="sys-status" style="margin: 0; font-size: 9px; color: #00ff00;">● ENCRYPTED</p>
             </div>
         </div>
-        <div id="clock" style="font-size: 11px; font-family: monospace; color: var(--gold);">00:00:00</div>
+        <div id="timer" style="font-family: monospace; font-size: 12px;">00:00:00</div>
     </div>
 
-    <div style="margin-top: 20px;">
-        <span id="p-title" style="letter-spacing: 5px; font-size: 12px; font-weight: bold;">HOME</span>
-    </div>
-
-    <div id="p-utility" class="pillar-container active-pillar">
-        <div style="font-size: 50px; margin: 15px 0;">🦅</div>
+    <div id="p-home" class="pillar-container active-pillar">
+        <p style="letter-spacing: 5px; font-size: 11px; color: #666;">COMMAND CENTER</p>
         <div class="card-ui">
-            <div class="status-pill">ACTIVE LIQUIDITY</div>
-            <p style="font-size: 10px; color: #444; margin: 0;">TOTAL BALANCE</p>
-            <h2 style="font-size: 34px; margin: 10px 0;">₦ 50,000.00</h2>
-            <div style="height: 2px; background: linear-gradient(to right, var(--gold), transparent); margin: 10px 0;"></div>
-            <p style="font-size: 10px; color: #666;">LIVENJET SECURE PAY READY</p>
+            <div class="stat-row"><span>LIQUIDITY</span><span class="stat-val">₦ 50,000.00</span></div>
+            <div class="stat-row"><span>CARGO STATUS</span><span class="stat-val" style="color:var(--gold);">AIRBORNE</span></div>
+            <div class="stat-row"><span>ACCESS LEVEL</span><span class="stat-val">PLATINUM</span></div>
+            <div style="height: 4px; background: #111; margin-top: 15px; border-radius: 2px;">
+                <div style="width: 88%; height: 100%; background: var(--gold); box-shadow: 0 0 10px var(--gold);"></div>
+            </div>
         </div>
-        <button class="btn" onclick="sysAlert('Utility', 'Opening Vend Portal...')">⚡ ACCESS UTILITIES</button>
+        <button class="btn" onclick="triggerAlert('System Optimized')">SYNC ALL PILLARS</button>
     </div>
 
-    <div id="p-logistics" class="pillar-container">
-        <div style="font-size: 50px; margin: 15px 0;">📦</div>
+    <div id="p-util" class="pillar-container">
+        <p style="letter-spacing: 5px; font-size: 11px; color: #666;">UTILITY HUB</p>
         <div class="card-ui">
-            <div class="status-pill" style="border-color: #0080ff; color: #0080ff;">GLOBAL TRACKING</div>
-            <h3 style="margin: 0; font-size: 16px;">Consignment #LJ-559</h3>
-            <p style="font-size: 11px; color: #666;">Route: Lagos (LOS) ➔ Paris (CDG)</p>
-            <div style="background: #111; height: 10px; border-radius: 10px; margin: 15px 0; border: 1px solid #222;">
-                <div style="background: var(--gold); width: 85%; height: 100%; box-shadow: 0 0 10px var(--gold);"></div>
-            </div>
-            <p style="font-size: 10px; text-align: right;">STATUS: <span style="color:var(--gold);">AIRBORNE</span></p>
+            <h3 style="margin: 0; font-size: 18px;">VEND POWER</h3>
+            <p style="font-size: 11px; color: #666;">Direct connection to grid enabled.</p>
+            <input type="number" id="amt" placeholder="Enter Amount" style="width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 15px; margin-top: 15px; border-radius: 8px;">
         </div>
-        <button class="btn" onclick="sysAlert('Logistics', 'Syncing Satellite Data...')">📡 VIEW LIVE MAP</button>
+        <button class="btn">EXECUTE VEND</button>
     </div>
 
-    <div id="p-finance" class="pillar-container">
-        <div style="font-size: 50px; margin: 15px 0;">💳</div>
-        <div class="card-ui" style="background: linear-gradient(45deg, #050505, #111);">
-            <div style="width: 45px; height: 35px; background: linear-gradient(45deg, #FFD700, #aa8800); border-radius: 6px; margin-bottom: 30px;"></div>
-            <p style="font-family: monospace; font-size: 20px; letter-spacing: 3px; color: #fff;">**** **** **** 2026</p>
-            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                <span style="font-size: 10px; letter-spacing: 2px;">PLATINUM MEMBER</span>
-                <span style="font-size: 10px;">EXP: 02/30</span>
-            </div>
+    <div id="p-logi" class="pillar-container">
+        <p style="letter-spacing: 5px; font-size: 11px; color: #666;">LOGISTICS RADAR</p>
+        <div class="card-ui">
+            <p style="font-size: 10px; color: #888;">FLIGHT #LJ-77</p>
+            <h2 style="margin: 10px 0;">LOS ➔ JFK</h2>
+            <p style="font-size: 11px; color: #00ff00;">ALTITUDE: 35,000 FT</p>
         </div>
-        <button class="btn" onclick="sysAlert('Finance', 'Opening Vault...')">🏦 ENTER THE VAULT</button>
+        <button class="btn">VIEW SATELLITE</button>
     </div>
 
-    <div id="p-identity" class="pillar-container">
-        <div style="font-size: 50px; margin: 15px 0;">🆔</div>
-        <div class="card-ui" style="text-align: center;">
-            <div class="status-pill" style="border-color: #FFD700;">ELITE ACCESS</div>
-            <div style="width: 140px; height: 140px; border: 2px solid var(--gold); margin: 15px auto; padding: 10px; background: #fff;">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=LIVENJET-STEVEN" style="width: 100%; height: 100%;">
-            </div>
-            <p style="font-weight: bold; letter-spacing: 3px;">S. ADEWOLE</p>
-            <p style="font-size: 9px; color: #444;">ID: LJ-001-ALPHA</p>
+    <div id="p-fina" class="pillar-container">
+        <p style="letter-spacing: 5px; font-size: 11px; color: #666;">DIGITAL VAULT</p>
+        <div class="card-ui" style="background: linear-gradient(135deg, #1a1a1a, #000);">
+            <div style="width: 40px; height: 25px; background: var(--gold); border-radius: 4px; margin-bottom: 40px;"></div>
+            <p style="font-family: monospace; letter-spacing: 3px;">**** **** **** 2026</p>
         </div>
-        <button class="btn" onclick="sysAlert('Identity', 'Refreshing Security Token...')">🔑 REGENERATE KEY</button>
+        <button class="btn">REVEAL SECURITY CODE</button>
     </div>
 
     <div class="dock">
-        <div id="n-util" class="dock-item active" onclick="nav('utility', 'HOME')">🏠</div>
-        <div id="n-logi" class="dock-item" onclick="nav('logistics', 'LOGISTICS')">📦</div>
-        <div id="n-fina" class="dock-item" onclick="nav('finance', 'VAULT')">💳</div>
-        <div id="n-iden" class="dock-item" onclick="nav('identity', 'IDENTITY')">🆔</div>
+        <div id="n-home" class="dock-item active" onclick="nav('home')">🪐</div>
+        <div id="n-util" class="dock-item" onclick="nav('util')">⚡</div>
+        <div id="n-logi" class="dock-item" onclick="nav('logi')">✈️</div>
+        <div id="n-fina" class="dock-item" onclick="nav('fina')">💳</div>
     </div>
 
     <script>
         // BOOT SEQUENCE
         setTimeout(() => {
-            document.getElementById('boot-screen').style.display = 'none';
-        }, 2500);
+            document.getElementById('boot-screen').style.opacity = '0';
+            setTimeout(() => { document.getElementById('boot-screen').style.display = 'none'; }, 500);
+        }, 3000);
 
-        function nav(p, label) {
-            document.querySelectorAll('.pillar-container').forEach(c => c.classList.remove('active-pillar'));
-            document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active'));
-            document.getElementById('p-' + p).classList.add('active-pillar');
-            document.getElementById('n-' + p.substring(0,4)).classList.add('active');
-            document.getElementById('p-title').innerText = label;
+        function nav(id) {
+            document.querySelectorAll('.pillar-container').forEach(p => p.classList.remove('active-pillar'));
+            document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active'));
+            document.getElementById('p-' + id).classList.add('active-pillar');
+            document.getElementById('n-' + id).classList.add('active');
         }
 
-        function sysAlert(module, msg) {
-            document.getElementById('sys-msg').innerText = msg;
-            document.getElementById('sys-msg').style.color = 'var(--gold)';
-            setTimeout(() => {
-                document.getElementById('sys-msg').innerText = "Nexus v7.0 Online";
-                document.getElementById('sys-msg').style.color = '#666';
+        function triggerAlert(msg) {
+            const status = document.getElementById('sys-status');
+            status.innerText = "● " + msg.toUpperCase();
+            status.style.color = "#FFD700";
+            setTimeout(() => { 
+                status.innerText = "● ENCRYPTED"; 
+                status.style.color = "#00ff00";
             }, 3000);
         }
 
         setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+            document.getElementById('timer').innerText = new Date().toLocaleTimeString();
         }, 1000);
     </script>
 </body>
