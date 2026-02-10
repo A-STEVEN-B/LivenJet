@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Vision Module</title>
+    <title>LivenJet | Control Center</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; }
@@ -24,14 +24,10 @@
         .receipt-card { background: #fff; color: #000; border: none; }
         .dashed-line { border-bottom: 2px dashed #ccc; margin: 20px 0; }
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* --- QR SCANNER (NEW) --- */
-        .camera-view { width: 100%; height: 300px; background: #222; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #444; }
-        .camera-corner { position: absolute; width: 30px; height: 30px; border-color: var(--green); border-style: solid; }
-        .tl { top: 20px; left: 20px; border-width: 4px 0 0 4px; }
-        .tr { top: 20px; right: 20px; border-width: 4px 4px 0 0; }
-        .bl { bottom: 20px; left: 20px; border-width: 0 0 4px 4px; }
-        .br { bottom: 20px; right: 20px; border-width: 0 4px 4px 0; }
+        /* --- QR SCANNER --- */
+        .camera-view { width: 100%; height: 250px; background: #222; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #444; }
         .laser-beam { width: 100%; height: 2px; background: red; position: absolute; top: 0; box-shadow: 0 0 10px red; animation: scan 1.5s linear infinite; }
 
         /* FORM INPUTS */
@@ -95,8 +91,7 @@
         
         /* HEADER ICONS */
         .avatar-btn { width: 35px; height: 35px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: 40px; left: 20px; z-index: 2001; cursor: pointer; }
-        .bell-btn { width: 35px; height: 35px; background: #222; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: 40px; right: 20px; z-index: 2001; cursor: pointer; font-size: 18px; }
-        .bell-dot { position: absolute; top: 5px; right: 8px; width: 8px; height: 8px; background: red; border-radius: 50%; border: 1px solid #000; }
+        .settings-btn { width: 35px; height: 35px; background: #222; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: 40px; right: 20px; z-index: 2001; cursor: pointer; font-size: 18px; }
         
         .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
         
@@ -115,14 +110,30 @@
 </head>
 <body>
 
+    <div id="settings-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <h2 style="margin: 0 0 20px 0;">CONTROL CENTER</h2>
+            <div class="input-group">
+                <label class="input-label">DISPLAY NAME</label>
+                <input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE">
+            </div>
+            <div class="input-group">
+                <label class="input-label">SYSTEM THEME</label>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn" style="margin:0; flex:1;" onclick="toggleTheme('gold')">GOLD</button>
+                    <button class="btn" style="margin:0; flex:1; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button>
+                </div>
+            </div>
+            <button class="btn-full" onclick="saveSettings()">SAVE CHANGES</button>
+            <button class="btn-outline" style="border-color:#ff4444; color:#ff4444;" onclick="resetSystem()">FACTORY RESET</button>
+            <button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button>
+        </div>
+    </div>
+
     <div id="scan-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2 style="margin: 0 0 20px 0;">SCAN & PAY</h2>
             <div class="camera-view">
-                <div class="camera-corner tl"></div>
-                <div class="camera-corner tr"></div>
-                <div class="camera-corner bl"></div>
-                <div class="camera-corner br"></div>
                 <div class="laser-beam"></div>
                 <p style="margin-top:130px; font-size:10px; color:#888;">ALIGN QR CODE</p>
             </div>
@@ -192,17 +203,6 @@
         </div>
     </div>
 
-    <div id="notif-overlay" class="modal-overlay">
-        <div class="modal-card">
-            <h2 style="margin: 0 0 20px 0;">SYSTEM ALERTS</h2>
-            <div class="ledger-box" style="margin-top:0;">
-                <div class="tx-row"><div class="tx-icon">🔔</div><div class="tx-details"><p class="tx-title">Market Update</p><p class="tx-date">BTC up +2.4%</p></div></div>
-                <div class="tx-row"><div class="tx-icon">🔒</div><div class="tx-details"><p class="tx-title">Security</p><p class="tx-date">New Login from Lagos</p></div></div>
-            </div>
-            <button class="btn-full" onclick="toggleModal('notif-overlay')">CLEAR ALL</button>
-        </div>
-    </div>
-
     <div id="chat-overlay" class="modal-overlay">
         <div class="modal-card chat-card">
             <div style="padding: 10px; background: #222; display: flex; justify-content: space-between;">
@@ -220,8 +220,8 @@
     <div id="passport-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2 style="color:var(--accent); margin-top:0;">USER PASSPORT</h2>
-            <div style="width: 60px; height: 60px; background: #222; border: 2px solid var(--accent); border-radius: 50%; margin: 10px auto; display: flex; align-items: center; justify-content: center; font-size: 24px;">SA</div>
-            <div class="pass-row"><span style="color:#888;">OPERATOR</span><span style="color:var(--accent);">STEVEN ADEWOLE</span></div>
+            <div style="width: 60px; height: 60px; background: #222; border: 2px solid var(--accent); border-radius: 50%; margin: 10px auto; display: flex; align-items: center; justify-content: center; font-size: 24px;" id="pass-avatar">SA</div>
+            <div class="pass-row"><span style="color:#888;">OPERATOR</span><span style="color:var(--accent);" id="pass-name">STEVEN ADEWOLE</span></div>
             <div class="pass-row"><span style="color:#888;">CLEARANCE</span><span style="color:var(--accent);">LEVEL 5</span></div>
             <button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE ID</button>
         </div>
@@ -240,13 +240,13 @@
                 <span>DETAILS</span>
                 <span style="font-family: monospace;" id="rec-to">Unknown</span>
             </div>
-            <button class="btn-full" style="background:#000; color:#fff;" onclick="toggleModal('receipt-overlay')">CLOSE RECEIPT</button>
+            <button class="btn-full" style="background:#000; color:#fff;" onclick="closeReceipt()">DOWNLOAD PDF</button>
         </div>
     </div>
 
     <div id="launchpad">
-        <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;" onclick="toggleTheme()">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">VISION MODULE v19.0</p>
+        <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;">LIVENJET</h1>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">CONTROL CENTER v20.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -254,8 +254,8 @@
 
     <div id="app-interface">
         <div class="ticker-wrap">SYSTEM NODE: LOS-NGA-01 | <span id="clock"></span></div>
-        <div class="avatar-btn" onclick="toggleModal('passport-overlay')">SA</div>
-        <div class="bell-btn" onclick="toggleModal('notif-overlay')">🔔<div class="bell-dot"></div></div>
+        <div class="avatar-btn" onclick="toggleModal('passport-overlay')" id="main-avatar">SA</div>
+        <div class="settings-btn" onclick="toggleModal('settings-overlay')">⚙️</div>
         
         <div class="neural-core"><div class="core-inner"></div></div>
         <div style="font-family: monospace; font-size: 10px; color: #888; height: 20px;" id="ai-msg">IDENTITY VERIFIED.</div>
@@ -354,8 +354,15 @@
         
         // REAL MATH & TRANSFER LOGIC
         let balance = 50000;
+        let userName = "STEVEN ADEWOLE";
+        
         function updateDisplay() {
             document.getElementById('wallet-bal').innerText = "₦ " + balance.toLocaleString() + ".00";
+            document.getElementById('pass-name').innerText = userName;
+            // Update Avatar initials
+            let initials = userName.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+            document.getElementById('main-avatar').innerText = initials;
+            document.getElementById('pass-avatar').innerText = initials;
         }
 
         function addToLedger(name, amt, type="debit") {
@@ -367,6 +374,43 @@
             let icon = type === "credit" ? "🏦" : "💸";
             row.innerHTML = `<div class="tx-icon">${icon}</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt" style="color:${color}">${sign}₦${amt.toLocaleString()}</div>`;
             list.insertBefore(row, list.firstChild);
+        }
+
+        // CONTROL CENTER LOGIC
+        function saveSettings() {
+            const newName = document.getElementById('set-name').value;
+            if(newName) {
+                userName = newName.toUpperCase();
+                updateDisplay();
+                msg("PROFILE UPDATED");
+                toggleModal('settings-overlay');
+            }
+        }
+        
+        function resetSystem() {
+            if(confirm("RESET ALL DATA?")) {
+                location.reload();
+            }
+        }
+
+        function toggleTheme(type) {
+            const r = document.querySelector(':root');
+            if(type === 'matrix') { r.style.setProperty('--accent', '#00ff00'); }
+            else { r.style.setProperty('--accent', '#FFD700'); }
+            buzz(50);
+        }
+
+        function closeReceipt() {
+            const btn = document.querySelector('#receipt-overlay .btn-full');
+            btn.innerText = "DOWNLOADING...";
+            buzz(50);
+            setTimeout(() => {
+                btn.innerText = "SAVED TO FILES";
+                setTimeout(() => {
+                    toggleModal('receipt-overlay');
+                    btn.innerText = "DOWNLOAD PDF"; // Reset text
+                }, 1000);
+            }, 1500);
         }
 
         // QR SCANNER LOGIC
@@ -457,13 +501,6 @@
             b.innerHTML+=`<div class="msg msg-user">${i.value}</div>`;
             setTimeout(()=>{ b.innerHTML+=`<div class="msg msg-ai">Request received. Processing...</div>`; b.scrollTop=b.scrollHeight; buzz(50);},1000);
             i.value=""; b.scrollTop=b.scrollHeight;
-        }
-
-        let theme=0;
-        function toggleTheme() {
-            const r = document.querySelector(':root');
-            if(theme===0) { r.style.setProperty('--accent', '#00ff00'); theme=1; }
-            else { r.style.setProperty('--accent', '#FFD700'); theme=0; }
         }
 
         function authenticate() {
