@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Global Vault</title>
+    <title>LivenJet | Wealth Reactor</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; }
@@ -70,10 +70,14 @@
         .msg-user { background: var(--accent); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
         .fab-chat { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; }
 
+        /* --- MINING TERMINAL (NEW) --- */
+        .miner-box { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-top: 15px; text-align: left; font-family: monospace; font-size: 10px; color: #0f0; height: 80px; overflow: hidden; display: none; }
+        .hash-line { margin: 2px 0; }
+
         /* --- MAIN APP --- */
         #app-interface { display: none; opacity: 0; transition: 1s; padding-bottom: 120px; overflow-y: scroll; height: 100vh; }
         .ticker-wrap { width: 100%; background: #111; padding: 8px 0; position: fixed; top: 0; z-index: 2000; font-family: monospace; font-size: 10px; color: #666; }
-        .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 60px auto 20px; position: relative; animation: core-pulse 3s infinite; }
+        .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 60px auto 20px; position: relative; animation: core-pulse 3s infinite; cursor: pointer; }
         .core-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40%; height: 40%; background: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--accent); }
         @keyframes core-pulse { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } }
 
@@ -249,8 +253,8 @@
     </div>
 
     <div id="launchpad">
-        <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;" onclick="godMode()">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">GLOBAL VAULT v22.0</p>
+        <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;">LIVENJET</h1>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">WEALTH REACTOR v23.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -262,7 +266,7 @@
         <div class="currency-btn" onclick="toggleCurrency()">₦ / $</div>
         <div class="settings-btn" onclick="toggleModal('settings-overlay')">⚙️</div>
         
-        <div class="neural-core"><div class="core-inner"></div></div>
+        <div class="neural-core" onclick="godMode()"><div class="core-inner"></div></div>
         <div style="font-family: monospace; font-size: 10px; color: #888; height: 20px;" id="ai-msg">IDENTITY VERIFIED.</div>
 
         <div id="home" class="pillar active">
@@ -332,16 +336,16 @@
                     <h3 style="margin:0;">PORTFOLIO</h3>
                     <span style="font-size:10px; color:#0f0;">+12.5%</span>
                 </div>
-                <div class="chart-container">
-                    <div class="chart-bar active" style="height:30%"></div>
-                    <div class="chart-bar active" style="height:50%"></div>
-                    <div class="chart-bar active" style="height:40%"></div>
-                    <div class="chart-bar active" style="height:85%"></div>
-                    <div class="chart-bar active" style="height:100%"></div>
-                </div>
+                
+                <div class="miner-box" id="miner-display">INITIALIZING...</div>
+                
                 <div class="asset-row">
                     <div class="asset-info"><div class="asset-name">Bitcoin (BTC)</div><div class="asset-price">$98,420</div></div>
                     <div style="text-align:right;"><button class="buy-btn" onclick="pay(5000, 'Bitcoin Inv')">BUY 5k</button></div>
+                </div>
+                <div class="asset-row">
+                    <div class="asset-info"><div class="asset-name">LivenJet (LJN)</div><div class="asset-price" id="ljn-bal">0.00 LJN</div></div>
+                    <div style="text-align:right;"><button class="buy-btn" onclick="startMining()" id="mine-btn">START MINING</button></div>
                 </div>
             </div>
         </div>
@@ -361,25 +365,58 @@
         function toggleModal(id) { buzz(30); const e = document.getElementById(id); e.style.display = (e.style.display==='flex')?'none':'flex'; }
         
         // --- REAL MATH & LOGIC ---
-        let balance = 50000; // stored in Naira
+        let balance = 50000;
+        let ljnCrypto = 0.00;
         let userName = "STEVEN ADEWOLE";
         let isCardFrozen = false;
         let currency = "NGN"; // NGN or USD
         let rate = 1500; // 1 USD = 1500 NGN
         let godModeCount = 0;
+        let isMining = false;
         
         function updateDisplay() {
             let displayBal = balance;
             let symbol = "₦ ";
-            if(currency === "USD") {
-                displayBal = balance / rate;
-                symbol = "$ ";
-            }
+            if(currency === "USD") { displayBal = balance / rate; symbol = "$ "; }
             document.getElementById('wallet-bal').innerText = symbol + displayBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('pass-name').innerText = userName;
             let initials = userName.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
             document.getElementById('main-avatar').innerText = initials;
             document.getElementById('pass-avatar').innerText = initials;
+            document.getElementById('ljn-bal').innerText = ljnCrypto.toFixed(4) + " LJN";
+        }
+
+        // --- MINING LOGIC ---
+        function startMining() {
+            if(isMining) return;
+            isMining = true;
+            const btn = document.getElementById('mine-btn');
+            const box = document.getElementById('miner-display');
+            btn.innerText = "MINING...";
+            box.style.display = "block";
+            buzz(50);
+            
+            let hashes = 0;
+            const interval = setInterval(() => {
+                hashes++;
+                const hash = Math.random().toString(36).substring(2, 15);
+                box.innerHTML = `<div class="hash-line">> HASH: ${hash}...</div>` + box.innerHTML;
+                if(hashes % 5 === 0) {
+                    let reward = Math.random() * 0.5;
+                    ljnCrypto += reward;
+                    updateDisplay();
+                    buzz(20);
+                }
+                if(hashes > 20) {
+                    clearInterval(interval);
+                    isMining = false;
+                    btn.innerText = "START MINING";
+                    box.style.display = "none";
+                    box.innerHTML = "INITIALIZING...";
+                    msg("MINING COMPLETE. LJN ADDED.");
+                    buzz([100,50,100]);
+                }
+            }, 300);
         }
 
         // --- GOD MODE ---
@@ -387,7 +424,7 @@
             godModeCount++;
             buzz(20);
             if(godModeCount === 5) {
-                balance = balance + 10000000;
+                balance += 10000000;
                 updateDisplay();
                 msg("GOD MODE: ₦10M ADDED");
                 buzz([100,100,100,100,100]);
@@ -397,11 +434,8 @@
 
         // --- CURRENCY TOGGLE ---
         function toggleCurrency() {
-            if(currency === "NGN") { currency = "USD"; } 
-            else { currency = "NGN"; }
-            updateDisplay();
-            buzz(50);
-            msg("CURRENCY: " + currency);
+            if(currency === "NGN") { currency = "USD"; } else { currency = "NGN"; }
+            updateDisplay(); buzz(50); msg("CURRENCY: " + currency);
         }
 
         function addToLedger(name, amt, type="debit") {
@@ -411,39 +445,22 @@
             let color = type === "credit" ? "#0f0" : "#ff4444";
             let sign = type === "credit" ? "+" : "-";
             let icon = type === "credit" ? "🏦" : "💸";
-            // Ledger always shows NGN for simplicity in this version, or update logic to convert
             row.innerHTML = `<div class="tx-icon">${icon}</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt" style="color:${color}">${sign}${amt.toLocaleString()}</div>`;
             list.insertBefore(row, list.firstChild);
         }
 
-        // --- FREEZE LOGIC ---
         function toggleFreeze() {
-            const card = document.getElementById('credit-card-ui');
-            const status = document.getElementById('card-status');
-            const num = document.getElementById('card-num');
-            buzz(100);
-            if(isCardFrozen) {
-                isCardFrozen = false; card.classList.remove('frozen'); status.innerText = "ACTIVE"; status.classList.remove('frozen-text'); num.innerText = "**** 8820"; msg("CARD UNLOCKED");
-            } else {
-                isCardFrozen = true; card.classList.add('frozen'); status.innerText = "FROZEN ❄️"; status.classList.add('frozen-text'); num.innerText = "❄️❄️❄️ ❄️❄️❄️"; msg("CARD FROZEN");
-            }
+            const card = document.getElementById('credit-card-ui'); const status = document.getElementById('card-status'); const num = document.getElementById('card-num'); buzz(100);
+            if(isCardFrozen) { isCardFrozen = false; card.classList.remove('frozen'); status.innerText = "ACTIVE"; status.classList.remove('frozen-text'); num.innerText = "**** 8820"; msg("CARD UNLOCKED"); } 
+            else { isCardFrozen = true; card.classList.add('frozen'); status.innerText = "FROZEN ❄️"; status.classList.add('frozen-text'); num.innerText = "❄️❄️❄️ ❄️❄️❄️"; msg("CARD FROZEN"); }
         }
         function bookFlight() { if(isCardFrozen) { msg("CARD IS FROZEN ❄️"); return; } pay(150000, "Private Jet Booking"); }
-
-        // --- PAYMENT ENGINE ---
         function pay(amount, name) {
-            // Amount coming in is always Naira value
             if(isCardFrozen) { msg("CARD IS FROZEN ❄️"); buzz([50,50,50]); return; }
             if(balance < amount) { msg("INSUFFICIENT FUNDS"); return; }
-            buzz(50);
-            balance = balance - amount;
-            updateDisplay();
-            addToLedger(name, amount);
-            toggleModal('receipt-overlay');
-            document.getElementById('rec-title').innerText = "SUCCESS";
-            let displayAmt = amount;
-            let symbol = "₦ ";
-            if(currency === "USD") { displayAmt = amount / rate; symbol = "$ "; }
+            buzz(50); balance -= amount; updateDisplay(); addToLedger(name, amount);
+            toggleModal('receipt-overlay'); document.getElementById('rec-title').innerText = "SUCCESS";
+            let displayAmt = amount; let symbol = "₦ "; if(currency === "USD") { displayAmt = amount / rate; symbol = "$ "; }
             document.getElementById('rec-amt').innerText = symbol + displayAmt.toLocaleString(undefined, {minimumFractionDigits: 2});
             document.getElementById('rec-to').innerText = name;
         }
@@ -464,7 +481,19 @@
         let isStealth=false;
         function toggleStealth() { buzz(20); const b=document.getElementById('wallet-bal'); if(isStealth){ updateDisplay(); isStealth=false; } else { b.innerText=currency==="USD"?"$ ****":"₦ ****"; isStealth=true; } }
         function msg(t) { const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
+        
+        // --- TIME GREETING ---
+        function setGreeting() {
+            const h = new Date().getHours();
+            let g = "Welcome";
+            if(h < 12) g = "Good Morning";
+            else if(h < 18) g = "Good Afternoon";
+            else g = "Good Evening";
+            msg(g + ", Chief.");
+        }
+
         setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString()},1000);
+        setTimeout(setGreeting, 1500); // Greet after launch
     </script>
 </body>
 </html>
