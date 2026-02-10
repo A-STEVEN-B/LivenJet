@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>LivenJet | Apex OS</title>
+    <title>LivenJet | UI Polish</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; --purple: #d000ff; }
-        body { background-color: #000; color: var(--accent); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; user-select: none; transition: 0.5s; perspective: 1000px; padding-top: env(safe-area-inset-top); }
+        body { background-color: #000; color: var(--accent); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; user-select: none; transition: 0.5s; perspective: 1000px; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
         
         /* --- VISUAL FX --- */
         .scanlines { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2)); background-size: 100% 4px; pointer-events: none; z-index: 9998; opacity: 0.3; }
@@ -29,37 +29,66 @@
         @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
         .auth-btn { background: var(--accent); border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 30px; cursor: pointer; animation: pulse 2s infinite; }
 
-        /* --- HEADER ELEMENTS (FIXED) --- */
-        .avatar-btn { width: 35px; height: 35px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: 50px; left: 20px; z-index: 2001; cursor: pointer; transition: 0.5s; }
-        .currency-btn { width: 35px; height: 35px; background: #222; border: 1px solid var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: 50px; left: 65px; z-index: 2001; cursor: pointer; font-size: 10px; font-weight: bold; }
-        .settings-btn { width: 35px; height: 35px; background: #222; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: 50px; right: 20px; z-index: 2001; cursor: pointer; font-size: 18px; }
+        /* --- HEADER ELEMENTS --- */
+        .avatar-btn { width: 35px; height: 35px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 20px; z-index: 2001; cursor: pointer; transition: 0.5s; }
+        .currency-btn { width: 35px; height: 35px; background: #222; border: 1px solid var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 65px; z-index: 2001; cursor: pointer; font-size: 10px; font-weight: bold; }
+        .settings-btn { width: 35px; height: 35px; background: #222; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; position: fixed; top: calc(20px + env(safe-area-inset-top)); right: 20px; z-index: 2001; cursor: pointer; font-size: 18px; }
         
-        /* TICKER MOVED DOWN FOR VISIBILITY */
-        .ticker-wrap { width: 100%; background: transparent; padding: 5px 0; position: fixed; top: 90px; z-index: 1000; font-family: monospace; font-size: 10px; color: #666; pointer-events: none; }
+        .ticker-wrap { width: 100%; background: transparent; padding: 5px 0; position: fixed; top: calc(65px + env(safe-area-inset-top)); z-index: 1000; font-family: monospace; font-size: 10px; color: #666; pointer-events: none; }
 
         /* --- NEURAL CORE --- */
-        .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 120px auto 10px; position: relative; animation: core-pulse 3s infinite; cursor: pointer; transition: 0.5s; z-index: 500; }
+        .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 100px auto 10px; position: relative; animation: core-pulse 3s infinite; cursor: pointer; transition: 0.5s; z-index: 500; }
         .core-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40%; height: 40%; background: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--accent); }
         @keyframes core-pulse { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } }
 
-        /* --- MAIN APP STRUCTURE --- */
-        #app-interface { display: none; opacity: 0; transition: 1s; padding-bottom: 120px; overflow-y: scroll; height: 100vh; }
+        /* --- MAIN APP --- */
+        #app-interface { display: none; opacity: 0; transition: 1s; padding-bottom: 150px; overflow-y: scroll; height: 100vh; }
         .pillar { display: none; padding: 20px; animation: slideIn 0.4s ease; }
         .active { display: block; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
         
-        /* --- CARDS & UI --- */
         .intel-card { background: rgba(15,15,15,0.9); border: 1px solid #222; border-bottom: 2px solid var(--accent); border-radius: 16px; padding: 20px; margin: 15px auto; max-width: 340px; text-align: left; transition: 0.3s; }
         .btn { background: var(--accent); border: none; padding: 15px; width: 100%; border-radius: 12px; margin-top: 10px; font-weight: bold; cursor: pointer; }
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* --- DOCK --- */
-        .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(10,10,10,0.95); border: 1px solid #332; border-radius: 25px; display: flex; justify-content: space-around; padding: 18px 0; z-index: 1000; backdrop-filter: blur(10px); }
-        .dock-item { font-size: 24px; opacity: 0.3; transition: 0.3s; cursor: pointer; }
-        .active-icon { opacity: 1; color: var(--accent); transform: translateY(-5px); }
+        /* --- DOCK (FIXED FOR IOS) --- */
+        .dock { 
+            position: fixed; 
+            bottom: calc(30px + env(safe-area-inset-bottom)); /* LIFTED UP */
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 90%; 
+            max-width: 400px; 
+            background: rgba(10,10,10,0.95); 
+            border: 1px solid #333; 
+            border-radius: 25px; 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 18px 0; 
+            z-index: 1000; 
+            backdrop-filter: blur(10px); 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+        .dock-item { font-size: 24px; opacity: 0.5; transition: 0.3s; cursor: pointer; } /* Increased opacity */
+        .active-icon { opacity: 1; color: var(--accent); transform: translateY(-5px); text-shadow: 0 0 10px var(--accent); }
 
-        /* --- WIDGETS --- */
+        /* --- NEWS TICKER (FIXED FOR IOS) --- */
+        .news-ticker { 
+            position: fixed; 
+            bottom: calc(95px + env(safe-area-inset-bottom)); /* LIFTED ABOVE DOCK */
+            width: 100%; 
+            background: #111; 
+            border-top: 1px solid #333; 
+            padding: 5px 0; 
+            overflow: hidden; 
+            white-space: nowrap; 
+            z-index: 900; 
+        }
+        .ticker-content { display: inline-block; padding-left: 100%; animation: scroll 20s linear infinite; color: #888; font-size: 10px; font-family: monospace; }
+        @keyframes scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+
+        /* --- WIDGETS & MODULES --- */
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
         .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
@@ -79,7 +108,6 @@
         .tx-date { font-size: 10px; color: #666; margin: 0; }
         .tx-amt { font-size: 12px; font-weight: bold; color: #ff4444; }
         
-        /* --- MODULES --- */
         .venture-card { background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; position: relative; overflow: hidden; }
         .venture-card.critical { border: 1px solid var(--red); animation: shake 0.5s infinite; }
         .venture-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -123,10 +151,6 @@
         .defend-bar-bg { width: 100%; height: 20px; background: #300; margin: 20px 0; border: 1px solid var(--red); }
         .defend-bar-fill { width: 0%; height: 100%; background: var(--red); transition: 0.1s; }
         .defend-btn { background: var(--red); color: #fff; font-size: 20px; font-weight: bold; border: none; padding: 20px; width: 100%; border-radius: 10px; cursor: pointer; animation: pulse 0.5s infinite; }
-
-        .news-ticker { position: fixed; bottom: 85px; width: 100%; background: #111; border-top: 1px solid #333; padding: 5px 0; overflow: hidden; white-space: nowrap; z-index: 900; }
-        .ticker-content { display: inline-block; padding-left: 100%; animation: scroll 20s linear infinite; color: #888; font-size: 10px; font-family: monospace; }
-        @keyframes scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
         
         /* CHAT */
         .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; }
@@ -136,7 +160,24 @@
         .msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; font-size: 12px; max-width: 70%; }
         .msg-ai { background: #333; color: #fff; border-top-left-radius: 0; }
         .msg-user { background: var(--accent); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
-        .fab-chat { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; }
+        .fab-chat { 
+            position: fixed; 
+            bottom: calc(115px + env(safe-area-inset-bottom)); /* LIFTED HIGHER */
+            right: 20px; 
+            width: 50px; 
+            height: 50px; 
+            background: var(--accent); 
+            border-radius: 50%; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; 
+            font-size: 24px; 
+            box-shadow: 0 0 20px rgba(255,215,0,0.4); 
+            z-index: 4000; 
+            cursor: pointer; 
+        }
+        .fab-label { font-size: 8px; color: #000; font-weight: bold; margin-top: -5px; }
 
         /* HACK GAME */
         .hack-bar-container { width: 100%; height: 30px; background: #222; border: 1px solid #444; border-radius: 15px; position: relative; overflow: hidden; margin: 30px 0; }
@@ -187,7 +228,15 @@
     <div id="drone-layer">🛸</div>
     <div id="breach-overlay"><div class="breach-box"><h1 style="color:var(--red); font-size:24px; margin:0;">⚠️ SYSTEM BREACH</h1><p style="color:#fff; font-size:12px;">HACKER DETECTED! FUNDS AT RISK!</p><div class="defend-bar-bg"><div class="defend-bar-fill" id="defend-bar"></div></div><button class="defend-btn" onclick="chargeFirewall()">DEPLOY FIREWALL</button></div></div>
 
-    <div id="assets-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ASSET VAULT</h2><div class="asset-grid" id="asset-list"></div><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('assets-overlay')">CLOSE VAULT</button></div></div>
+    <div id="assets-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <h2 style="color:var(--gold);">ASSET VAULT</h2>
+            <div class="asset-grid" id="asset-list">
+                </div>
+            <button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('assets-overlay')">CLOSE VAULT</button>
+        </div>
+    </div>
+
     <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--ice);">BUSINESS EMPIRE</h2><div id="active-ventures"></div><div style="margin-top:20px; border-top:1px dashed #333; padding-top:20px;"><h3>START NEW VENTURE</h3><div class="input-group"><label class="input-label">BUSINESS NAME</label><input type="text" class="app-input" id="biz-name" placeholder="e.g. Lagos Tech"></div><div class="input-group"><label class="input-label">TYPE</label><select class="app-input" id="biz-type"><option value="retail">RETAIL CHAIN (Low Risk)</option><option value="tech">TECH STARTUP (Med Risk)</option><option value="oil">OIL RIG (High Yield)</option></select></div><p style="font-size:10px; color:#888;">SEED CAPITAL REQUIRED: ₦100,000</p><button class="btn-full" onclick="createBusiness()">LAUNCH ENTERPRISE</button></div><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
     <div id="trophy-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ACHIEVEMENTS</h2><div class="trophy-grid"><div class="trophy" id="badge-breach"><div class="trophy-icon">🛡️</div><div class="trophy-name">SURVIVOR</div></div><div class="trophy" id="badge-hack"><div class="trophy-icon">📡</div><div class="trophy-name">HACKER</div></div><div class="trophy" id="badge-mine"><div class="trophy-icon">⛏️</div><div class="trophy-name">MINER</div></div><div class="trophy" id="badge-rich"><div class="trophy-icon">💰</div><div class="trophy-name">TYCOON</div></div><div class="trophy" id="badge-god"><div class="trophy-icon">⚡</div><div class="trophy-name">GOD MODE</div></div><div class="trophy" id="badge-agent"><div class="trophy-icon">🕵️</div><div class="trophy-name">COMMANDER</div></div><div class="trophy" id="badge-trade"><div class="trophy-icon">⚖️</div><div class="trophy-name">TRADER</div></div><div class="trophy" id="badge-grid"><div class="trophy-icon">🏭</div><div class="trophy-name">GRID MASTER</div></div><div class="trophy" id="badge-ceo"><div class="trophy-icon">👔</div><div class="trophy-name">CEO</div></div><div class="trophy" id="badge-war"><div class="trophy-icon">⚔️</div><div class="trophy-name">WARLORD</div></div><div class="trophy" id="badge-apex"><div class="trophy-icon">🟣</div><div class="trophy-name">APEX</div></div></div><button class="btn-full" onclick="toggleModal('trophy-overlay')">CLOSE</button></div></div>
     <div id="hack-overlay" class="modal-overlay"><div class="modal-card" style="border-color:red;"><h2 style="margin: 0 0 10px 0; color:red;">SATELLITE UPLINK</h2><div class="hack-bar-container"><div class="hack-zone"></div><div class="hack-cursor cursor-moving" id="hack-cursor"></div></div><div style="font-family:monospace; color:#fff; font-size:12px; margin:20px 0;" id="hack-log">WAITING FOR SIGNAL...</div><button class="btn-full" style="background:red;" onclick="lockSignal()">LOCK SIGNAL</button><button class="btn-full" style="background:#222; border:1px solid #333; color:#fff;" onclick="toggleModal('hack-overlay')">ABORT</button></div></div>
@@ -206,7 +255,7 @@
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">APEX OS v38.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">APEX OS v39.0 (IOS FIX)</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -287,7 +336,10 @@
             <div id="n-fina" class="dock-item" onclick="nav('fina')">💳</div>
         </div>
         
-        <div class="fab-chat" onclick="toggleModal('chat-overlay')">💬</div>
+        <div class="fab-chat" onclick="toggleModal('chat-overlay')">
+            💬
+            <div class="fab-label">AI</div>
+        </div>
     </div>
 
     <script>
@@ -299,7 +351,6 @@
             if(localStorage.getItem('livenjet_data_v7')) {
                 const d = JSON.parse(localStorage.getItem('livenjet_data_v7'));
                 balance = d.balance||50000; ljnCrypto=d.ljnCrypto||0; userName=d.userName||"STEVEN ADEWOLE"; agents=d.agents||[]; badges=d.badges||badges; transactions=d.transactions||[]; inventory=d.inventory||{gold:0,oil:0}; infra=d.infra||{solar:0,nuke:0}; ventures=d.ventures||[]; ownedAssets=d.ownedAssets||{island:false,yacht:false,jet:false,mansion:false}; influence=d.influence||0; singularity=d.singularity||false;
-                
                 const l = document.getElementById('ledger-list'); l.innerHTML = "";
                 if(transactions.length === 0) {
                     l.innerHTML = "<div style='color:#444; font-size:10px; margin-top:10px;'>NO RECENT ACTIVITY</div>";
@@ -309,7 +360,6 @@
                 updateDisplay(); updateAgentList(); updateVentureUI(); checkAchievements();
                 if(singularity) activateSingularity(true);
             } else {
-                // Initial Load for empty state
                 document.getElementById('ledger-list').innerHTML = "<div style='color:#444; font-size:10px; margin-top:10px;'>NO RECENT ACTIVITY</div>";
             }
         }
