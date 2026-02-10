@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Investment Terminal</title>
+    <title>LivenJet | Universal Transfer</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; }
@@ -20,32 +20,38 @@
 
         /* --- MODALS --- */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .modal-card { background: #111; border: 1px solid var(--accent); color: #fff; width: 85%; padding: 20px; border-radius: 20px; position: relative; animation: slideUp 0.4s ease; text-align: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.15); }
+        .modal-card { background: #111; border: 1px solid var(--accent); color: #fff; width: 85%; padding: 25px 20px; border-radius: 20px; position: relative; animation: slideUp 0.4s ease; text-align: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.15); }
         .receipt-card { background: #fff; color: #000; border: none; }
         .dashed-line { border-bottom: 2px dashed #ccc; margin: 20px 0; }
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        /* FORM INPUTS */
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
+        .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
+        .app-input:focus { border-color: var(--accent); }
+        select.app-input { appearance: none; }
 
-        /* --- INVESTMENT STYLES (NEW) --- */
+        /* --- NEW ACTION GRID --- */
+        .action-grid { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
+        .action-btn { flex: 1; background: #1a1a1a; border-radius: 12px; padding: 15px 5px; cursor: pointer; border: 1px solid #333; transition: 0.2s; }
+        .action-btn:active { background: #333; transform: scale(0.95); }
+        .action-icon { font-size: 20px; margin-bottom: 5px; }
+        .action-text { font-size: 10px; font-weight: bold; color: #ccc; }
+
+        /* --- INVESTMENT & MAP --- */
         .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; }
         .chart-bar { width: 12%; background: #333; border-radius: 4px 4px 0 0; transition: 0.5s; animation: growBar 1s ease-out; }
-        .chart-bar.active { background: var(--green); box-shadow: 0 0 10px rgba(0,255,0,0.3); }
+        .chart-bar.active { background: var(--green); }
         @keyframes growBar { from { height: 0; } }
         
-        .asset-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222; }
-        .asset-info { text-align: left; }
-        .asset-name { font-weight: bold; font-size: 14px; color: #fff; }
-        .asset-price { font-size: 10px; color: #888; }
-        .asset-change { font-size: 10px; color: var(--green); }
-        .buy-btn { background: #222; color: #fff; border: 1px solid #444; padding: 5px 15px; border-radius: 15px; font-size: 10px; cursor: pointer; }
-        .buy-btn:active { background: var(--accent); color: #000; }
-
-        /* --- MAP & CHAT --- */
         .map-grid { width: 100%; height: 200px; background: radial-gradient(circle, #222 10%, #000 90%); border: 1px solid #333; margin-bottom: 15px; position: relative; overflow: hidden; border-radius: 10px; }
         .radar-scan { width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(0, 255, 0, 0.2)); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: spin 3s linear infinite; }
         .map-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--accent); animation: blink 1s infinite; }
         @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
         @keyframes blink { 50% { opacity: 0.5; } }
 
+        /* --- CHAT --- */
         .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; }
         .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; }
         .chat-input-area { padding: 10px; background: #222; display: flex; gap: 10px; }
@@ -80,7 +86,7 @@
         
         .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
         
-        /* LEDGER & TRANSFERS */
+        /* LEDGER */
         .ledger-box { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; padding-right: 5px; }
         .tx-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; animation: fadeIn 0.5s; }
         .tx-icon { width: 30px; height: 30px; background: #222; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 10px; }
@@ -88,14 +94,46 @@
         .tx-title { font-size: 12px; color: #fff; margin: 0; font-weight: bold; }
         .tx-date { font-size: 10px; color: #666; margin: 0; }
         .tx-amt { font-size: 12px; font-weight: bold; color: #ff4444; }
-        .transfer-row { display: flex; justify-content: space-between; margin-top: 15px; gap: 10px; }
-        .agent { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .agent-img { width: 45px; height: 45px; background: #222; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: #fff; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
+
+    <div id="send-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <h2 style="margin: 0 0 20px 0;">SEND MONEY</h2>
+            
+            <div class="input-group">
+                <label class="input-label">BANK NAME</label>
+                <select class="app-input" id="send-bank">
+                    <option>OPay Digital Services</option>
+                    <option>GTBank</option>
+                    <option>Zenith Bank</option>
+                    <option>Access Bank</option>
+                    <option>Kuda MFB</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">ACCOUNT NUMBER</label>
+                <input type="number" class="app-input" id="send-acc" placeholder="10-digit number" oninput="verifyAccount()">
+            </div>
+            
+            <div id="verify-box" style="display:none; margin-bottom:15px; background:#1a1a1a; padding:10px; border-radius:8px;">
+                <p style="font-size:10px; color:#888; margin:0;">VERIFIED NAME</p>
+                <p style="font-weight:bold; color:var(--green); margin:5px 0;" id="verified-name">LOADING...</p>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">AMOUNT (₦)</label>
+                <input type="number" class="app-input" id="send-amt" placeholder="0.00">
+            </div>
+
+            <button class="btn-full" onclick="processTransfer()">CONFIRM TRANSFER</button>
+            <button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('send-overlay')">CANCEL</button>
+        </div>
+    </div>
 
     <div id="map-overlay" class="modal-overlay">
         <div class="modal-card">
@@ -155,7 +193,7 @@
                 <span style="font-weight: bold;" id="rec-amt">₦ 0.00</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 14px;">
-                <span>ITEM/AGENT</span>
+                <span>BENEFICIARY</span>
                 <span style="font-family: monospace;" id="rec-to">Unknown</span>
             </div>
             <button class="btn-full" style="background:#000; color:#fff;" onclick="toggleModal('receipt-overlay')">CLOSE RECEIPT</button>
@@ -164,7 +202,7 @@
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;" onclick="toggleTheme()">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">FINANCE OS v16.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">TRANSFER HUB v17.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -183,12 +221,23 @@
                 <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY</p>
                 <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal" onclick="toggleStealth()">₦ 50,000.00</h2>
                 
-                <p style="font-size: 9px; color: #666; margin-top: 15px;">QUICK TRANSFER</p>
-                <div class="transfer-row">
-                    <div class="agent" onclick="pay(5000, 'Agent Sarah')"><div class="agent-img">SA</div></div>
-                    <div class="agent" onclick="pay(2500, 'Pilot Mike')"><div class="agent-img">PM</div></div>
-                    <div class="agent" onclick="pay(10000, 'HQ Vault')"><div class="agent-img">HQ</div></div>
-                    <div class="agent" onclick="pay(1500, 'Logistics')"><div class="agent-img">LG</div></div>
+                <div class="action-grid">
+                    <div class="action-btn" onclick="toggleModal('send-overlay')">
+                        <div class="action-icon">💸</div>
+                        <div class="action-text">SEND</div>
+                    </div>
+                    <div class="action-btn" onclick="nav('util')">
+                        <div class="action-icon">💡</div>
+                        <div class="action-text">BILLS</div>
+                    </div>
+                    <div class="action-btn" onclick="nav('fina')">
+                        <div class="action-icon">📈</div>
+                        <div class="action-text">INVEST</div>
+                    </div>
+                    <div class="action-btn" onclick="msg('Deposit via USSD *991#')">
+                        <div class="action-icon">➕</div>
+                        <div class="action-text">ADD</div>
+                    </div>
                 </div>
 
                 <p style="font-size: 9px; color: #666; margin-top: 20px;">RECENT ACTIVITY</p>
@@ -227,40 +276,22 @@
                     <h3 style="margin:0;">PORTFOLIO</h3>
                     <span style="font-size:10px; color:#0f0;">+12.5%</span>
                 </div>
-                
                 <div class="chart-container">
-                    <div class="chart-bar" style="height:30%"></div>
-                    <div class="chart-bar" style="height:50%"></div>
-                    <div class="chart-bar" style="height:40%"></div>
-                    <div class="chart-bar" style="height:70%"></div>
-                    <div class="chart-bar active" style="height:60%"></div>
+                    <div class="chart-bar active" style="height:30%"></div>
+                    <div class="chart-bar active" style="height:50%"></div>
+                    <div class="chart-bar active" style="height:40%"></div>
                     <div class="chart-bar active" style="height:85%"></div>
                     <div class="chart-bar active" style="height:100%"></div>
                 </div>
-
                 <div class="asset-row">
                     <div class="asset-info"><div class="asset-name">Bitcoin (BTC)</div><div class="asset-price">$98,420</div></div>
-                    <div style="text-align:right;">
-                        <div class="asset-change">+1.2%</div>
-                        <button class="buy-btn" onclick="pay(5000, 'Bitcoin Inv')">BUY ₦5k</button>
-                    </div>
+                    <div style="text-align:right;"><button class="buy-btn" onclick="pay(5000, 'Bitcoin Inv')">BUY ₦5k</button></div>
                 </div>
                 <div class="asset-row">
-                    <div class="asset-info"><div class="asset-name">Ethereum (ETH)</div><div class="asset-price">$2,850</div></div>
-                    <div style="text-align:right;">
-                        <div class="asset-change">+0.8%</div>
-                        <button class="buy-btn" onclick="pay(2000, 'Ethereum Inv')">BUY ₦2k</button>
-                    </div>
-                </div>
-                <div class="asset-row" style="border:none;">
                     <div class="asset-info"><div class="asset-name">LivenJet (LJN)</div><div class="asset-price">$12.50</div></div>
-                    <div style="text-align:right;">
-                        <div class="asset-change">+5.5%</div>
-                        <button class="buy-btn" onclick="pay(1000, 'LJN Stock')">BUY ₦1k</button>
-                    </div>
+                    <div style="text-align:right;"><button class="buy-btn" onclick="pay(1000, 'LJN Stock')">BUY ₦1k</button></div>
                 </div>
             </div>
-            <button class="btn" onclick="msg('Analyzing Market Trends...')">MARKET SCAN</button>
         </div>
 
         <div class="dock">
@@ -277,7 +308,7 @@
         function buzz(d) { if(navigator.vibrate) navigator.vibrate(d); }
         function toggleModal(id) { buzz(30); const e = document.getElementById(id); e.style.display = (e.style.display==='flex')?'none':'flex'; }
         
-        // REAL MATH LOGIC
+        // REAL MATH & TRANSFER LOGIC
         let balance = 50000;
         function updateDisplay() {
             document.getElementById('wallet-bal').innerText = "₦ " + balance.toLocaleString() + ".00";
@@ -289,6 +320,43 @@
             row.className = 'tx-row';
             row.innerHTML = `<div class="tx-icon">💸</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt">-₦${amt.toLocaleString()}</div>`;
             list.insertBefore(row, list.firstChild);
+        }
+
+        // AUTO-VERIFY ACCOUNT NAME
+        function verifyAccount() {
+            const acc = document.getElementById('send-acc').value;
+            const box = document.getElementById('verify-box');
+            const nameEl = document.getElementById('verified-name');
+            
+            if(acc.length === 10) {
+                box.style.display = 'block';
+                nameEl.innerText = "VERIFYING...";
+                setTimeout(() => {
+                    buzz(50);
+                    // Generate random name for realism
+                    const names = ["EMMANUEL CHIBUZOR", "AISHAT MOHAMMED", "TUNDE BAKARE", "CHIOMA OKORO"];
+                    nameEl.innerText = names[Math.floor(Math.random() * names.length)];
+                }, 1000);
+            } else {
+                box.style.display = 'none';
+            }
+        }
+
+        // PROCESS MANUAL TRANSFER
+        function processTransfer() {
+            const amt = parseInt(document.getElementById('send-amt').value);
+            const name = document.getElementById('verified-name').innerText;
+            const bank = document.getElementById('send-bank').value;
+            
+            if(!amt || amt <= 0) { msg("ENTER AMOUNT"); return; }
+            
+            toggleModal('send-overlay');
+            pay(amt, name + " (" + bank + ")");
+            
+            // Reset form
+            document.getElementById('send-acc').value = "";
+            document.getElementById('send-amt').value = "";
+            document.getElementById('verify-box').style.display = "none";
         }
 
         function pay(amount, name) {
