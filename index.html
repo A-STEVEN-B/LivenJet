@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Infinity Credit</title>
+    <title>LivenJet | Vision Module</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; }
@@ -25,13 +25,22 @@
         .dashed-line { border-bottom: 2px dashed #ccc; margin: 20px 0; }
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
+        /* --- QR SCANNER (NEW) --- */
+        .camera-view { width: 100%; height: 300px; background: #222; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #444; }
+        .camera-corner { position: absolute; width: 30px; height: 30px; border-color: var(--green); border-style: solid; }
+        .tl { top: 20px; left: 20px; border-width: 4px 0 0 4px; }
+        .tr { top: 20px; right: 20px; border-width: 4px 4px 0 0; }
+        .bl { bottom: 20px; left: 20px; border-width: 0 0 4px 4px; }
+        .br { bottom: 20px; right: 20px; border-width: 0 4px 4px 0; }
+        .laser-beam { width: 100%; height: 2px; background: red; position: absolute; top: 0; box-shadow: 0 0 10px red; animation: scan 1.5s linear infinite; }
+
         /* FORM INPUTS */
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
         .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
         select.app-input { appearance: none; }
 
-        /* --- CREDIT METER (NEW) --- */
+        /* --- CREDIT METER --- */
         .credit-meter { width: 150px; height: 150px; border-radius: 50%; border: 10px solid #222; border-top: 10px solid var(--accent); margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: spin-load 2s ease-out; position: relative; }
         .credit-score { font-size: 40px; font-weight: bold; color: #fff; }
         .credit-label { font-size: 10px; color: var(--green); text-transform: uppercase; letter-spacing: 2px; }
@@ -99,22 +108,36 @@
         .tx-title { font-size: 12px; color: #fff; margin: 0; font-weight: bold; }
         .tx-date { font-size: 10px; color: #666; margin: 0; }
         .tx-amt { font-size: 12px; font-weight: bold; color: #ff4444; }
-        .tx-amt.credit { color: #00ff00; } /* Green for money coming in */
+        .tx-amt.credit { color: #00ff00; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
 
+    <div id="scan-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <h2 style="margin: 0 0 20px 0;">SCAN & PAY</h2>
+            <div class="camera-view">
+                <div class="camera-corner tl"></div>
+                <div class="camera-corner tr"></div>
+                <div class="camera-corner bl"></div>
+                <div class="camera-corner br"></div>
+                <div class="laser-beam"></div>
+                <p style="margin-top:130px; font-size:10px; color:#888;">ALIGN QR CODE</p>
+            </div>
+            <p id="scan-status" style="color:var(--accent); font-size:12px; margin-top:15px; height:15px;"></p>
+            <button class="btn-full" onclick="toggleModal('scan-overlay')">CANCEL</button>
+        </div>
+    </div>
+
     <div id="loan-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2 style="margin: 0 0 20px 0;">CREDIT SCAN</h2>
-            
             <div id="credit-scanner" style="display:block;">
                 <p style="font-size:10px; color:#888;">ANALYZING FINANCIAL HISTORY...</p>
                 <div style="width:100%; height:4px; background:#222; margin:20px 0;"><div style="width:100%; height:100%; background:var(--accent); animation:growBar 2s;"></div></div>
             </div>
-
             <div id="credit-result" style="display:none;">
                 <div class="credit-meter">
                     <div class="credit-score">780</div>
@@ -223,7 +246,7 @@
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;" onclick="toggleTheme()">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">CREDIT SYSTEM v18.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">VISION MODULE v19.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -247,13 +270,13 @@
                         <div class="action-icon">💸</div>
                         <div class="action-text">SEND</div>
                     </div>
-                    <div class="action-btn" onclick="startLoanProcess()">
-                        <div class="action-icon" style="color:var(--green);">🏦</div>
-                        <div class="action-text" style="color:#fff;">LOANS</div>
+                    <div class="action-btn" onclick="openScanner()">
+                        <div class="action-icon" style="color:#0f0;">📸</div>
+                        <div class="action-text">SCAN</div>
                     </div>
-                    <div class="action-btn" onclick="nav('fina')">
-                        <div class="action-icon">📈</div>
-                        <div class="action-text">INVEST</div>
+                    <div class="action-btn" onclick="startLoanProcess()">
+                        <div class="action-icon">🏦</div>
+                        <div class="action-text">LOANS</div>
                     </div>
                     <div class="action-btn" onclick="msg('Deposit via USSD *991#')">
                         <div class="action-icon">➕</div>
@@ -342,9 +365,23 @@
             let color = type === "credit" ? "#0f0" : "#ff4444";
             let sign = type === "credit" ? "+" : "-";
             let icon = type === "credit" ? "🏦" : "💸";
-            
             row.innerHTML = `<div class="tx-icon">${icon}</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt" style="color:${color}">${sign}₦${amt.toLocaleString()}</div>`;
             list.insertBefore(row, list.firstChild);
+        }
+
+        // QR SCANNER LOGIC
+        function openScanner() {
+            toggleModal('scan-overlay');
+            const status = document.getElementById('scan-status');
+            status.innerText = "SEARCHING FOR CODES...";
+            setTimeout(() => {
+                buzz(50);
+                status.innerText = "MERCHANT DETECTED: SHOPRITE IKEJA";
+                setTimeout(() => {
+                    toggleModal('scan-overlay');
+                    pay(3500, "Shoprite Ikeja (QR)");
+                }, 1500);
+            }, 3000);
         }
 
         // LOAN LOGIC
@@ -353,7 +390,6 @@
             document.getElementById('credit-scanner').style.display = "block";
             document.getElementById('credit-result').style.display = "none";
             buzz(50);
-            
             setTimeout(() => {
                 document.getElementById('credit-scanner').style.display = "none";
                 document.getElementById('credit-result').style.display = "block";
@@ -363,10 +399,9 @@
 
         function disburseLoan() {
             toggleModal('loan-overlay');
-            balance = balance + 500000; // ADD LOAN
+            balance = balance + 500000; 
             updateDisplay();
             addToLedger("Credit Disbursal", 500000, "credit");
-            
             setTimeout(() => {
                 toggleModal('receipt-overlay');
                 document.getElementById('rec-title').innerText = "LOAN APPROVED";
@@ -376,7 +411,7 @@
             }, 500);
         }
 
-        // AUTO-VERIFY ACCOUNT NAME
+        // AUTO-VERIFY ACCOUNT
         function verifyAccount() {
             const acc = document.getElementById('send-acc').value;
             const box = document.getElementById('verify-box');
