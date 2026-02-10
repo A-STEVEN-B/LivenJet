@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>LivenJet | Turbo OS</title>
+    <title>LivenJet | Hall of Power</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; --purple: #d000ff; }
@@ -21,24 +21,21 @@
             margin: 0; 
             overflow: hidden; 
             user-select: none; 
-            /* PC CENTER ALIGNMENT */
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            cursor: crosshair;
             background-image: radial-gradient(#151515 1px, transparent 1px);
             background-size: 30px 30px;
         }
 
-        /* --- DEVICE FRAME (PC OPTIMIZED) --- */
+        /* --- DEVICE FRAME (PC CONTAINER) --- */
         #device-frame {
             position: relative;
             width: 100%;
             height: 100%;
             background: #000;
             overflow: hidden;
-            box-shadow: none;
             display: flex;
             flex-direction: column;
         }
@@ -51,30 +48,12 @@
                 border: 6px solid #222;
                 box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             }
-            body::before {
-                content: "SECURE TERMINAL // LOS-01 // OPTIMIZED";
-                position: absolute; bottom: 20px; left: 20px; color: #444; font-family: monospace; font-size: 10px;
-            }
         }
 
-        /* --- VISUAL FX (LIGHTWEIGHT) --- */
-        /* Removed heavy scanline animation, replaced with static overlay */
+        /* --- VISUAL FX --- */
         .scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; pointer-events: none; z-index: 9998; opacity: 0.5; }
-        
         .tilt-card { transition: transform 0.1s; transform-style: preserve-3d; will-change: transform; }
         
-        /* --- SINGULARITY MODE --- */
-        #device-frame.singularity { --accent: var(--purple); --green: var(--ice); border-color: var(--purple); }
-        
-        /* --- BOOT & LOCK --- */
-        #boot-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 20px; box-sizing: border-box; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
-        .boot-line { margin: 2px 0; }
-        #launchpad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .scanner-box { width: 100px; height: 100px; border: 2px solid #333; border-radius: 20px; position: relative; overflow: hidden; }
-        .scan-line { width: 100%; height: 4px; background: #0f0; position: absolute; top: 0; animation: scan 2s linear infinite; will-change: top; }
-        @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
-        .auth-btn { background: var(--accent); border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 30px; cursor: pointer; }
-
         /* --- HEADER --- */
         .avatar-btn { width: 35px; height: 35px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: absolute; top: 40px; left: 20px; z-index: 2001; cursor: pointer; }
         .currency-btn { width: 35px; height: 35px; background: #222; border: 1px solid var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: 40px; left: 65px; z-index: 2001; cursor: pointer; font-size: 10px; font-weight: bold; }
@@ -87,95 +66,49 @@
         @keyframes core-pulse { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } }
 
         /* --- MAIN APP STRUCTURE --- */
-        #app-interface { display: none; opacity: 0; transition: opacity 0.5s; padding-bottom: 120px; overflow-y: auto; height: 100%; flex: 1; -webkit-overflow-scrolling: touch; }
+        #app-interface { display: none; opacity: 0; transition: opacity 0.5s; padding-bottom: 120px; overflow-y: auto; height: 100%; flex: 1; }
         .pillar { display: none; padding: 20px; animation: slideIn 0.3s ease; }
         .active { display: block; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
         
-        /* --- CARDS & UI (Simplified Shadows) --- */
         .intel-card { background: rgba(20,20,20,0.95); border: 1px solid #333; border-bottom: 2px solid var(--accent); border-radius: 16px; padding: 20px; margin: 15px auto; max-width: 340px; text-align: left; transition: 0.2s; }
         .btn { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* --- DOCK (OPTIMIZED) --- */
-        .dock { 
-            position: absolute; 
-            bottom: 30px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            width: 90%; 
-            background: #111; /* Removed Blur */
-            border: 1px solid #333; 
-            border-radius: 25px; 
-            display: flex; 
-            justify-content: space-around; 
-            padding: 15px 0; 
-            z-index: 1000; 
-        }
+        /* --- DOCK & NEWS --- */
+        .dock { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 90%; background: #111; border: 1px solid #333; border-radius: 25px; display: flex; justify-content: space-around; padding: 15px 0; z-index: 1000; }
         .dock-item { font-size: 24px; opacity: 0.5; transition: 0.2s; cursor: pointer; }
         .active-icon { opacity: 1; color: var(--accent); transform: translateY(-3px); }
-
-        /* --- NEWS TICKER (OPTIMIZED) --- */
         .news-ticker { position: absolute; bottom: 85px; width: 100%; background: #111; border-top: 1px solid #333; padding: 5px 0; overflow: hidden; white-space: nowrap; z-index: 900; }
         .ticker-content { display: inline-block; padding-left: 100%; animation: scroll 25s linear infinite; color: #888; font-size: 10px; font-family: monospace; will-change: transform; }
         @keyframes scroll { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
-        /* --- COMPONENTS --- */
+        /* --- LEADERBOARD (NEW) --- */
+        .rank-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; align-items: center; }
+        .rank-num { font-weight: bold; color: #666; width: 30px; }
+        .rank-name { flex: 1; color: #fff; font-size: 12px; }
+        .rank-val { color: var(--green); font-family: monospace; font-size: 12px; }
+        .rank-row.user-rank { background: #222; border-left: 3px solid var(--accent); }
+
+        /* --- STANDARD UI --- */
         .input-group { margin-bottom: 15px; text-align: left; }
-        .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
-        .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
-        
+        .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; outline: none; }
         .action-grid { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
         .action-btn { flex: 1; background: #222; border-radius: 12px; padding: 15px 5px; cursor: pointer; border: 1px solid #333; transition: 0.1s; }
         .action-btn:active { background: #333; transform: scale(0.95); }
-        .action-icon { font-size: 20px; margin-bottom: 5px; }
         .action-text { font-size: 10px; font-weight: bold; color: #ccc; }
-
-        .ledger-box { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; padding-right: 5px; }
-        .tx-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; }
-        .tx-icon { width: 30px; height: 30px; background: #222; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 10px; }
-        .tx-details { flex: 1; }
-        .tx-title { font-size: 12px; color: #fff; margin: 0; font-weight: bold; }
-        .tx-date { font-size: 10px; color: #666; margin: 0; }
-        .tx-amt { font-size: 12px; font-weight: bold; color: #ff4444; }
         
-        /* --- SPECIAL MODULES --- */
-        .grid-monitor { width: 100%; height: 80px; background: #000; border: 1px solid #333; margin-top: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .grid-status-text { z-index: 2; font-family: monospace; font-size: 20px; font-weight: bold; color: var(--accent); }
-        .grid-fail { color: var(--red); }
-
-        .agent-list { text-align: left; max-height: 100px; overflow-y: auto; margin-top: 10px; }
-        .agent-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 3px solid var(--green); }
-        .agent-item.hostile { border-left: 3px solid var(--red); background: #2a0000; }
-        .status-badge { font-size: 9px; padding: 3px 6px; border-radius: 4px; background: #003300; color: #0f0; }
-        .status-badge.alert { background: #550000; color: #f00; }
-
-        /* --- MODAL OVERLAYS (ABSOLUTE FOR CONTAINER) --- */
+        /* --- MODALS (ABSOLUTE) --- */
         .modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; }
-        #call-overlay, #breach-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; }
         
-        .breach-box { border: 2px solid var(--red); padding: 20px; border-radius: 15px; width: 80%; background: #100; text-align: center; }
-        .defend-bar-bg { width: 100%; height: 20px; background: #300; margin: 20px 0; border: 1px solid var(--red); }
-        .defend-bar-fill { width: 0%; height: 100%; background: var(--red); transition: 0.1s; }
-        
-        /* CHAT */
+        /* --- CHAT --- */
         .fab-chat { position: absolute; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px; z-index: 4000; cursor: pointer; }
         .fab-label { font-size: 8px; color: #000; font-weight: bold; margin-top: -5px; }
-        .chat-card { height: 70vh; display: flex; flex-direction: column; }
-        .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; }
         
-        /* MAP */
-        .nexus-map { width: 100%; height: 250px; background: #001; border: 1px solid #333; border-radius: 10px; position: relative; overflow: hidden; }
-        .map-node { width: 8px; height: 8px; background: var(--green); border-radius: 50%; position: absolute; }
-        .map-node.red { background: var(--red); }
-        .map-label { position: absolute; color: #fff; font-size: 8px; white-space: nowrap; transform: translate(-50%, -15px); }
-
-        .venture-card { background: #1a1a1a; border: 1px solid #333; padding: 10px; border-radius: 10px; margin-bottom: 10px; text-align: left; }
-        .venture-progress { width: 100%; height: 4px; background: #333; margin: 5px 0; }
-        .venture-bar { height: 100%; background: var(--green); width: 0%; transition: width 1s linear; }
-        .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .asset-item { background: #222; border: 1px solid #444; padding: 10px; opacity: 0.6; }
-        .asset-item.owned { opacity: 1; border-color: var(--gold); }
+        /* --- BOOT --- */
+        #boot-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 20px; box-sizing: border-box; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+        #launchpad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
@@ -183,250 +116,222 @@
     <div id="device-frame">
         <div class="scanlines"></div>
         <div id="boot-screen"></div>
-        <div id="red-alert" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,0,0,0.2); z-index:7000; pointer-events:none;"></div>
 
-        <div id="call-overlay"><div class="caller-icon">👤</div><div style="font-size:20px; font-weight:bold; margin-bottom:5px;">UNKNOWN</div><div style="font-size:12px; color:#888;">INCOMING CALL...</div><div class="call-actions"><button class="btn" style="background:#f00; width:60px;" onclick="endCall()">✕</button><button class="btn" style="background:#0f0; width:60px;" onclick="answerCall()">📞</button></div></div>
-        
-        <div id="breach-overlay"><div class="breach-box"><h1 style="color:var(--red); font-size:24px; margin:0;">⚠️ BREACH</h1><div class="defend-bar-bg"><div class="defend-bar-fill" id="defend-bar"></div></div><button class="defend-btn" style="background:var(--red); color:#fff; padding:15px; width:100%; border:none; font-weight:bold;" onclick="chargeFirewall()">FIREWALL</button></div></div>
+        <div id="leaderboard-overlay" class="modal-overlay">
+            <div class="modal-card">
+                <h2 style="color:var(--accent);">GLOBAL RANKING</h2>
+                <div id="leaderboard-list"></div>
+                <button class="btn-outline" onclick="toggleModal('leaderboard-overlay')">CLOSE</button>
+            </div>
+        </div>
 
-        <div id="assets-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ASSETS</h2><div class="asset-grid" id="asset-list"></div><button class="btn-outline" onclick="toggleModal('assets-overlay')">CLOSE</button></div></div>
-        <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--ice);">BUSINESS</h2><div id="active-ventures"></div><div style="margin-top:20px; border-top:1px dashed #333; padding-top:20px;"><h3>NEW VENTURE</h3><div class="input-group"><input type="text" class="app-input" id="biz-name" placeholder="Name"></div><div class="input-group"><select class="app-input" id="biz-type"><option value="retail">RETAIL</option><option value="tech">TECH</option><option value="oil">OIL</option></select></div><button class="btn-full" onclick="createBusiness()">LAUNCH (₦100k)</button></div><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
-        <div id="trophy-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">AWARDS</h2><div class="trophy-grid"><div class="trophy" id="badge-breach">🛡️</div><div class="trophy" id="badge-hack">📡</div><div class="trophy" id="badge-mine">⛏️</div><div class="trophy" id="badge-rich">💰</div><div class="trophy" id="badge-god">⚡</div><div class="trophy" id="badge-agent">🕵️</div></div><button class="btn-outline" onclick="toggleModal('trophy-overlay')">CLOSE</button></div></div>
-        <div id="agent-overlay" class="modal-overlay"><div class="modal-card"><h2>DEPLOY</h2><div class="input-group"><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>New York</option><option>Tokyo</option></select></div><button class="btn-full" onclick="deployAgent()">DEPLOY (₦50k)</button><button class="btn-outline" onclick="toggleModal('agent-overlay')">CANCEL</button></div></div>
-        <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>SETTINGS</h2><div class="input-group"><input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE"></div><div style="margin-top:10px;"><button class="btn" style="margin:5px 0;" onclick="toggleTheme('gold')">GOLD</button><button class="btn" style="margin:5px 0; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button></div><button class="btn-outline" onclick="hardReset()" style="color:red; border-color:red;">RESET DATA</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
-        <div id="scan-overlay" class="modal-overlay"><div class="modal-card"><h2>SCAN</h2><div class="camera-view"><div class="laser-beam"></div></div><p id="scan-status" style="margin-top:10px;">SEARCHING...</p><button class="btn-outline" onclick="toggleModal('scan-overlay')">CANCEL</button></div></div>
-        <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>TRANSFER</h2><div class="input-group"><input type="number" class="app-input" id="send-acc" placeholder="Account"></div><div class="input-group"><input type="number" class="app-input" id="send-amt" placeholder="Amount"></div><button class="btn-full" onclick="processTransfer()">SEND</button><button class="btn-outline" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
-        <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>NEXUS</h2><div class="nexus-map" id="nexus-map"></div><button class="btn-outline" onclick="toggleModal('map-overlay')" style="margin-top:10px;">CLOSE</button></div></div>
-        <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:10px; background:#222;">TERMINAL <span onclick="toggleModal('chat-overlay')" style="float:right; cursor:pointer;">✕</span></div><div class="chat-body" id="chat-box"></div><div class="chat-input-area"><input type="text" class="chat-input" id="user-input" placeholder="..."><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div></div></div>
-        <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--accent);">ID CARD</h2><div style="width:60px; height:60px; background:#222; border:2px solid var(--accent); border-radius:50%; margin:10px auto; display:flex; align-items:center; justify-content:center; font-size:24px;" id="pass-avatar">SA</div><div class="pass-row"><span>NAME</span><span id="pass-name">STEVEN</span></div><div class="pass-row"><span>CLEARANCE</span><span style="cursor:pointer;" onclick="openTrophies()">LEVEL 5</span></div><button class="btn-outline" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
-        <div id="receipt-overlay" class="modal-overlay"><div class="modal-card"><h2 id="rec-title">SUCCESS</h2><div class="dashed-line"></div><div style="display:flex; justify-content:space-between; margin:10px 0;"><span>AMT</span><span id="rec-amt">₦ 0</span></div><button class="btn-full" onclick="closeReceipt()">OK</button></div></div>
+        <div id="assets-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ASSETS</h2><div id="asset-list" style="text-align:left;"></div><button class="btn-outline" onclick="toggleModal('assets-overlay')">CLOSE</button></div></div>
+        <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--ice);">BUSINESS</h2><div id="active-ventures"></div><button class="btn-full" onclick="createBusiness()">NEW VENTURE (₦100k)</button><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
+        <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>SETTINGS</h2><input type="text" class="app-input" id="set-name" value="STEVEN"><button class="btn-full" onclick="saveSettings()">SAVE</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
+        <div id="scan-overlay" class="modal-overlay"><div class="modal-card"><h2>SCAN</h2><p>Scanning...</p><button class="btn-outline" onclick="toggleModal('scan-overlay')">CANCEL</button></div></div>
+        <div id="receipt-overlay" class="modal-overlay"><div class="modal-card"><h2>SUCCESS</h2><h1 id="rec-amt" style="color:var(--green);"></h1><button class="btn-full" onclick="toggleModal('receipt-overlay')">OK</button></div></div>
 
-        <div class="news-ticker"><div class="ticker-content" id="news-text">LIVENJET TURBO OS ONLINE ... SYSTEM OPTIMIZED ... READY FOR ACTION ...</div></div>
+        <div class="news-ticker"><div class="ticker-content" id="news-text">LIVENJET LEADERBOARD ACTIVE ... COMPETE FOR DOMINANCE ... SYSTEM OPTIMAL ...</div></div>
 
         <div id="launchpad">
             <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-            <p style="color: #666; font-size: 10px; margin-bottom: 40px;">TURBO OS v41.0</p>
-            <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
+            <p style="color: #666; font-size: 10px; margin-bottom: 40px;">LEADERBOARD OS v42.0</p>
             <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
-            <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING...</p>
         </div>
 
         <div id="app-interface">
             <div class="ticker-wrap">
-                <span style="font-weight:bold; color:var(--ice);" id="influence-score">INF: 0%</span> | 
-                <span>LOS-01</span> | <span id="clock"></span>
+                <span style="font-weight:bold; color:var(--ice); cursor:pointer;" onclick="openLeaderboard()" id="rank-display">RANK: #999</span> | 
+                <span id="influence-display">INF: 0%</span> | <span id="clock"></span>
             </div>
-            <div class="avatar-btn" onclick="toggleModal('passport-overlay')" id="main-avatar">SA</div>
+            <div class="avatar-btn" onclick="toggleModal('settings-overlay')" id="main-avatar">SA</div>
             <div class="currency-btn" onclick="toggleCurrency()">₦/$</div>
             <div class="settings-btn" onclick="toggleModal('settings-overlay')">⚙️</div>
             
-            <div class="neural-core" onclick="handleCoreClick()" id="neural-core"><div class="core-inner"></div></div>
+            <div class="neural-core" onclick="godMode()"><div class="core-inner"></div></div>
             <div style="font-family: monospace; font-size: 10px; color: #888; height: 20px;" id="ai-msg">IDENTITY VERIFIED.</div>
 
             <div id="home" class="pillar active">
                 <div class="intel-card tilt-card">
                     <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY</p>
-                    <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal" onclick="toggleStealth()">₦ 50,000.00</h2>
+                    <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal">₦ 50,000.00</h2>
                     <div class="action-grid">
-                        <div class="action-btn" onclick="toggleModal('send-overlay')"><div class="action-icon">💸</div><div class="action-text">SEND</div></div>
+                        <div class="action-btn" onclick="pay(5000, 'Transfer')"><div class="action-icon">💸</div><div class="action-text">SEND</div></div>
                         <div class="action-btn" onclick="toggleModal('ventures-overlay')"><div class="action-icon" style="color:var(--ice);">🏢</div><div class="action-text">BIZ</div></div>
                         <div class="action-btn" onclick="openAssets()"><div class="action-icon" style="color:var(--gold);">🏛️</div><div class="action-text">ASSET</div></div>
-                        <div class="action-btn" onclick="msg('Deposit via USSD *991#')"><div class="action-icon">➕</div><div class="action-text">ADD</div></div>
+                        <div class="action-btn" onclick="toggleModal('scan-overlay')"><div class="action-icon">📸</div><div class="action-text">SCAN</div></div>
                     </div>
                     <p style="font-size: 9px; color: #666; margin-top: 20px;">RECENT ACTIVITY</p>
                     <div class="ledger-box" id="ledger-list"></div>
                 </div>
-                <button class="btn" onclick="msg('Syncing...')">SYNC NETWORK</button>
             </div>
 
             <div id="util" class="pillar">
-                <div class="intel-card tilt-card">
-                    <h3>GRID COMMAND</h3>
-                    <div class="grid-monitor"><div class="grid-status-text" id="grid-text">GRID: STABLE</div></div>
-                    <div style="margin-top:15px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                        <button class="btn" style="margin:0; background:#222; font-size:10px;" onclick="buyInfra('solar', 200000)">SOLAR <br>₦200k</button>
-                        <button class="btn" style="margin:0; background:#222; font-size:10px;" onclick="buyInfra('nuke', 500000)">NUCLEAR <br>₦500k</button>
-                    </div>
-                    <button class="btn" style="margin-top:10px; background:var(--red); display:none;" id="inject-btn" onclick="injectPower()">⚡ INJECT</button>
-                </div>
-            </div>
-
-            <div id="logi" class="pillar">
-                <div class="intel-card tilt-card">
-                    <h3>WAR ROOM</h3>
-                    <div class="agent-list" id="agent-display"><div style="color:#666; font-size:10px; text-align:center; padding:10px;">NO AGENTS</div></div>
-                    <button class="btn" onclick="toggleModal('agent-overlay')" style="margin-top:10px; font-size:10px;">+ DEPLOY (₦50k)</button>
-                </div>
-                <button class="btn" onclick="openMap()">OPEN NEXUS</button>
+                <div class="intel-card tilt-card"><h3>INFRASTRUCTURE</h3><button class="btn" onclick="buyItem('solar', 200000)">BUY SOLAR (₦200k)</button></div>
             </div>
 
             <div id="fina" class="pillar">
                 <div class="intel-card tilt-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0;">PORTFOLIO</h3><span style="font-size:10px; color:#0f0;">+12%</span></div>
-                    <div class="asset-row" style="margin-top:10px;"><div class="asset-info"><div class="asset-name">BTC</div><div class="asset-price" id="btc-price">$98,420</div></div><div style="text-align:right;"><button class="btn" style="padding:5px; margin:0;" onclick="pay(5000, 'BTC Inv')">BUY</button></div></div>
-                    <div class="asset-row" style="margin-top:10px;"><div class="asset-info"><div class="asset-name">LJN</div><div class="asset-price" id="ljn-bal">0.00</div></div><div style="text-align:right;"><button class="btn" style="padding:5px; margin:0;" onclick="startMining()" id="mine-btn">MINE</button></div></div>
+                    <h3>PORTFOLIO</h3>
+                    <div style="margin-top:10px; display:flex; justify-content:space-between;"><span>LJN CRYPTO</span><span id="ljn-bal">0.00</span></div>
+                    <button class="btn" onclick="startMining()" id="mine-btn">START MINING</button>
                 </div>
             </div>
 
             <div class="dock">
                 <div id="n-home" class="dock-item active-icon" onclick="nav('home')">🪐</div>
                 <div id="n-util" class="dock-item" onclick="nav('util')">⚡</div>
-                <div id="n-logi" class="dock-item" onclick="nav('logi')">✈️</div>
                 <div id="n-fina" class="dock-item" onclick="nav('fina')">💳</div>
             </div>
             
-            <div class="fab-chat" onclick="toggleModal('chat-overlay')">💬<div class="fab-label">AI</div></div>
+            <div class="fab-chat" onclick="msg('AI: Systems Nominal')">💬<div class="fab-label">AI</div></div>
         </div>
     </div>
 
     <script>
-        // --- OPTIMIZED JS ---
-        let balance=50000, ljnCrypto=0.00, userName="STEVEN ADEWOLE", agents=[], transactions=[], inventory={gold:0,oil:0}, infra={solar:0,nuke:0}, ventures=[], ownedAssets={}, influence=0;
-        let isCardFrozen=false, currency="NGN", rate=1500, godModeCount=0, isMining=false, miningSpeed=0.5, panicMode=false, btcPrice=98420, defensePower=0, gridHealth=100;
+        // --- DATA & STATE ---
+        let balance=50000, ljnCrypto=0.00, userName="STEVEN", influence=0;
+        let ventures=[], transactions=[], rank=999;
+        let currency="NGN", rate=1500;
 
         function loadData() {
-            if(localStorage.getItem('livenjet_data_v8')) {
-                const d = JSON.parse(localStorage.getItem('livenjet_data_v8'));
-                balance = d.balance||50000; ljnCrypto=d.ljnCrypto||0; userName=d.userName||"STEVEN"; agents=d.agents||[]; transactions=d.transactions||[]; ventures=d.ventures||[]; ownedAssets=d.ownedAssets||{}; influence=d.influence||0;
-                updateLedger(); updateDisplay(); updateAgentList(); updateVentureUI();
-            } else updateLedger();
+            if(localStorage.getItem('livenjet_v9')) {
+                const d = JSON.parse(localStorage.getItem('livenjet_v9'));
+                balance = d.balance || 50000;
+                userName = d.userName || "STEVEN";
+                influence = d.influence || 0;
+                ventures = d.ventures || [];
+                transactions = d.transactions || [];
+                updateDisplay(); updateLedger(); updateVentureUI();
+            } else {
+                updateLedger(); // Init empty
+            }
         }
-        function saveData(){ localStorage.setItem('livenjet_data_v8',JSON.stringify({balance,ljnCrypto,userName,agents,transactions,ventures,ownedAssets,influence})); }
-        function updateLedger() {
-            const l = document.getElementById('ledger-list'); l.innerHTML = "";
-            if(transactions.length===0) l.innerHTML = "<div style='color:#444; font-size:10px; margin-top:10px;'>NO RECENT ACTIVITY</div>";
-            else transactions.slice(0,5).forEach(tx => {
-                let c = tx.type==="credit"?"#0f0":"#ff4444";
-                l.innerHTML += `<div class="tx-row"><div class="tx-details"><p class="tx-title">${tx.name}</p></div><div class="tx-amt" style="color:${c}">₦${tx.amt.toLocaleString()}</div></div>`;
+        function saveData() {
+            localStorage.setItem('livenjet_v9', JSON.stringify({balance, userName, influence, ventures, transactions}));
+        }
+
+        // --- LEADERBOARD LOGIC ---
+        function openLeaderboard() {
+            toggleModal('leaderboard-overlay');
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = "";
+            
+            // Fake Rivals
+            const rivals = [
+                {name: "SPECTER CORP", val: 500000000},
+                {name: "OMNI SYSTEMS", val: 100000000},
+                {name: "APEX HOLDINGS", val: 50000000}
+            ];
+            
+            // Determine User Rank
+            if(balance > 500000000) rank = 1;
+            else if(balance > 100000000) rank = 2;
+            else if(balance > 50000000) rank = 3;
+            else rank = Math.floor(10000000 / (balance + 1)); 
+
+            // Render
+            rivals.forEach((r, i) => {
+                list.innerHTML += `<div class="rank-row"><span class="rank-num">#${i+1}</span><span class="rank-name">${r.name}</span><span class="rank-val">₦${(r.val/1000000).toFixed(0)}M</span></div>`;
             });
+            list.innerHTML += `<div class="rank-row user-rank"><span class="rank-num">#${rank}</span><span class="rank-name">${userName}</span><span class="rank-val">₦${balance.toLocaleString()}</span></div>`;
+            
+            document.getElementById('rank-display').innerText = `RANK: #${rank}`;
         }
 
-        window.onload = function() {
-            loadData();
-            const boot = document.getElementById('boot-screen');
-            let i=0; const lines=["SYSTEM INIT...", "OPTIMIZING...", "READY."];
-            const interval = setInterval(() => {
-                if(i<lines.length) { boot.innerHTML += `<div class='boot-line'>${lines[i]}</div>`; i++; }
-                else { clearInterval(interval); setTimeout(() => { boot.style.display='none'; document.getElementById('launchpad').style.display='flex'; }, 500); }
-            }, 200);
-        };
-
-        // --- CORE ---
+        // --- CORE FUNCTIONS ---
         function updateDisplay() {
             let d = balance; let s = "₦ "; if(currency==="USD") { d=balance/rate; s="$ "; }
             document.getElementById('wallet-bal').innerText = s + d.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-            document.getElementById('pass-name').innerText = userName;
-            let i = userName.substring(0,2).toUpperCase();
-            document.getElementById('main-avatar').innerText = i; document.getElementById('pass-avatar').innerText = i;
-            document.getElementById('ljn-bal').innerText = ljnCrypto.toFixed(2);
-            document.getElementById('influence-score').innerText = "INF: " + influence + "%";
+            document.getElementById('influence-display').innerText = "INF: " + influence + "%";
+            document.getElementById('rank-display').innerText = `RANK: #${rank}`;
             saveData();
         }
-        
-        function addToLedger(n, a, t="debit") {
-            transactions.unshift({name:n, amt:a, type:t}); if(transactions.length>10) transactions.pop();
-            updateLedger(); saveData();
+
+        function addToLedger(n, a) {
+            transactions.unshift({name:n, amt:a}); 
+            if(transactions.length>5) transactions.pop();
+            updateLedger();
         }
 
-        // --- ACTIONS ---
+        function updateLedger() {
+            const l = document.getElementById('ledger-list'); l.innerHTML = "";
+            if(transactions.length===0) l.innerHTML = "<div style='color:#444; font-size:10px; margin-top:10px;'>NO RECENT ACTIVITY</div>";
+            else transactions.forEach(tx => {
+                l.innerHTML += `<div class="rank-row" style="border:none;"><span style="color:#fff;">${tx.name}</span><span style="color:red;">-₦${tx.amt.toLocaleString()}</span></div>`;
+            });
+        }
+
         function pay(a, n) {
-            if(balance < a) { msg("INSUFFICIENT FUNDS"); return; }
-            balance -= a; addToLedger(n, a); updateDisplay();
-            toggleModal('receipt-overlay'); document.getElementById('rec-amt').innerText="₦ "+a.toLocaleString();
-        }
-        
-        function startMining() {
-            if(isMining) return; isMining=true;
-            const btn = document.getElementById('mine-btn'); btn.innerText = "...";
-            let cycles = 0;
-            const i = setInterval(() => {
-                cycles++;
-                if(cycles > 10) { clearInterval(i); isMining=false; btn.innerText="MINE"; ljnCrypto+=0.5; updateDisplay(); msg("MINED 0.5 LJN"); }
-            }, 200);
+            if(balance >= a) {
+                balance -= a;
+                addToLedger(n, a);
+                updateDisplay();
+                toggleModal('receipt-overlay');
+                document.getElementById('rec-amt').innerText = "₦ " + a.toLocaleString();
+            } else msg("INSUFFICIENT FUNDS");
         }
 
+        // --- VENTURES ---
         function createBusiness() {
-            const name = document.getElementById('biz-name').value;
-            const type = document.getElementById('biz-type').value;
-            if(balance >= 100000 && name) {
-                balance -= 100000; ventures.push({name:name, type:type, level:1, revenue:0, progress:0, status:'active'});
-                updateDisplay(); updateVentureUI(); toggleModal('ventures-overlay'); msg("LAUNCHED");
+            if(balance >= 100000) {
+                balance -= 100000;
+                ventures.push({name: "TECH STARTUP", revenue: 0, progress: 0});
+                updateVentureUI();
+                updateDisplay();
+                msg("VENTURE LAUNCHED");
             } else msg("NEED ₦100k");
         }
 
         function updateVentureUI() {
             const c = document.getElementById('active-ventures');
-            if(ventures.length===0) { c.innerHTML="<p style='font-size:10px; color:#666;'>NO BUSINESSES</p>"; return; }
-            c.innerHTML="";
-            ventures.forEach((v,i) => {
-                c.innerHTML += `<div class="venture-card"><div class="venture-header"><span class="venture-title">${v.name.toUpperCase()}</span><span class="venture-profit">₦${v.revenue.toLocaleString()}</span></div><div class="venture-progress"><div class="venture-bar" id="bar-${i}" style="width:${v.progress}%"></div></div><div class="venture-actions"><button class="venture-btn" onclick="collectRev(${i})">COLLECT</button></div></div>`;
+            c.innerHTML = "";
+            if(ventures.length === 0) c.innerHTML = "<p style='color:#666; font-size:10px;'>NO BUSINESSES</p>";
+            ventures.forEach((v, i) => {
+                c.innerHTML += `<div class="intel-card" style="margin:5px 0; padding:10px;"><div style="display:flex; justify-content:space-between;"><span>${v.name}</span><span style="color:#0f0;">₦${v.revenue.toLocaleString()}</span></div><button class="btn" style="margin-top:5px; padding:5px; font-size:10px;" onclick="collect(${i})">COLLECT</button></div>`;
             });
         }
 
+        function collect(i) {
+            if(ventures[i].revenue > 0) {
+                balance += ventures[i].revenue;
+                ventures[i].revenue = 0;
+                updateDisplay();
+                updateVentureUI();
+            }
+        }
+
+        // --- LOOP ---
         setInterval(() => {
-            ventures.forEach((v,i) => {
-                if(v.progress < 100) { v.progress += 10; const b = document.getElementById(`bar-${i}`); if(b) b.style.width=v.progress+"%"; }
-                else { v.revenue += 2000 * v.level; v.progress = 0; updateVentureUI(); }
-            });
-            saveData();
-        }, 2000); // Slower interval for performance
-
-        function collectRev(i) {
-            if(ventures[i].revenue > 0) { balance += ventures[i].revenue; ventures[i].revenue=0; updateDisplay(); updateVentureUI(); }
-        }
-
-        function deployAgent() {
-            const city = document.getElementById('agent-city').value;
-            if(balance >= 50000) {
-                balance -= 50000; agents.push({name:city, status:'active'}); influence+=5;
-                updateDisplay(); updateAgentList(); toggleModal('agent-overlay'); msg("DEPLOYED");
-            } else msg("NEED ₦50k");
-        }
-
-        function updateAgentList() {
-            const l = document.getElementById('agent-display'); l.innerHTML="";
-            if(agents.length===0) l.innerHTML="<div style='color:#666; font-size:10px; text-align:center;'>NO AGENTS</div>";
-            else agents.forEach(a => { l.innerHTML+=`<div class="agent-item"><span>${a.name}</span><span class="status-badge">SECURE</span></div>`; });
-        }
-
-        function openAssets() {
-            toggleModal('assets-overlay');
-            const list = document.getElementById('asset-list'); list.innerHTML="";
-            const db = [{id:'island',n:'ISLAND',c:100000000}, {id:'jet',n:'JET',c:50000000}];
-            db.forEach(a => {
-                let btn = ownedAssets[a.id] ? '<span style="color:#0f0; font-size:10px;">OWNED</span>' : `<button class="btn" style="margin:0; padding:5px; font-size:9px;" onclick="buyAsset('${a.id}',${a.c})">₦${(a.c/1000000).toFixed(0)}M</button>`;
-                list.innerHTML += `<div class="asset-item"><div class="asset-name">${a.n}</div>${btn}</div>`;
-            });
-        }
-        function buyAsset(id, cost) { if(balance>=cost) { balance-=cost; ownedAssets[id]=true; influence+=20; updateDisplay(); openAssets(); msg("ACQUIRED"); } else msg("FUNDS?"); }
+            ventures.forEach(v => { v.revenue += 1000; }); // Fake revenue gen
+            if(Math.random() > 0.5) updateVentureUI(); // Random visual update
+        }, 2000);
 
         // --- UTILS ---
-        function buzz(d){ if(navigator.vibrate) navigator.vibrate(d); }
-        function toggleModal(id){ buzz(20); const e=document.getElementById(id); e.style.display=(e.style.display==='flex')?'none':'flex'; }
-        function msg(t){ const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
-        function authenticate(){ document.getElementById('auth-status').innerText="SCANNING..."; setTimeout(()=>{document.getElementById('launchpad').style.display='none'; document.getElementById('app-interface').style.display='block'; setTimeout(()=>{document.getElementById('app-interface').style.opacity='1';},50);},800); }
-        function nav(id){ document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon')); document.getElementById(id).classList.add('active'); document.getElementById('n-'+id).classList.add('active-icon'); }
-        function toggleStealth(){ const b=document.getElementById('wallet-bal'); if(b.innerText.includes("*")) updateDisplay(); else b.innerText="****"; }
-        function toggleCurrency(){ currency=currency==="NGN"?"USD":"NGN"; updateDisplay(); }
-        function handleCoreClick(){ godModeCount++; if(godModeCount===5){ balance+=10000000; updateDisplay(); msg("GOD MODE"); godModeCount=0; } }
-        function hardReset(){ if(confirm("RESET?")) { localStorage.removeItem('livenjet_data_v8'); location.reload(); } }
-        function openMap(){ toggleModal('map-overlay'); const m=document.getElementById('nexus-map'); m.innerHTML=`<div class='nexus-grid'></div>`; agents.forEach(a=>{ m.innerHTML+=`<div class='map-node' style='top:${Math.random()*80+10}%; left:${Math.random()*80+10}%;'></div>`; }); }
-        
-        // --- LOOPS ---
-        setInterval(()=>{
-            if(Math.random()>0.98 && !document.getElementById('launchpad').style.display) {
-                document.getElementById('breach-overlay').style.display='flex';
-                document.getElementById('red-alert').style.display='block';
-            }
-            if(agents.length>0) { balance += agents.length*1000; updateDisplay(); }
-        }, 10000);
+        window.onload = function() {
+            loadData();
+            const boot = document.getElementById('boot-screen');
+            let i=0; const lines=["INIT SYSTEM...", "LOADING ASSETS...", "DONE."];
+            const int = setInterval(()=>{
+                if(i<lines.length) { boot.innerHTML += `<div class='boot-line'>${lines[i]}</div>`; i++; }
+                else { clearInterval(int); setTimeout(()=>{ boot.style.display='none'; document.getElementById('launchpad').style.display='flex'; },500); }
+            }, 300);
+        };
 
-        function chargeFirewall() { 
-            defensePower+=20; document.getElementById('defend-bar').style.width=defensePower+"%"; 
-            if(defensePower>=100) { document.getElementById('breach-overlay').style.display='none'; document.getElementById('red-alert').style.display='none'; defensePower=0; msg("SECURED"); }
-        }
+        function buzz(d) { if(navigator.vibrate) navigator.vibrate(d); }
+        function toggleModal(id) { buzz(20); const e = document.getElementById(id); e.style.display = (e.style.display==='flex')?'none':'flex'; }
+        function msg(t) { document.getElementById('ai-msg').innerText = t; setTimeout(()=>{document.getElementById('ai-msg').innerText="IDENTITY VERIFIED.";}, 2000); }
+        function authenticate() { document.getElementById('auth-status').innerText="SCANNING..."; setTimeout(()=>{ document.getElementById('launchpad').style.display='none'; document.getElementById('app-interface').style.display='block'; setTimeout(()=>{document.getElementById('app-interface').style.opacity='1';},50); }, 800); }
+        function nav(id) { document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon')); document.getElementById(id).classList.add('active'); document.getElementById('n-'+id).classList.add('active-icon'); }
+        function toggleCurrency() { currency = currency==="NGN"?"USD":"NGN"; updateDisplay(); }
+        function toggleStealth() { const b = document.getElementById('wallet-bal'); b.innerText = b.innerText.includes("*") ? "₦ " + balance.toLocaleString() : "₦ ****"; }
+        function saveSettings() { userName = document.getElementById('set-name').value; updateDisplay(); toggleModal('settings-overlay'); }
+        function openAssets() { toggleModal('assets-overlay'); document.getElementById('asset-list').innerHTML = "<div class='intel-card'>ISLAND (₦100M) - LOCKED</div>"; }
+        function startMining() { msg("MINING... (Simulated)"); }
+        function godMode() { balance += 1000000; updateDisplay(); msg("GOD MODE: +₦1M"); }
+        function buyInfra(t, c) { if(balance>=c) { balance-=c; msg("BOUGHT "+t.toUpperCase()); updateDisplay(); } else msg("FUNDS?"); }
 
-        setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})},1000);
+        setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})},1000);
     </script>
 </body>
 </html>
