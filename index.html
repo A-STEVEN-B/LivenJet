@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>LivenJet | Master OS</title>
+    <title>LivenJet | Sovereign OS</title>
     <style>
         /* --- CORE VISUALS --- */
         :root { 
@@ -19,9 +17,9 @@
             --purple: #d000ff; 
         }
         
-        /* NO SCROLLBARS */
+        /* NO SCROLLBARS & OPTIMIZATION */
         ::-webkit-scrollbar { display: none; }
-        * { -ms-overflow-style: none; scrollbar-width: none; touch-action: manipulation; user-select: none; box-sizing: border-box; }
+        * { -ms-overflow-style: none; scrollbar-width: none; touch-action: manipulation; user-select: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body { 
             background-color: #050505; 
@@ -63,7 +61,7 @@
         }
 
         /* --- FX LAYERS --- */
-        .scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 3px; pointer-events: none; z-index: 9000; opacity: 0.6; }
+        .scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 3px; pointer-events: none; z-index: 9000; opacity: 0.4; }
         .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
         
@@ -77,7 +75,7 @@
         #boot-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 20px; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; display: flex; flex-direction: column; justify-content: flex-end; }
         .boot-line { margin: 2px 0; }
 
-        /* 2. LOCK SCREEN */
+        /* 2. LOCK SCREEN (PIN) */
         #launchpad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
         .pin-display { font-size: 30px; letter-spacing: 15px; color: var(--accent); margin-bottom: 40px; height: 40px; font-family: monospace; text-shadow: 0 0 15px var(--accent); }
         .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 240px; }
@@ -85,7 +83,7 @@
         .pin-btn:active, .pin-btn.active { background: var(--accent); color: #000; transform: scale(0.95); }
         
         /* 3. MAIN INTERFACE */
-        #app-interface { display: none; opacity: 0; transition: opacity 0.5s; padding-bottom: 140px; overflow-y: auto; height: 100%; flex: 1; -webkit-overflow-scrolling: touch; padding-left:15px; padding-right:15px; padding-top: 130px; } /* Top padding for header */
+        #app-interface { display: none; opacity: 0; transition: opacity 0.5s; padding-bottom: 140px; overflow-y: auto; height: 100%; flex: 1; -webkit-overflow-scrolling: touch; padding-left:15px; padding-right:15px; padding-top: 130px; } 
         
         /* --- HEADER & NAV --- */
         .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 90px; z-index: 2000; padding-top: max(20px, env(safe-area-inset-top)); background: linear-gradient(to bottom, #000 80%, transparent); display: flex; justify-content: space-between; align-items: center; padding-left: 20px; padding-right: 20px; }
@@ -109,11 +107,12 @@
         .active { display: block; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
 
-        .intel-card { background: rgba(20,20,20,0.9); border: 1px solid #333; border-bottom: 2px solid var(--accent); border-radius: 18px; padding: 20px; margin: 15px auto; text-align: left; backdrop-filter: blur(5px); }
+        .intel-card { background: rgba(20,20,20,0.9); border: 1px solid #333; border-bottom: 2px solid var(--accent); border-radius: 18px; padding: 20px; margin: 15px auto; text-align: left; }
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 13px; }
         .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .input-group { margin-bottom: 15px; text-align: left; }
         .app-input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; font-size: 16px; outline: none; }
+        .btn { background: var(--accent); border: none; padding: 8px 12px; width: 100%; border-radius: 8px; margin-top: 5px; font-weight: bold; cursor: pointer; color: #000; font-size: 12px; }
         
         .action-grid { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; }
         .action-btn { flex: 1; background: #151515; border-radius: 12px; padding: 15px 5px; cursor: pointer; border: 1px solid #222; transition: 0.1s; }
@@ -137,6 +136,14 @@
         .grid-fail { color: var(--red) !important; text-shadow: 0 0 10px var(--red); animation: blinkRed 0.5s infinite; }
         @keyframes blinkRed { 50% { opacity: 0.5; } }
 
+        .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .asset-item { background: #151515; border: 1px solid #333; border-radius: 12px; padding: 15px; opacity: 0.5; }
+        .asset-item.owned { opacity: 1; border-color: var(--gold); box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.1); }
+
+        .trophy-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .trophy { background: #111; border: 1px solid #333; border-radius: 10px; padding: 10px; opacity: 0.3; }
+        .trophy.unlocked { opacity: 1; border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+
         /* --- MODALS --- */
         .modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; }
         .modal-card { background: #111; border: 1px solid var(--accent); color: #fff; width: 85%; padding: 25px 20px; border-radius: 25px; text-align: center; max-height: 80vh; overflow-y: auto; }
@@ -145,11 +152,20 @@
         .fab-chat { position: absolute; bottom: 110px; right: 20px; width: 55px; height: 55px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; z-index: 4000; cursor: pointer; box-shadow: 0 0 20px rgba(255,215,0,0.3); color: #000; }
         .chat-card { height: 75vh; display: flex; flex-direction: column; }
         .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; font-family: monospace; font-size: 12px; }
-        
+        .msg-ai { color: var(--accent); margin-bottom: 5px; } .msg-user { color: #fff; text-align: right; margin-bottom: 10px; opacity: 0.7; }
+
         /* ALERTS */
         #red-alert { display:none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.2); z-index: 7000; pointer-events: none; }
         #breach-overlay, #call-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; }
         
+        /* MAP */
+        .nexus-map { width: 100%; height: 300px; background: #001; border: 1px solid #333; border-radius: 10px; position: relative; overflow: hidden; background-image: radial-gradient(#222 1px, transparent 1px); background-size: 20px 20px; }
+        .nexus-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; animation: gridScroll 10s linear infinite; opacity: 0.3; background: linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px), linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px); background-size: 40px 40px; }
+        @keyframes gridScroll { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
+        .map-node { width: 8px; height: 8px; background: var(--green); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--green); animation: pulse 1s infinite; }
+        .map-node.red { background: var(--red); box-shadow: 0 0 10px var(--red); }
+        .map-label { position: absolute; color: #fff; font-size: 8px; white-space: nowrap; transform: translate(-50%, -15px); }
+
         /* DATA CODE BOX */
         .data-box { background: #111; border: 1px dashed #444; color: var(--green); padding: 10px; font-family: monospace; font-size: 10px; word-break: break-all; margin: 10px 0; max-height: 60px; overflow-y: auto; user-select: text; }
     </style>
@@ -177,7 +193,7 @@
                 <div class="pin-btn" id="btn-0" onclick="enterPin(0)">0</div>
                 <div class="pin-btn" id="btn-go" style="color:var(--green); border-color:var(--green);" onclick="checkPin()">></div>
             </div>
-            <p id="auth-status" style="margin-top: 30px; font-family: monospace; font-size: 10px; color: #666;">PIN: 8820</p>
+            <p id="auth-status" style="margin-top: 30px; font-family: monospace; font-size: 10px; color: #666;">DEFAULT PIN: 8820</p>
             <div style="margin-top:20px; font-size:10px; color:#444; text-decoration:underline; cursor:pointer;" onclick="hardReset()">FORGOT PIN? RESET</div>
         </div>
 
@@ -186,7 +202,7 @@
         <div id="app-interface">
             <div class="ticker-wrap">
                 <span style="font-weight:bold; color:var(--ice);" id="influence-score">INF: 0%</span> | 
-                <span id="clock">00:00</span>
+                <span id="system-status">ONLINE</span> | <span id="clock"></span>
             </div>
             
             <div class="neural-core" onclick="handleCoreClick()" id="neural-core"><div class="core-inner"></div></div>
@@ -197,10 +213,10 @@
                     <p style="font-size: 10px; color: #666; margin: 0;">LIQUIDITY</p>
                     <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal">₦ 50,000.00</h2>
                     <div class="action-grid">
-                        <div class="action-btn" onclick="toggleModal('send-overlay')"><div style="font-size:20px;">💸</div><div style="font-size:10px; color:#ccc;">SEND</div></div>
-                        <div class="action-btn" onclick="toggleModal('ventures-overlay')"><div style="font-size:20px; color:var(--ice);">🏢</div><div style="font-size:10px; color:#ccc;">BIZ</div></div>
-                        <div class="action-btn" onclick="openAssets()"><div style="font-size:20px; color:var(--gold);">🏛️</div><div style="font-size:10px; color:#ccc;">ASSET</div></div>
-                        <div class="action-btn" onclick="msg('USSD *991#')"><div style="font-size:20px;">➕</div><div style="font-size:10px; color:#ccc;">ADD</div></div>
+                        <div class="action-btn" onclick="toggleModal('send-overlay')"><div style="font-size:20px;">💸</div><div class="action-text">SEND</div></div>
+                        <div class="action-btn" onclick="toggleModal('ventures-overlay')"><div style="font-size:20px; color:var(--ice);">🏢</div><div class="action-text">BIZ</div></div>
+                        <div class="action-btn" onclick="openAssets()"><div style="font-size:20px; color:var(--gold);">🏛️</div><div class="action-text">ASSET</div></div>
+                        <div class="action-btn" onclick="msg('USSD *991#')"><div style="font-size:20px;">➕</div><div class="action-text">ADD</div></div>
                     </div>
                     <p style="font-size: 9px; color: #666; margin-top: 20px;">RECENT ACTIVITY</p>
                     <div class="ledger-box" id="ledger-list"></div>
@@ -257,7 +273,7 @@
             <div class="fab-chat" onclick="toggleModal('chat-overlay')">💬</div>
         </div>
 
-        <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>SYSTEM</h2><input type="text" class="app-input" id="set-name" placeholder="User Name"><button class="btn-full" onclick="saveSettings()">SAVE PROFILE</button><div style="margin-top:20px; border-top:1px dashed #333; padding-top:10px;"><p style="font-size:10px; color:#888;">DATA BACKUP</p><button class="btn-outline" onclick="exportData()">GET BACKUP CODE</button><input type="text" class="app-input" id="import-code" placeholder="Paste Code Here" style="margin-top:5px;"><button class="btn-full" onclick="importData()">RESTORE DATA</button></div><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
+        <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>SYSTEM</h2><input type="text" class="app-input" id="set-name" placeholder="User Name"><button class="btn-full" onclick="saveSettings()">SAVE PROFILE</button><div style="margin-top:20px; border-top:1px dashed #333; padding-top:10px;"><p style="font-size:10px; color:#888;">DATA BACKUP</p><button class="btn-outline" onclick="exportData()">GET BACKUP CODE</button><input type="text" class="app-input" id="import-code" placeholder="Paste Code Here" style="margin-top:5px;"><button class="btn-full" onclick="importData()">RESTORE DATA</button></div><button class="btn-outline" onclick="hardReset()" style="color:red; border-color:red;">FACTORY RESET</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
         
         <div id="transfer-modal" class="modal-overlay"><div class="modal-card"><h2>COPY CODE</h2><div class="data-box" id="export-text"></div><button class="btn-full" onclick="toggleModal('transfer-modal')">CLOSE</button></div></div>
 
@@ -268,6 +284,8 @@
         <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:10px; background:#222;">TERMINAL <span onclick="toggleModal('chat-overlay')" style="float:right;">✕</span></div><div class="chat-body" id="chat-box"></div><div class="chat-input-area"><input type="text" class="chat-input" id="user-input" placeholder="..."><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div></div></div>
         <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--accent);">ID CARD</h2><div style="font-size:40px;">👤</div><h3 id="pass-name-display">USER</h3><p>LEVEL 5</p><button class="btn-outline" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
         <div id="receipt-overlay" class="modal-overlay"><div class="modal-card"><h2>SUCCESS</h2><h1 id="rec-amt" style="color:var(--green);"></h1><button class="btn-full" onclick="toggleModal('receipt-overlay')">OK</button></div></div>
+        <div id="trophy-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ACHIEVEMENTS</h2><div class="trophy-grid"><div class="trophy" id="badge-breach">🛡️</div><div class="trophy" id="badge-hack">📡</div><div class="trophy" id="badge-mine">⛏️</div><div class="trophy" id="badge-rich">💰</div><div class="trophy" id="badge-god">⚡</div><div class="trophy" id="badge-agent">🕵️</div><div class="trophy" id="badge-trade">⚖️</div><div class="trophy" id="badge-grid">🏭</div><div class="trophy" id="badge-ceo">👔</div><div class="trophy" id="badge-war">⚔️</div><div class="trophy" id="badge-apex">🟣</div></div><button class="btn-outline" onclick="toggleModal('trophy-overlay')">CLOSE</button></div></div>
+        <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>NEXUS</h2><div class="nexus-map" id="nexus-map"></div><button class="btn-outline" onclick="toggleModal('map-overlay')">CLOSE</button></div></div>
         
         <div id="call-overlay"><div class="caller-icon">👤</div><div style="font-size:20px; font-weight:bold; margin-bottom:5px;">UNKNOWN</div><div style="font-size:12px; color:#888;">INCOMING CALL...</div><div class="call-actions"><button class="btn" style="background:#f00; width:60px;" onclick="endCall()">✕</button><button class="btn" style="background:#0f0; width:60px;" onclick="answerCall()">📞</button></div></div>
         <div id="breach-overlay"><div class="breach-box"><h1 style="color:var(--red); font-size:24px; margin:0;">⚠️ BREACH</h1><div class="defend-bar-bg"><div class="defend-bar-fill" id="defend-bar"></div></div><button class="defend-btn" style="background:var(--red); color:#fff; padding:15px; width:100%; border:none; font-weight:bold;" onclick="chargeFirewall()">FIREWALL</button></div></div>
@@ -280,6 +298,7 @@
         let inventory={gold:0, oil:0}, infra={solar:0, nuke:0};
         let pin="8820", inputPin="", currency="NGN", rate=1500;
         let godModeCount=0, isMining=false, defensePower=0, gridHealth=100, commodities={gold:{price:85000, trend:1}, oil:{price:12000, trend:-1}};
+        let badges={breach:false,hack:false,mine:false,rich:false,god:false,agent:false,trade:false,grid:false,ceo:false,war:false,apex:false};
 
         // --- INIT ---
         window.onload = function() {
@@ -297,12 +316,12 @@
         function loadData() {
             if(localStorage.getItem('livenjet_final')) {
                 let d = JSON.parse(localStorage.getItem('livenjet_final'));
-                balance=d.b; ljnCrypto=d.c; userName=d.u; agents=d.a; ventures=d.v; transactions=d.t; ownedAssets=d.o; influence=d.i; singularity=d.s; inventory=d.inv; infra=d.inf;
+                balance=d.b; ljnCrypto=d.c; userName=d.u; agents=d.a; ventures=d.v; transactions=d.t; ownedAssets=d.o; influence=d.i; singularity=d.s; inventory=d.inv; infra=d.inf; badges=d.badges||badges;
             }
             renderUI();
         }
         function saveData() {
-            let data = { b:balance, c:ljnCrypto, u:userName, a:agents, v:ventures, t:transactions, o:ownedAssets, i:influence, s:singularity, inv:inventory, inf:infra };
+            let data = { b:balance, c:ljnCrypto, u:userName, a:agents, v:ventures, t:transactions, o:ownedAssets, i:influence, s:singularity, inv:inventory, inf:infra, badges:badges };
             localStorage.setItem('livenjet_final', JSON.stringify(data));
         }
         function exportData() {
@@ -312,9 +331,8 @@
         function importData() {
             try {
                 let d = JSON.parse(atob(document.getElementById('import-code').value));
-                // Manually parsing the double stringify from localstorage
                 let p = JSON.parse(d);
-                balance=p.b; ljnCrypto=p.c; userName=p.u; agents=p.a; ventures=p.v; transactions=p.t; ownedAssets=p.o; influence=p.i; singularity=p.s; inventory=p.inv; infra=p.inf;
+                balance=p.b; ljnCrypto=p.c; userName=p.u; agents=p.a; ventures=p.v; transactions=p.t; ownedAssets=p.o; influence=p.i; singularity=p.s; inventory=p.inv; infra=p.inf; badges=p.badges;
                 saveData(); renderUI(); msg("RESTORED"); toggleModal('settings-overlay');
             } catch(e) { msg("INVALID CODE"); }
         }
@@ -362,7 +380,7 @@
             if(transactions.length===0) l.innerHTML="<div style='color:#444; font-size:10px; margin-top:10px;'>NO DATA</div>";
             else transactions.slice(0,5).forEach(t=>{ l.innerHTML+=`<div class="tx-row"><div class="tx-details"><p class="tx-title">${t.desc}</p></div><div class="tx-amt" style="color:${t.amt>0?'#0f0':'#f44'}">${t.amt>0?'+':''}₦${Math.abs(t.amt).toLocaleString()}</div></div>`; });
 
-            updateAgentList(); updateVentureUI();
+            updateAgentList(); updateVentureUI(); checkAchievements();
             if(singularity) document.getElementById('device-frame').classList.add('singularity');
         }
 
@@ -404,7 +422,7 @@
         function updateAgentList() {
             const l = document.getElementById('agent-display'); l.innerHTML="";
             if(agents.length===0) l.innerHTML="<div style='color:#666; font-size:10px; text-align:center;'>NO AGENTS</div>";
-            else agents.forEach(a=>{ let s = a.status==='hostile'?'color:red':'color:#0f0'; l.innerHTML+=`<div style="background:#111; padding:10px; margin-bottom:5px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;"><span>${a.city}</span><span style="${s}">${a.status.toUpperCase()}</span></div>`; });
+            else agents.forEach(a=>{ let s=a.status==='hostile'?'color:red':'color:#0f0'; l.innerHTML+=`<div style="background:#111; padding:10px; margin-bottom:5px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;"><span>${a.city}</span><span style="${s}">${a.status.toUpperCase()}</span></div>`; });
         }
         function openAssets() {
             toggleModal('assets-overlay'); const l = document.getElementById('asset-list'); l.innerHTML="";
@@ -429,21 +447,18 @@
             saveData(); renderUI();
         }
         function rigNews(){ if(balance>=50000){balance-=50000; commodities.gold.price+=5000; msg("RIGGED"); saveData(); renderUI(); updateCommodityUI();} else msg("FUNDS?"); }
+        function checkAchievements(){if(balance>1e9&&!badges.rich){badges.rich=true;msg("TROPHY: TYCOON");}if(ljnCrypto>5&&!badges.mine){badges.mine=true;msg("TROPHY: MINER");}if(badges.trade)document.getElementById('badge-trade').classList.add('unlocked');if(badges.grid)document.getElementById('badge-grid').classList.add('unlocked');if(badges.ceo)document.getElementById('badge-ceo').classList.add('unlocked');if(badges.war)document.getElementById('badge-war').classList.add('unlocked');if(badges.apex)document.getElementById('badge-apex').classList.add('unlocked');for(const[k,v]of Object.entries(badges)){if(v)document.getElementById('badge-'+k).classList.add('unlocked');}saveData();}
 
         // --- LOOPS ---
         setInterval(()=>{
             ventures.forEach(v=>{ if(v.prog < 100) v.prog+=10; else { v.rev += 2000*v.lvl; v.prog=0; updateVentureUI(); } });
             if(agents.length>0) { 
-                // Simple Income
                 balance+=agents.length*100; renderUI(); 
-                // Random Attack
                 if(Math.random()>0.95) { 
                     let t = Math.floor(Math.random()*agents.length);
-                    agents[t].status = 'hostile'; updateAgentList(); msg("AGENT ATTACKED");
-                    setTimeout(()=>{ document.getElementById('breach-overlay').style.display='flex'; }, 1000);
+                    if(agents[t].status==='active') { agents[t].status = 'hostile'; updateAgentList(); msg("AGENT ATTACKED"); setTimeout(()=>{ document.getElementById('breach-overlay').style.display='flex'; }, 1000); }
                 }
             }
-            // Grid Fail
             if(Math.random()>0.98) triggerBlackout();
         }, 2000);
 
@@ -463,6 +478,9 @@
         function authenticate(){ document.getElementById('auth-status').innerText="SCANNING..."; setTimeout(()=>{document.getElementById('launchpad').style.display='none'; document.getElementById('app-interface').style.display='block'; document.getElementById('header-ui').style.display='flex'; setTimeout(()=>{document.getElementById('app-interface').style.opacity='1';},50);},800); }
         function handleCoreClick(){ godModeCount++; if(godModeCount===5){ balance+=10000000; renderUI(); msg("GOD MODE"); godModeCount=0; } }
         function openMap(){ toggleModal('map-overlay'); document.getElementById('nexus-map').innerHTML="<div class='nexus-grid'></div>"; agents.forEach(a=>{document.getElementById('nexus-map').innerHTML+=`<div class='map-node' style='top:${Math.random()*80+10}%; left:${Math.random()*80+10}%;'></div>`}); }
+        function openTrophies(){toggleModal('passport-overlay');toggleModal('trophy-overlay');}
+        function endCall(){document.getElementById('call-overlay').style.display='none';}
+        function answerCall(){document.getElementById('call-overlay').style.display='none';speak("Good day, Chief. The funds have been secured.");msg("ENCRYPTED MSG RECEIVED");}
 
         setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})},1000);
     </script>
