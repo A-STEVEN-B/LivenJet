@@ -2,239 +2,404 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>LivenJet | Secure OS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>LivenJet | Sovereign OS</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; --purple: #d000ff; }
-        body { background-color: #000; color: var(--accent); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; user-select: none; transition: 0.5s; perspective: 1000px; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); display: flex; align-items: center; justify-content: center; height: 100vh; background-image: radial-gradient(#151515 1px, transparent 1px); background-size: 30px 30px; }
         
-        /* --- DEVICE FRAME --- */
-        #device-frame { position: relative; width: 100%; height: 100%; background: #000; overflow: hidden; display: flex; flex-direction: column; }
-        @media (min-width: 768px) { #device-frame { width: 400px; height: 85vh; border-radius: 30px; border: 6px solid #222; box-shadow: 0 20px 50px rgba(0,0,0,0.8); } }
+        /* SCROLLBAR HIDING */
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; touch-action: manipulation; }
+
+        body { 
+            background-color: #050505; 
+            color: var(--accent); 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            text-align: center; 
+            margin: 0; 
+            overflow: hidden; 
+            user-select: none; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-image: radial-gradient(#151515 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* --- THE TERMINAL CONTAINER --- */
+        #device-frame {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        /* PC MODE: Floating Terminal */
+        @media (min-width: 768px) {
+            #device-frame {
+                width: 400px; 
+                height: 85vh; 
+                max-height: 900px;
+                border-radius: 35px;
+                border: 6px solid #222;
+                box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 20px var(--accent);
+            }
+        }
 
         /* --- VISUAL FX --- */
-        .scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; pointer-events: none; z-index: 9998; opacity: 0.5; }
-        .tilt-card { transition: transform 0.1s; transform-style: preserve-3d; }
-        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+        .scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 3px; pointer-events: none; z-index: 9998; opacity: 0.6; }
         
         /* --- SINGULARITY MODE --- */
-        #device-frame.singularity { --accent: var(--purple); --green: var(--ice); border-color: var(--purple); }
+        #device-frame.singularity { --accent: var(--purple); --green: var(--ice); border-color: var(--purple); box-shadow: 0 0 50px var(--purple); }
         
-        /* --- BOOT SCREEN --- */
-        #boot-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 20px; box-sizing: border-box; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
-        .boot-line { margin: 2px 0; animation: typeLine 0.1s; }
-
-        /* --- LOCK SCREEN (PIN PAD) --- */
-        #launchpad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
-        .pin-display { font-size: 30px; letter-spacing: 10px; color: var(--accent); margin-bottom: 30px; height: 40px; font-family: monospace; text-shadow: 0 0 10px var(--accent); }
-        .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 200px; }
-        .pin-btn { width: 60px; height: 60px; background: rgba(255,255,255,0.1); border: 1px solid #333; border-radius: 50%; color: #fff; font-size: 20px; cursor: pointer; transition: 0.1s; display: flex; align-items: center; justify-content: center; }
-        .pin-btn:active { background: var(--accent); color: #000; transform: scale(0.9); }
-        .pin-btn.clear { color: var(--red); border-color: var(--red); }
-        .pin-btn.enter { color: var(--green); border-color: var(--green); }
-
+        /* --- LOCK SCREEN --- */
+        #launchpad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
+        .pin-display { font-size: 30px; letter-spacing: 15px; color: var(--accent); margin-bottom: 40px; height: 40px; font-family: monospace; text-shadow: 0 0 15px var(--accent); }
+        .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 240px; }
+        .pin-btn { width: 65px; height: 65px; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 50%; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s; }
+        .pin-btn:active { background: var(--accent); color: #000; transform: scale(0.95); }
+        
         /* --- HEADER --- */
-        .avatar-btn { width: 35px; height: 35px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; position: absolute; top: 40px; left: 20px; z-index: 2001; cursor: pointer; }
-        .currency-btn { width: 35px; height: 35px; background: #222; border: 1px solid var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: 40px; left: 65px; z-index: 2001; cursor: pointer; font-size: 10px; font-weight: bold; }
-        .settings-btn { width: 35px; height: 35px; background: #222; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; position: absolute; top: 40px; right: 20px; z-index: 2001; cursor: pointer; font-size: 18px; }
-        .ticker-wrap { width: 100%; background: transparent; padding: 5px 0; position: absolute; top: 80px; z-index: 1000; font-family: monospace; font-size: 10px; color: #666; pointer-events: none; }
+        .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 100px; z-index: 2000; padding-top: max(20px, env(safe-area-inset-top)); background: linear-gradient(to bottom, #000 80%, transparent); display: flex; justify-content: space-between; align-items: flex-start; padding-left: 20px; padding-right: 20px; box-sizing: border-box; }
+        .icon-btn { width: 40px; height: 40px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; color: #fff; }
+        .avatar-box { font-weight: 900; background: var(--accent); color: #000; }
+        
+        .ticker-wrap { width: 100%; position: absolute; top: 70px; z-index: 1999; font-family: monospace; font-size: 10px; color: #666; pointer-events: none; text-shadow: 0 2px 2px #000; }
 
         /* --- NEURAL CORE --- */
-        .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 110px auto 10px; position: relative; animation: core-pulse 3s infinite; cursor: pointer; transition: 0.5s; z-index: 500; flex-shrink: 0; }
+        .neural-core { width: 80px; height: 80px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 110px auto 10px; position: relative; animation: core-pulse 3s infinite; cursor: pointer; transition: 0.5s; z-index: 500; flex-shrink: 0; }
         .core-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40%; height: 40%; background: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--accent); }
         @keyframes core-pulse { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } }
 
-        /* --- MAIN APP STRUCTURE --- */
-        #app-interface { display: none; opacity: 0; transition: opacity 0.5s; padding-bottom: 120px; overflow-y: auto; height: 100%; flex: 1; -webkit-overflow-scrolling: touch; }
-        .pillar { display: none; padding: 20px; animation: slideIn 0.3s ease; }
+        /* --- APP CONTENT --- */
+        #app-interface { display: none; opacity: 0; transition: opacity 0.5s; padding-bottom: 140px; overflow-y: auto; height: 100%; flex: 1; -webkit-overflow-scrolling: touch; padding-left:15px; padding-right:15px; box-sizing: border-box; }
+        .pillar { display: none; animation: slideIn 0.3s ease; }
         .active { display: block; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
         
-        /* --- CARDS & UI --- */
-        .intel-card { background: rgba(20,20,20,0.95); border: 1px solid #333; border-bottom: 2px solid var(--accent); border-radius: 16px; padding: 20px; margin: 15px auto; max-width: 340px; text-align: left; transition: 0.2s; }
-        .btn { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-
-        /* --- DOCK & NEWS --- */
-        .dock { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 90%; background: #111; border: 1px solid #333; border-radius: 25px; display: flex; justify-content: space-around; padding: 15px 0; z-index: 1000; }
-        .dock-item { font-size: 24px; opacity: 0.5; transition: 0.2s; cursor: pointer; }
-        .active-icon { opacity: 1; color: var(--accent); transform: translateY(-3px); }
-        .news-ticker { position: absolute; bottom: 85px; width: 100%; background: #111; border-top: 1px solid #333; padding: 5px 0; overflow: hidden; white-space: nowrap; z-index: 900; }
-        .ticker-content { display: inline-block; padding-left: 100%; animation: scroll 25s linear infinite; color: #888; font-size: 10px; font-family: monospace; will-change: transform; }
-        @keyframes scroll { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
-
         /* --- COMPONENTS --- */
+        .intel-card { background: rgba(20,20,20,0.9); border: 1px solid #333; border-bottom: 2px solid var(--accent); border-radius: 18px; padding: 20px; margin: 15px auto; text-align: left; position: relative; backdrop-filter: blur(5px); }
+        .btn-full { background: var(--accent); color: #000; border: none; padding: 14px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
+        .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .input-group { margin-bottom: 15px; text-align: left; }
-        .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
-        .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
-        select.app-input { appearance: none; }
-        .action-grid { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
-        .action-btn { flex: 1; background: #222; border-radius: 12px; padding: 15px 5px; cursor: pointer; border: 1px solid #333; transition: 0.1s; }
+        .app-input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
+        
+        .action-grid { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; }
+        .action-btn { flex: 1; background: #151515; border-radius: 12px; padding: 15px 5px; cursor: pointer; border: 1px solid #222; transition: 0.1s; }
         .action-btn:active { background: #333; transform: scale(0.95); }
-        .action-icon { font-size: 20px; margin-bottom: 5px; }
-        .action-text { font-size: 10px; font-weight: bold; color: #ccc; }
-        .ledger-box { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; padding-right: 5px; }
-        .tx-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; }
-        .tx-icon { width: 30px; height: 30px; background: #222; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 10px; }
-        .tx-details { flex: 1; }
-        .tx-title { font-size: 12px; color: #fff; margin: 0; font-weight: bold; }
-        .tx-date { font-size: 10px; color: #666; margin: 0; }
-        .tx-amt { font-size: 12px; font-weight: bold; color: #ff4444; }
-        .venture-card { background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; position: relative; overflow: hidden; }
-        .venture-card.critical { border: 1px solid var(--red); animation: shake 0.5s infinite; }
-        .venture-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .venture-title { font-weight: bold; color: var(--ice); font-size: 14px; }
-        .venture-profit { color: var(--green); font-family: monospace; font-size: 14px; }
-        .venture-progress { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
-        .venture-bar { height: 100%; background: var(--green); width: 0%; transition: width 1s linear; }
-        .venture-actions { display: flex; gap: 10px; margin-top: 10px; }
-        .venture-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; cursor: pointer; font-size: 10px; }
-        .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .asset-item { background: #222; border: 1px solid #444; border-radius: 10px; padding: 10px; opacity: 0.5; transition: 0.3s; }
-        .asset-item.owned { opacity: 1; border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
-        .asset-icon { font-size: 30px; margin-bottom: 5px; }
-        .asset-name { font-size: 10px; font-weight: bold; color: #fff; }
-        .asset-cost { font-size: 9px; color: var(--accent); }
-        .grid-monitor { width: 100%; height: 100px; background: #000; border: 1px solid #333; margin-top: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        
+        /* --- DOCK --- */
+        .dock { 
+            position: absolute; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 85%; 
+            background: rgba(15,15,15,0.95); 
+            border: 1px solid #333; 
+            border-radius: 30px; 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 18px 0; 
+            z-index: 1000; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .dock-item { font-size: 24px; opacity: 0.4; transition: 0.2s; cursor: pointer; }
+        .active-icon { opacity: 1; color: var(--accent); transform: translateY(-3px); text-shadow: 0 0 15px var(--accent); }
+
+        /* --- MODULES --- */
+        .ledger-box { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        .tx-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; font-size: 13px; }
+        
+        .venture-card { background: #151515; border: 1px solid #333; padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: left; }
+        .venture-bar { height: 4px; background: var(--green); width: 0%; border-radius: 2px; transition: width 1s linear; }
+        
+        .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .asset-item { background: #151515; border: 1px solid #333; border-radius: 12px; padding: 15px; opacity: 0.5; }
+        .asset-item.owned { opacity: 1; border-color: var(--gold); box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.1); }
+
+        .grid-monitor { height: 80px; background: #000; border: 1px solid #333; margin-top: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .sine-wave { position: absolute; width: 200%; height: 100%; background: repeating-linear-gradient(90deg, transparent 0, transparent 20px, var(--accent) 20px, var(--accent) 22px); opacity: 0.2; animation: wave 2s linear infinite; }
         @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
-        .grid-status-text { z-index: 2; font-family: monospace; font-size: 24px; font-weight: bold; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
-        .grid-fail { color: var(--red); text-shadow: 0 0 10px var(--red); animation: blinkRed 0.5s infinite; }
-        @keyframes blinkRed { 50% { opacity: 0.5; } }
-        .trade-row { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #333; }
-        .trade-name { font-size: 12px; font-weight: bold; color: #fff; }
-        .trade-price { font-size: 12px; font-family: monospace; color: var(--gold); }
-        .trade-actions { display: flex; gap: 5px; }
-        .trade-btn { background: #333; border: 1px solid #555; color: #fff; font-size: 9px; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
-        .trade-btn:active { background: var(--accent); color: #000; }
-        .trend-up { color: #0f0; } .trend-down { color: #f00; }
-        .agent-list { text-align: left; max-height: 100px; overflow-y: auto; margin-top: 10px; }
-        .agent-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 3px solid var(--green); }
-        .agent-item.hostile { border-left: 3px solid var(--red); background: #2a0000; }
-        .status-badge { font-size: 9px; padding: 3px 6px; border-radius: 4px; background: #003300; color: #0f0; }
-        .status-badge.alert { background: #550000; color: #f00; animation: blinkRed 1s infinite; }
-        .war-actions { display: none; gap: 5px; margin-top: 5px; width: 100%; }
-        .war-btn { flex: 1; font-size: 9px; padding: 5px; border: 1px solid #444; background: #000; color: #fff; cursor: pointer; }
-        .nexus-map { width: 100%; height: 300px; background: #001; border: 1px solid #333; border-radius: 10px; position: relative; overflow: hidden; background-image: radial-gradient(#222 1px, transparent 1px); background-size: 20px 20px; }
-        .nexus-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; animation: gridScroll 10s linear infinite; opacity: 0.3; background: linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px), linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px); background-size: 40px 40px; }
-        @keyframes gridScroll { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
-        .map-node { width: 8px; height: 8px; background: var(--green); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--green); animation: pulse 1s infinite; }
-        .map-node.red { background: var(--red); box-shadow: 0 0 10px var(--red); }
-        .map-label { position: absolute; color: #fff; font-size: 8px; white-space: nowrap; transform: translate(-50%, -15px); }
-        .trophy-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .trophy { background: #111; border: 1px solid #333; border-radius: 10px; padding: 10px; opacity: 0.3; transition: 0.3s; }
-        .trophy.unlocked { opacity: 1; border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
-        .trophy-icon { font-size: 24px; margin-bottom: 5px; }
-        .trophy-name { font-size: 8px; color: #888; text-transform: uppercase; }
 
-        /* --- MODAL OVERLAYS (ABSOLUTE FOR CONTAINER) --- */
+        /* --- MODALS --- */
         .modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; }
-        #call-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; }
-        .caller-icon { width: 100px; height: 100px; background: #222; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; animation: pulse 1s infinite; }
-        .call-actions { display: flex; gap: 40px; margin-top: 50px; }
-        .call-btn { width: 70px; height: 70px; border-radius: 50%; border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .accept { background: #0f0; box-shadow: 0 0 20px #0f0; }
-        .decline { background: #f00; box-shadow: 0 0 20px #f00; }
-        #drone-layer { position: fixed; top: 20%; left: -100px; z-index: 6000; font-size: 40px; transition: 0.1s; pointer-events: none; }
-        .fly-anim { animation: flyOver 3s linear forwards; }
-        @keyframes flyOver { 0% { left: -100px; transform: rotate(10deg); } 50% { left: 50%; transform: rotate(0deg); } 100% { left: 120%; transform: rotate(-10deg); } }
-        #red-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.3); z-index: 7000; display: none; pointer-events: none; mix-blend-mode: overlay; }
-        #breach-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; align-items: center; justify-content: center; }
-        .breach-box { border: 2px solid var(--red); padding: 20px; border-radius: 15px; width: 80%; background: #100; text-align: center; }
-        .defend-bar-bg { width: 100%; height: 20px; background: #300; margin: 20px 0; border: 1px solid var(--red); }
-        .defend-bar-fill { width: 0%; height: 100%; background: var(--red); transition: 0.1s; }
-        .defend-btn { background: var(--red); color: #fff; font-size: 20px; font-weight: bold; border: none; padding: 20px; width: 100%; border-radius: 10px; cursor: pointer; animation: pulse 0.5s infinite; }
         
         /* CHAT */
-        .fab-chat { position: absolute; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px; z-index: 4000; cursor: pointer; }
-        .fab-label { font-size: 8px; color: #000; font-weight: bold; margin-top: -5px; }
-        .chat-card { height: 70vh; display: flex; flex-direction: column; }
-        .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; }
-        .chat-input-area { padding: 10px; background: #222; display: flex; gap: 10px; }
-        .chat-input { flex: 1; padding: 10px; border-radius: 20px; border: none; background: #333; color: #fff; outline: none; }
-        .msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; font-size: 12px; max-width: 70%; }
-        .msg-ai { background: #333; color: #fff; border-top-left-radius: 0; }
-        .msg-user { background: var(--accent); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
-        
-        /* MISC */
-        .receipt-card { background: #fff; color: #000; border: none; }
-        .dashed-line { border-bottom: 2px dashed #ccc; margin: 20px 0; }
-        .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .frozen { border-color: var(--ice) !important; background: linear-gradient(145deg, #002, #000) !important; box-shadow: 0 0 20px var(--ice) !important; }
-        .frozen-text { color: var(--ice) !important; text-shadow: 0 0 10px var(--ice); }
+        .fab-chat { position: absolute; bottom: 110px; right: 20px; width: 55px; height: 55px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; z-index: 4000; cursor: pointer; box-shadow: 0 0 20px rgba(255,215,0,0.3); color: #000; }
+        .chat-card { height: 75vh; display: flex; flex-direction: column; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; font-family: monospace; font-size: 12px; }
+        .msg-ai { color: var(--accent); margin-bottom: 5px; } .msg-user { color: #fff; text-align: right; margin-bottom: 10px; opacity: 0.7; }
+
+        /* DATA TRANSFER */
+        .data-box { background: #111; border: 1px dashed #444; color: var(--green); padding: 10px; font-family: monospace; font-size: 10px; word-break: break-all; margin: 10px 0; max-height: 60px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
     <div id="device-frame">
         <div class="scanlines"></div>
-        <div id="boot-screen"></div>
-        <div id="red-alert" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,0,0,0.2); z-index:7000; pointer-events:none;"></div>
 
-        <div id="call-overlay"><div class="caller-icon">👤</div><div style="font-size:20px; font-weight:bold; margin-bottom:5px;">UNKNOWN</div><div style="font-size:12px; color:#888;">INCOMING CALL...</div><div class="call-actions"><button class="btn" style="background:#f00; width:60px;" onclick="endCall()">✕</button><button class="btn" style="background:#0f0; width:60px;" onclick="answerCall()">📞</button></div></div>
-        
-        <div id="breach-overlay"><div class="breach-box"><h1 style="color:var(--red); font-size:24px; margin:0;">⚠️ BREACH</h1><div class="defend-bar-bg"><div class="defend-bar-fill" id="defend-bar"></div></div><button class="defend-btn" style="background:var(--red); color:#fff; padding:15px; width:100%; border:none; font-weight:bold;" onclick="chargeFirewall()">FIREWALL</button></div></div>
-
-        <div id="assets-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ASSETS</h2><div class="asset-grid" id="asset-list"></div><button class="btn-outline" onclick="toggleModal('assets-overlay')">CLOSE</button></div></div>
-        <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--ice);">BUSINESS</h2><div id="active-ventures"></div><div style="margin-top:20px; border-top:1px dashed #333; padding-top:20px;"><h3>NEW VENTURE</h3><div class="input-group"><input type="text" class="app-input" id="biz-name" placeholder="Name"></div><div class="input-group"><select class="app-input" id="biz-type"><option value="retail">RETAIL</option><option value="tech">TECH</option><option value="oil">OIL</option></select></div><button class="btn-full" onclick="createBusiness()">LAUNCH (₦100k)</button></div><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
-        <div id="trophy-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">AWARDS</h2><div class="trophy-grid"><div class="trophy" id="badge-breach">🛡️</div><div class="trophy" id="badge-hack">📡</div><div class="trophy" id="badge-mine">⛏️</div><div class="trophy" id="badge-rich">💰</div><div class="trophy" id="badge-god">⚡</div><div class="trophy" id="badge-agent">🕵️</div><div class="trophy" id="badge-trade">⚖️</div><div class="trophy" id="badge-grid">🏭</div><div class="trophy" id="badge-ceo">👔</div><div class="trophy" id="badge-war">⚔️</div><div class="trophy" id="badge-apex">🟣</div></div><button class="btn-outline" onclick="toggleModal('trophy-overlay')">CLOSE</button></div></div>
-        <div id="agent-overlay" class="modal-overlay"><div class="modal-card"><h2>DEPLOY</h2><div class="input-group"><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>New York</option><option>Tokyo</option></select></div><button class="btn-full" onclick="deployAgent()">DEPLOY (₦50k)</button><button class="btn-outline" onclick="toggleModal('agent-overlay')">CANCEL</button></div></div>
-        <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>SETTINGS</h2><div class="input-group"><input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE"></div><div style="margin-top:10px;"><button class="btn" style="margin:5px 0;" onclick="toggleTheme('gold')">GOLD</button><button class="btn" style="margin:5px 0; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button></div><button class="btn-outline" onclick="activatePanic()" style="color:orange; border-color:orange;">PANIC</button><button class="btn-outline" onclick="hardReset()" style="color:red; border-color:red;">RESET DATA</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
-        <div id="scan-overlay" class="modal-overlay"><div class="modal-card"><h2>SCAN</h2><div class="camera-view"><div class="laser-beam"></div></div><p id="scan-status" style="margin-top:10px;">SEARCHING...</p><button class="btn-outline" onclick="toggleModal('scan-overlay')">CANCEL</button></div></div>
-        <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>TRANSFER</h2><div class="input-group"><input type="number" class="app-input" id="send-acc" placeholder="Account"></div><div class="input-group"><input type="number" class="app-input" id="send-amt" placeholder="Amount"></div><button class="btn-full" onclick="processTransfer()">SEND</button><button class="btn-outline" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
-        <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>NEXUS</h2><div class="nexus-map" id="nexus-map"></div><button class="btn-outline" onclick="toggleModal('map-overlay')" style="margin-top:10px;">CLOSE</button></div></div>
-        <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:10px; background:#222;">TERMINAL <span onclick="toggleModal('chat-overlay')" style="float:right; cursor:pointer;">✕</span></div><div class="chat-body" id="chat-box"></div><div class="chat-input-area"><input type="text" class="chat-input" id="user-input" placeholder="..."><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div></div></div>
-        <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--accent);">ID CARD</h2><div style="width:60px; height:60px; background:#222; border:2px solid var(--accent); border-radius:50%; margin:10px auto; display:flex; align-items:center; justify-content:center; font-size:24px;" id="pass-avatar">SA</div><div class="pass-row"><span>NAME</span><span id="pass-name">STEVEN</span></div><div class="pass-row"><span>CLEARANCE</span><span style="cursor:pointer;" onclick="openTrophies()">LEVEL 5</span></div><button class="btn-outline" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
-        <div id="receipt-overlay" class="modal-overlay"><div class="modal-card"><h2 id="rec-title">SUCCESS</h2><div class="dashed-line"></div><div style="display:flex; justify-content:space-between; margin:10px 0;"><span>AMT</span><span id="rec-amt">₦ 0</span></div><button class="btn-full" onclick="closeReceipt()">OK</button></div></div>
-        <div id="hack-overlay" class="modal-overlay"><div class="modal-card" style="border-color:red;"><h2 style="margin: 0 0 10px 0; color:red;">UPLINK</h2><div class="hack-bar-container"><div class="hack-zone"></div><div class="hack-cursor cursor-moving" id="hack-cursor"></div></div><div style="font-family:monospace; color:#fff; font-size:12px; margin:20px 0;" id="hack-log">WAITING...</div><button class="btn-full" style="background:red;" onclick="lockSignal()">LOCK</button><button class="btn-outline" onclick="toggleModal('hack-overlay')">ABORT</button></div></div>
-
-        <div class="news-ticker"><div class="ticker-content" id="news-text">LIVENJET APEX OS ONLINE ... INFLUENCE MULTIPLIERS ACTIVE ... SYSTEM DOMINANCE ...</div></div>
+        <div class="header-bar" id="header-ui" style="display:none;">
+            <div class="icon-btn avatar-box" onclick="toggleModal('passport-overlay')" id="main-avatar">SA</div>
+            <div class="icon-btn" onclick="toggleCurrency()">₦/$</div>
+            <div class="icon-btn" onclick="toggleModal('settings-overlay')">⚙️</div>
+        </div>
 
         <div id="launchpad">
-            <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-            <p style="color: #666; font-size: 10px; margin-bottom: 40px;">SECURE OS v43.0</p>
+            <h1 style="letter-spacing: 5px; font-size: 24px; margin-bottom: 50px;">LIVENJET</h1>
             <div class="pin-display" id="pin-display">****</div>
             <div class="pin-grid">
                 <div class="pin-btn" onclick="enterPin(1)">1</div><div class="pin-btn" onclick="enterPin(2)">2</div><div class="pin-btn" onclick="enterPin(3)">3</div>
                 <div class="pin-btn" onclick="enterPin(4)">4</div><div class="pin-btn" onclick="enterPin(5)">5</div><div class="pin-btn" onclick="enterPin(6)">6</div>
                 <div class="pin-btn" onclick="enterPin(7)">7</div><div class="pin-btn" onclick="enterPin(8)">8</div><div class="pin-btn" onclick="enterPin(9)">9</div>
-                <div class="pin-btn clear" onclick="clearPin()">C</div><div class="pin-btn" onclick="enterPin(0)">0</div><div class="pin-btn enter" onclick="checkPin()">></div>
+                <div class="pin-btn" style="color:var(--red); border-color:var(--red);" onclick="clearPin()">C</div>
+                <div class="pin-btn" onclick="enterPin(0)">0</div>
+                <div class="pin-btn" style="color:var(--green); border-color:var(--green);" onclick="checkPin()">></div>
             </div>
-            <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">ENTER PIN (8820)</p>
+            <p id="auth-status" style="margin-top: 30px; font-family: monospace; font-size: 10px; color: #666;">SECURE ACCESS v44.0</p>
         </div>
 
         <div id="app-interface">
             <div class="ticker-wrap">
                 <span style="font-weight:bold; color:var(--ice);" id="influence-score">INF: 0%</span> | 
-                <span onclick="restorePanic()">LOS-01</span> | <span id="clock"></span>
+                <span id="system-status">ONLINE</span> | <span id="clock"></span>
             </div>
-            <div class="avatar-btn" onclick="toggleModal('passport-overlay')" id="main-avatar">SA</div>
-            <div class="currency-btn" onclick="toggleCurrency()">₦/$</div>
-            <div class="settings-btn" onclick="toggleModal('settings-overlay')">⚙️</div>
             
             <div class="neural-core" onclick="handleCoreClick()" id="neural-core"><div class="core-inner"></div></div>
             <div style="font-family: monospace; font-size: 10px; color: #888; height: 20px;" id="ai-msg">IDENTITY VERIFIED.</div>
 
             <div id="home" class="pillar active">
-                <div class="intel-card tilt-card">
-                    <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY</p>
-                    <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal" onclick="toggleStealth()">₦ 50,000.00</h2>
+                <div class="intel-card">
+                    <p style="font-size: 10px; color: #666; margin: 0;">LIQUIDITY</p>
+                    <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal">₦ 50,000.00</h2>
                     <div class="action-grid">
                         <div class="action-btn" onclick="toggleModal('send-overlay')"><div class="action-icon">💸</div><div class="action-text">SEND</div></div>
                         <div class="action-btn" onclick="toggleModal('ventures-overlay')"><div class="action-icon" style="color:var(--ice);">🏢</div><div class="action-text">BIZ</div></div>
                         <div class="action-btn" onclick="openAssets()"><div class="action-icon" style="color:var(--gold);">🏛️</div><div class="action-text">ASSET</div></div>
-                        <div class="action-btn" onclick="msg('Deposit via USSD *991#')"><div class="action-icon">➕</div><div class="action-text">ADD</div></div>
+                        <div class="action-btn" onclick="msg('USSD *991#')"><div class="action-icon">➕</div><div class="action-text">ADD</div></div>
                     </div>
-                    <p style="font-size: 9px; color: #666; margin-top: 20px;">RECENT ACTIVITY</p>
                     <div class="ledger-box" id="ledger-list"></div>
                 </div>
-                <button class="btn" onclick="msg('Syncing Global Accounts...')">SYNC NETWORK</button>
             </div>
 
             <div id="util" class="pillar">
-                <div class="intel-card tilt-card">
-                    <h3>INFRASTRUCTURE COMMAND</h3>
-                    <div class="grid-monitor"><div class="sine-wave"></div>
+                <div class="intel-card">
+                    <h3>GRID COMMAND</h3>
+                    <div class="grid-monitor"><div class="sine-wave"></div><div class="grid-status-text" id="grid-text">STABLE</div></div>
+                    <div style="margin-top:15px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <button class="btn" style="margin:0; background:#222; font-size:10px;" onclick="buyInfra('solar', 200000)">SOLAR<br>₦200k</button>
+                        <button class="btn" style="margin:0; background:#222; font-size:10px;" onclick="buyInfra('nuke', 500000)">NUCLEAR<br>₦500k</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="logi" class="pillar">
+                <div class="intel-card">
+                    <h3>WAR ROOM</h3>
+                    <div class="agent-list" id="agent-display"></div>
+                    <button class="btn" onclick="toggleModal('agent-overlay')" style="margin-top:10px; font-size:10px;">+ DEPLOY (₦50k)</button>
+                </div>
+                <button class="btn" onclick="openMap()">OPEN NEXUS MAP</button>
+            </div>
+
+            <div id="fina" class="pillar">
+                <div class="intel-card">
+                    <div style="display:flex; justify-content:space-between;"><h3>PORTFOLIO</h3><span style="color:#0f0;">+15%</span></div>
+                    <div style="margin-top:15px; border-bottom:1px solid #333; padding-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <div><div style="font-weight:bold;">BTC</div><div style="font-size:10px; color:#666;">$98,400</div></div>
+                        <button class="btn" style="width:60px; padding:8px; margin:0;" onclick="pay(5000, 'BTC')">BUY</button>
+                    </div>
+                    <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <div><div style="font-weight:bold;">LJN</div><div style="font-size:10px; color:var(--accent);" id="ljn-bal">0.00</div></div>
+                        <button class="btn" style="width:60px; padding:8px; margin:0;" onclick="startMining()" id="mine-btn">MINE</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dock">
+                <div id="n-home" class="dock-item active-icon" onclick="nav('home')">🪐</div>
+                <div id="n-util" class="dock-item" onclick="nav('util')">⚡</div>
+                <div id="n-logi" class="dock-item" onclick="nav('logi')">✈️</div>
+                <div id="n-fina" class="dock-item" onclick="nav('fina')">💳</div>
+            </div>
+            
+            <div class="fab-chat" onclick="toggleModal('chat-overlay')">💬</div>
+        </div>
+
+        <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>SYSTEM</h2><input type="text" class="app-input" id="set-name" placeholder="Name"><button class="btn-full" onclick="saveSettings()">SAVE PROFILE</button><div style="margin-top:20px; border-top:1px dashed #333; padding-top:10px;"><p style="font-size:10px; color:#888;">DATA TRANSFER</p><button class="btn-outline" onclick="exportData()">EXPORT SAVE CODE</button><input type="text" class="app-input" id="import-code" placeholder="Paste Save Code Here" style="margin-top:5px;"><button class="btn-full" onclick="importData()">IMPORT DATA</button></div><button class="btn-outline" onclick="hardReset()" style="color:red; border-color:red;">FACTORY RESET</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
+        
+        <div id="transfer-modal" class="modal-overlay"><div class="modal-card"><h2>SAVE CODE</h2><p style="font-size:10px;">COPY THIS CODE TO SAVE YOUR PROGRESS:</p><div class="data-box" id="export-text"></div><button class="btn-full" onclick="toggleModal('transfer-modal')">CLOSE</button></div></div>
+
+        <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2>BUSINESS</h2><div id="active-ventures"></div><button class="btn-full" onclick="createBusiness()">NEW VENTURE (₦100k)</button><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
+        <div id="assets-overlay" class="modal-overlay"><div class="modal-card"><h2>ASSETS</h2><div class="asset-grid" id="asset-list"></div><button class="btn-outline" onclick="toggleModal('assets-overlay')">CLOSE</button></div></div>
+        <div id="agent-overlay" class="modal-overlay"><div class="modal-card"><h2>DEPLOY</h2><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>Tokyo</option></select><button class="btn-full" onclick="deployAgent()">CONFIRM (₦50k)</button><button class="btn-outline" onclick="toggleModal('agent-overlay')">CANCEL</button></div></div>
+        <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>SEND</h2><input type="number" class="app-input" id="send-amt" placeholder="Amount"><button class="btn-full" onclick="pay(document.getElementById('send-amt').value, 'Transfer')">SEND</button><button class="btn-outline" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
+        <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:10px; background:#222;">TERMINAL <span onclick="toggleModal('chat-overlay')" style="float:right;">✕</span></div><div class="chat-body" id="chat-box"></div><div class="chat-input-area"><input type="text" class="chat-input" id="user-input" placeholder="..."><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div></div></div>
+        <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2>ID CARD</h2><div style="font-size:40px;">👤</div><h3 id="pass-name-display">USER</h3><p>LEVEL 5</p><button class="btn-outline" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
+        <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>NEXUS</h2><div class="nexus-map" id="nexus-map"></div><button class="btn-outline" onclick="toggleModal('map-overlay')">CLOSE</button></div></div>
+
+    </div>
+
+    <script>
+        // --- DATA ENGINE ---
+        let balance=50000, ljnCrypto=0.00, userName="STEVEN", agents=[], ventures=[], transactions=[], ownedAssets={}, influence=0, singularity=false;
+        let pin="8820", inputPin="";
+
+        function loadData() {
+            if(localStorage.getItem('livenjet_master')) {
+                let d = JSON.parse(localStorage.getItem('livenjet_master'));
+                balance=d.b; ljnCrypto=d.c; userName=d.u; agents=d.a; ventures=d.v; transactions=d.t; ownedAssets=d.o; influence=d.i; singularity=d.s;
+            }
+            renderUI();
+        }
+        function saveData() {
+            let data = { b:balance, c:ljnCrypto, u:userName, a:agents, v:ventures, t:transactions, o:ownedAssets, i:influence, s:singularity };
+            localStorage.setItem('livenjet_master', JSON.stringify(data));
+        }
+        function exportData() {
+            let data = JSON.stringify({ b:balance, c:ljnCrypto, u:userName, a:agents, v:ventures, t:transactions, o:ownedAssets, i:influence, s:singularity });
+            let code = btoa(data); // Encode Base64
+            document.getElementById('export-text').innerText = code;
+            toggleModal('transfer-modal');
+        }
+        function importData() {
+            try {
+                let code = document.getElementById('import-code').value;
+                let json = atob(code); // Decode
+                let d = JSON.parse(json);
+                balance=d.b; ljnCrypto=d.c; userName=d.u; agents=d.a; ventures=d.v; transactions=d.t; ownedAssets=d.o; influence=d.i; singularity=d.s;
+                saveData(); renderUI(); msg("DATA RESTORED"); toggleModal('settings-overlay');
+            } catch(e) { msg("INVALID CODE"); }
+        }
+        function hardReset() { if(confirm("WIPE EVERYTHING?")) { localStorage.removeItem('livenjet_master'); location.reload(); } }
+
+        // --- AUTH ---
+        function enterPin(n) { if(inputPin.length<4) { inputPin+=n; document.getElementById('pin-display').innerText = inputPin.padEnd(4,'*').replace(/\d/g,'*'); } }
+        function clearPin() { inputPin=""; document.getElementById('pin-display').innerText="****"; }
+        function checkPin() {
+            if(inputPin===pin) {
+                document.getElementById('launchpad').style.opacity = 0;
+                setTimeout(()=>{ 
+                    document.getElementById('launchpad').style.display='none'; 
+                    document.getElementById('app-interface').style.display='block';
+                    document.getElementById('header-ui').style.display='flex';
+                    setTimeout(()=>{document.getElementById('app-interface').style.opacity=1;},100);
+                }, 500);
+            } else {
+                document.getElementById('auth-status').innerText="INVALID PIN";
+                document.getElementById('auth-status').style.color="red";
+                inputPin=""; document.getElementById('pin-display').innerText="****";
+                if(navigator.vibrate) navigator.vibrate(200);
+            }
+        }
+
+        // --- CORE UI ---
+        function renderUI() {
+            document.getElementById('wallet-bal').innerText = "₦ " + balance.toLocaleString(undefined, {minimumFractionDigits:2});
+            document.getElementById('ljn-bal').innerText = ljnCrypto.toFixed(2);
+            document.getElementById('pass-name-display').innerText = userName.toUpperCase();
+            document.getElementById('main-avatar').innerText = userName.substring(0,2).toUpperCase();
+            document.getElementById('influence-score').innerText = "INF: "+influence+"%";
+            
+            const l = document.getElementById('ledger-list'); l.innerHTML="";
+            if(transactions.length===0) l.innerHTML="<div style='color:#444; font-size:10px; margin-top:10px;'>NO DATA</div>";
+            else transactions.slice(0,5).forEach(t=>{ l.innerHTML+=`<div class="tx-row"><div class="tx-details"><p class="tx-title">${t.desc}</p></div><div class="tx-amt" style="color:${t.amt>0?'#0f0':'#f44'}">${t.amt>0?'+':''}₦${Math.abs(t.amt).toLocaleString()}</div></div>`; });
+
+            updateAgentList(); updateVentureUI();
+            if(singularity) document.getElementById('device-frame').classList.add('singularity');
+        }
+
+        function nav(id) {
+            document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active'));
+            document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('n-'+id).classList.add('active-icon');
+        }
+
+        // --- GAMEPLAY ---
+        function pay(amt, desc) {
+            if(balance>=amt) {
+                balance-=amt; transactions.unshift({desc:desc, amt:-amt}); saveData(); renderUI();
+                msg("SUCCESS"); 
+            } else msg("FUNDS?");
+        }
+        function startMining() {
+            const b = document.getElementById('mine-btn'); b.innerText="...";
+            setTimeout(()=>{ ljnCrypto+=0.5; b.innerText="MINE"; saveData(); renderUI(); msg("MINED 0.5"); }, 1000);
+        }
+        
+        function createBusiness() {
+            if(balance>=100000) {
+                balance-=100000; ventures.push({name:"STARTUP", rev:0, prog:0, lvl:1});
+                saveData(); renderUI(); toggleModal('ventures-overlay');
+            } else msg("NEED ₦100k");
+        }
+        function updateVentureUI() {
+            const c = document.getElementById('active-ventures'); c.innerHTML="";
+            if(ventures.length===0) c.innerHTML="<p style='color:#666; font-size:10px;'>NONE</p>";
+            ventures.forEach((v,i)=>{
+                c.innerHTML+=`<div class="venture-card"><div><span style="color:#fff;">${v.name}</span> <span style="color:#0f0;">₦${v.rev.toLocaleString()}</span></div><div style="height:4px; background:#333; margin:5px 0;"><div style="height:100%; width:${v.prog}%; background:#0f0;"></div></div><button class="btn" style="padding:5px; font-size:10px;" onclick="collect(${i})">COLLECT</button></div>`;
+            });
+        }
+        function collect(i) {
+            if(ventures[i].rev > 0) { balance+=ventures[i].rev; ventures[i].rev=0; saveData(); renderUI(); }
+        }
+        
+        function deployAgent() {
+            let c = document.getElementById('agent-city').value;
+            if(balance>=50000) {
+                balance-=50000; agents.push({city:c, status:'active'}); influence+=5;
+                saveData(); renderUI(); toggleModal('agent-overlay');
+            } else msg("FUNDS?");
+        }
+        function updateAgentList() {
+            const l = document.getElementById('agent-display'); l.innerHTML="";
+            if(agents.length===0) l.innerHTML="<div style='color:#666; font-size:10px; text-align:center;'>NO AGENTS</div>";
+            else agents.forEach(a=>{ l.innerHTML+=`<div style="background:#111; padding:10px; margin-bottom:5px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;"><span>${a.city}</span><span style="color:#0f0; font-size:10px;">ACTIVE</span></div>`; });
+        }
+
+        function openAssets() {
+            toggleModal('assets-overlay'); const l = document.getElementById('asset-list'); l.innerHTML="";
+            const db = [{id:'island',n:'ISLAND',c:100000000},{id:'jet',n:'JET',c:50000000}];
+            db.forEach(a=>{
+                let btn = ownedAssets[a.id] ? "<span style='color:#0f0; font-size:10px;'>OWNED</span>" : `<button class="btn" style="margin:0; padding:5px; font-size:9px;" onclick="buyAsset('${a.id}',${a.c})">BUY</button>`;
+                l.innerHTML+=`<div class="asset-item"><div style="font-size:20px;">🏛️</div><div class="asset-name">${a.n}</div>${btn}</div>`;
+            });
+        }
+        function buyAsset(id,c) { if(balance>=c){balance-=c; ownedAssets[id]=true; influence+=20; saveData(); renderUI(); openAssets();} else msg("FUNDS?"); }
+        
+        function buyInfra(t,c){ if(balance>=c){balance-=c; infra[t]++; saveData(); renderUI(); msg("BOUGHT "+t.toUpperCase());} else msg("FUNDS?"); }
+
+        // --- SYSTEM LOOPS ---
+        setInterval(()=>{
+            ventures.forEach(v=>{
+                if(v.prog < 100) v.prog+=10;
+                else { v.rev += 2000*v.lvl; v.prog=0; updateVentureUI(); }
+            });
+            if(agents.length>0) { balance+=agents.length*1000; renderUI(); }
+        }, 2000);
+
+        // --- UTILS ---
+        function buzz(d){ if(navigator.vibrate) navigator.vibrate(d); }
+        function toggleModal(id){ buzz(20); const e=document.getElementById(id); e.style.display=(e.style.display==='flex')?'none':'flex'; }
+        function msg(t){ const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
+        function authenticate(){ document.getElementById('auth-status').innerText="SCANNING..."; setTimeout(()=>{document.getElementById('launchpad').style.display='none'; document.getElementById('app-interface').style.display='block'; document.getElementById('header-ui').style.display='flex'; setTimeout(()=>{document.getElementById('app-interface').style.opacity='1';},50);},800); }
+        function toggleCurrency(){ currency=currency==="NGN"?"USD":"NGN"; renderUI(); }
+        function saveSettings(){ userName=document.getElementById('set-name').value; saveData(); renderUI(); toggleModal('settings-overlay'); }
+        function sendMsg(){ const i=document.getElementById('user-input'); if(i.value){ document.getElementById('chat-box').innerHTML+=`<div class="msg msg-user">${i.value}</div><div class="msg msg-ai">Received.</div>`; i.value=""; } }
+        function openMap(){ toggleModal('map-overlay'); document.getElementById('nexus-map').innerHTML="<div class='nexus-grid'></div>"; agents.forEach(a=>{document.getElementById('nexus-map').innerHTML+=`<div class='map-node' style='top:${Math.random()*80+10}%; left:${Math.random()*80+10}%;'></div>`}); }
+        function handleCoreClick(){ balance+=10000; renderUI(); msg("DATA MINED"); }
+
+        setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})},1000);
+        window.onload=function(){ loadData(); }
+    </script>
+</body>
+</html>
