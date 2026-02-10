@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Puppet Master</title>
+    <title>LivenJet | War Room</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; }
@@ -30,7 +30,16 @@
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* --- ASSETS & VENTURES --- */
+        /* --- WAR ROOM UI (NEW) --- */
+        .agent-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 3px solid var(--green); }
+        .agent-item.hostile { border-left: 3px solid var(--red); background: #2a0000; }
+        .status-badge { font-size: 9px; padding: 3px 6px; border-radius: 4px; background: #003300; color: #0f0; }
+        .status-badge.alert { background: #550000; color: #f00; animation: blinkRed 1s infinite; }
+        .war-actions { display: none; gap: 5px; margin-top: 5px; width: 100%; }
+        .war-btn { flex: 1; font-size: 9px; padding: 5px; border: 1px solid #444; background: #000; color: #fff; cursor: pointer; }
+        .war-btn:active { background: #fff; color: #000; }
+
+        /* --- VENTURES & ASSETS --- */
         .venture-card { background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; }
         .venture-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .venture-title { font-weight: bold; color: var(--ice); font-size: 14px; }
@@ -39,7 +48,6 @@
         .venture-bar { height: 100%; background: var(--green); width: 0%; transition: width 1s linear; }
         .venture-actions { display: flex; gap: 10px; margin-top: 10px; }
         .venture-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; cursor: pointer; font-size: 10px; }
-        
         .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .asset-item { background: #222; border: 1px solid #444; border-radius: 10px; padding: 10px; opacity: 0.5; transition: 0.3s; }
         .asset-item.owned { opacity: 1; border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
@@ -47,15 +55,26 @@
         .asset-name { font-size: 10px; font-weight: bold; color: #fff; }
         .asset-cost { font-size: 9px; color: var(--accent); }
 
-        /* --- GRID & MAP --- */
+        /* --- STANDARD UI --- */
         .grid-monitor { width: 100%; height: 100px; background: #000; border: 1px solid #333; margin-top: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .sine-wave { position: absolute; width: 200%; height: 100%; background: repeating-linear-gradient(90deg, transparent 0, transparent 20px, var(--accent) 20px, var(--accent) 22px); opacity: 0.2; animation: wave 2s linear infinite; }
         @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
         .grid-status-text { z-index: 2; font-family: monospace; font-size: 24px; font-weight: bold; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
         .grid-fail { color: var(--red); text-shadow: 0 0 10px var(--red); animation: blinkRed 0.5s infinite; }
         @keyframes blinkRed { 50% { opacity: 0.5; } }
+        .camera-view { width: 100%; height: 250px; background: #222; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #444; }
+        .laser-beam { width: 100%; height: 2px; background: red; position: absolute; top: 0; box-shadow: 0 0 10px red; animation: scan 1.5s linear infinite; }
+        .map-grid { width: 100%; height: 200px; background: radial-gradient(circle, #222 10%, #000 90%); border: 1px solid #333; margin-bottom: 15px; position: relative; overflow: hidden; border-radius: 10px; }
+        .radar-scan { width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(0, 255, 0, 0.2)); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: spin 3s linear infinite; }
+        .map-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--accent); animation: blink 1s infinite; }
+        .map-node { width: 8px; height: 8px; background: var(--green); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--green); animation: pulse 1s infinite; }
+        .map-node.red { background: var(--red); box-shadow: 0 0 10px var(--red); }
+        .map-label { position: absolute; color: #fff; font-size: 8px; white-space: nowrap; transform: translate(-50%, -15px); }
+        .nexus-map { width: 100%; height: 300px; background: #001; border: 1px solid #333; border-radius: 10px; position: relative; overflow: hidden; background-image: radial-gradient(#222 1px, transparent 1px); background-size: 20px 20px; }
+        .nexus-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; animation: gridScroll 10s linear infinite; opacity: 0.3; background: linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px), linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px); background-size: 40px 40px; }
+        @keyframes gridScroll { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
         
-        /* --- STANDARD UI --- */
+        /* --- MAIN UI --- */
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
         .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
@@ -65,17 +84,23 @@
         .action-btn:active { background: #333; transform: scale(0.95); }
         .action-icon { font-size: 20px; margin-bottom: 5px; }
         .action-text { font-size: 10px; font-weight: bold; color: #ccc; }
-        
-        /* --- SPECIAL MODULES --- */
+        .credit-meter { width: 150px; height: 150px; border-radius: 50%; border: 10px solid #222; border-top: 10px solid var(--accent); margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: spin-load 2s ease-out; position: relative; }
+        .credit-score { font-size: 40px; font-weight: bold; color: #fff; }
+        .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; }
+        .chart-bar { width: 12%; background: #333; border-radius: 4px 4px 0 0; transition: 0.5s; animation: growBar 1s ease-out; }
+        .chart-bar.active { background: var(--green); }
+        .miner-box { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-top: 15px; text-align: left; font-family: monospace; font-size: 10px; color: #0f0; height: 80px; overflow: hidden; display: none; }
+        .hash-line { margin: 2px 0; }
         .market-item { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding:15px 0; }
         .market-btn { background:#333; color:#0f0; border:1px solid #0f0; padding:5px 10px; border-radius:5px; font-size:10px; cursor:pointer; }
+        .avatar-glow { box-shadow: 0 0 15px var(--gold), 0 0 30px var(--gold); border: 2px solid #fff !important; }
         .hack-bar-container { width: 100%; height: 30px; background: #222; border: 1px solid #444; border-radius: 15px; position: relative; overflow: hidden; margin: 30px 0; }
         .hack-zone { width: 40px; height: 100%; background: rgba(0, 255, 0, 0.3); border-left: 1px solid #0f0; border-right: 1px solid #0f0; position: absolute; left: 50%; transform: translateX(-50%); }
         .hack-cursor { width: 4px; height: 100%; background: #fff; position: absolute; left: 0; box-shadow: 0 0 10px #fff; }
         .cursor-moving { animation: moveCursor 1s linear infinite alternate; }
         @keyframes moveCursor { 0% { left: 0%; } 100% { left: 98%; } }
-        
-        /* --- CHAT & TROPHIES --- */
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; }
         .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; }
         .chat-input-area { padding: 10px; background: #222; display: flex; gap: 10px; }
@@ -89,8 +114,22 @@
         .trophy.unlocked { opacity: 1; border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
         .trophy-icon { font-size: 24px; margin-bottom: 5px; }
         .trophy-name { font-size: 8px; color: #888; text-transform: uppercase; }
-
-        /* --- MAIN APP STRUCTURE --- */
+        #call-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .caller-icon { width: 100px; height: 100px; background: #222; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; animation: pulse 1s infinite; }
+        .call-actions { display: flex; gap: 40px; margin-top: 50px; }
+        .call-btn { width: 70px; height: 70px; border-radius: 50%; border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .accept { background: #0f0; box-shadow: 0 0 20px #0f0; }
+        .decline { background: #f00; box-shadow: 0 0 20px #f00; }
+        #drone-layer { position: fixed; top: 20%; left: -100px; z-index: 6000; font-size: 40px; transition: 0.1s; pointer-events: none; }
+        .fly-anim { animation: flyOver 3s linear forwards; }
+        @keyframes flyOver { 0% { left: -100px; transform: rotate(10deg); } 50% { left: 50%; transform: rotate(0deg); } 100% { left: 120%; transform: rotate(-10deg); } }
+        #red-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.3); z-index: 7000; display: none; pointer-events: none; mix-blend-mode: overlay; }
+        #breach-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .breach-box { border: 2px solid var(--red); padding: 20px; border-radius: 15px; width: 80%; background: #100; text-align: center; box-shadow: 0 0 50px var(--red); }
+        .defend-bar-bg { width: 100%; height: 20px; background: #300; margin: 20px 0; border: 1px solid var(--red); }
+        .defend-bar-fill { width: 0%; height: 100%; background: var(--red); transition: 0.1s; }
+        .defend-btn { background: var(--red); color: #fff; font-size: 20px; font-weight: bold; border: none; padding: 20px; width: 100%; border-radius: 10px; cursor: pointer; animation: pulse 0.5s infinite; }
+        
         #app-interface { display: none; opacity: 0; transition: 1s; padding-bottom: 120px; overflow-y: scroll; height: 100vh; }
         .ticker-wrap { width: 100%; background: #111; padding: 8px 0; position: fixed; top: 0; z-index: 2000; font-family: monospace; font-size: 10px; color: #666; }
         .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 60px auto 20px; position: relative; animation: core-pulse 3s infinite; cursor: pointer; transition: 0.5s; }
@@ -117,9 +156,6 @@
         .tx-amt.credit { color: #00ff00; }
         .frozen { border-color: var(--ice) !important; background: linear-gradient(145deg, #002, #000) !important; box-shadow: 0 0 20px var(--ice) !important; }
         .frozen-text { color: var(--ice) !important; text-shadow: 0 0 10px var(--ice); }
-        .agent-list { text-align: left; max-height: 100px; overflow-y: auto; margin-top: 10px; }
-        .active-agent { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #222; font-size: 10px; }
-        .agent-loc { color: var(--green); }
         .news-ticker { position: fixed; bottom: 85px; width: 100%; background: #111; border-top: 1px solid #333; padding: 5px 0; overflow: hidden; white-space: nowrap; z-index: 900; }
         .ticker-content { display: inline-block; padding-left: 100%; animation: scroll 20s linear infinite; color: #888; font-size: 10px; font-family: monospace; }
         @keyframes scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
@@ -132,44 +168,6 @@
         .trade-btn { background: #333; border: 1px solid #555; color: #fff; font-size: 9px; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
         .trade-btn:active { background: var(--accent); color: #000; }
         .trend-up { color: #0f0; } .trend-down { color: #f00; }
-        
-        /* --- ASSETS --- */
-        .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; }
-        .chart-bar { width: 12%; background: #333; border-radius: 4px 4px 0 0; transition: 0.5s; animation: growBar 1s ease-out; }
-        .chart-bar.active { background: var(--green); }
-        .miner-box { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-top: 15px; text-align: left; font-family: monospace; font-size: 10px; color: #0f0; height: 80px; overflow: hidden; display: none; }
-        .hash-line { margin: 2px 0; }
-        .avatar-glow { box-shadow: 0 0 15px var(--gold), 0 0 30px var(--gold); border: 2px solid #fff !important; }
-        
-        /* --- CALL, BREACH, DRONE --- */
-        #call-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .caller-icon { width: 100px; height: 100px; background: #222; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; animation: pulse 1s infinite; }
-        .call-actions { display: flex; gap: 40px; margin-top: 50px; }
-        .call-btn { width: 70px; height: 70px; border-radius: 50%; border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .accept { background: #0f0; box-shadow: 0 0 20px #0f0; }
-        .decline { background: #f00; box-shadow: 0 0 20px #f00; }
-        #drone-layer { position: fixed; top: 20%; left: -100px; z-index: 6000; font-size: 40px; transition: 0.1s; pointer-events: none; }
-        .fly-anim { animation: flyOver 3s linear forwards; }
-        @keyframes flyOver { 0% { left: -100px; transform: rotate(10deg); } 50% { left: 50%; transform: rotate(0deg); } 100% { left: 120%; transform: rotate(-10deg); } }
-        #red-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.3); z-index: 7000; display: none; pointer-events: none; mix-blend-mode: overlay; }
-        #breach-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .breach-box { border: 2px solid var(--red); padding: 20px; border-radius: 15px; width: 80%; background: #100; text-align: center; box-shadow: 0 0 50px var(--red); }
-        .defend-bar-bg { width: 100%; height: 20px; background: #300; margin: 20px 0; border: 1px solid var(--red); }
-        .defend-bar-fill { width: 0%; height: 100%; background: var(--red); transition: 0.1s; }
-        .defend-btn { background: var(--red); color: #fff; font-size: 20px; font-weight: bold; border: none; padding: 20px; width: 100%; border-radius: 10px; cursor: pointer; animation: pulse 0.5s infinite; }
-        
-        /* --- MAP NEXUS --- */
-        .camera-view { width: 100%; height: 250px; background: #222; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #444; }
-        .laser-beam { width: 100%; height: 2px; background: red; position: absolute; top: 0; box-shadow: 0 0 10px red; animation: scan 1.5s linear infinite; }
-        .map-grid { width: 100%; height: 200px; background: radial-gradient(circle, #222 10%, #000 90%); border: 1px solid #333; margin-bottom: 15px; position: relative; overflow: hidden; border-radius: 10px; }
-        .radar-scan { width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(0, 255, 0, 0.2)); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: spin 3s linear infinite; }
-        .map-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--accent); animation: blink 1s infinite; }
-        .nexus-map { width: 100%; height: 300px; background: #001; border: 1px solid #333; border-radius: 10px; position: relative; overflow: hidden; background-image: radial-gradient(#222 1px, transparent 1px); background-size: 20px 20px; }
-        .nexus-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; animation: gridScroll 10s linear infinite; opacity: 0.3; background: linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px), linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px); background-size: 40px 40px; }
-        @keyframes gridScroll { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
-        .map-node { width: 8px; height: 8px; background: var(--green); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--green); animation: pulse 1s infinite; }
-        .map-node.red { background: var(--red); box-shadow: 0 0 10px var(--red); }
-        .map-label { position: absolute; color: #fff; font-size: 8px; white-space: nowrap; transform: translate(-50%, -15px); }
     </style>
 </head>
 <body>
@@ -192,9 +190,9 @@
     </div>
 
     <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--ice);">BUSINESS EMPIRE</h2><div id="active-ventures"></div><div style="margin-top:20px; border-top:1px dashed #333; padding-top:20px;"><h3>START NEW VENTURE</h3><div class="input-group"><label class="input-label">BUSINESS NAME</label><input type="text" class="app-input" id="biz-name" placeholder="e.g. Lagos Tech"></div><div class="input-group"><label class="input-label">TYPE</label><select class="app-input" id="biz-type"><option value="retail">RETAIL CHAIN (Low Risk)</option><option value="tech">TECH STARTUP (Med Risk)</option><option value="oil">OIL RIG (High Yield)</option></select></div><p style="font-size:10px; color:#888;">SEED CAPITAL REQUIRED: ₦100,000</p><button class="btn-full" onclick="createBusiness()">LAUNCH ENTERPRISE</button></div><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
-    <div id="trophy-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ACHIEVEMENTS</h2><div class="trophy-grid"><div class="trophy" id="badge-breach"><div class="trophy-icon">🛡️</div><div class="trophy-name">SURVIVOR</div></div><div class="trophy" id="badge-hack"><div class="trophy-icon">📡</div><div class="trophy-name">HACKER</div></div><div class="trophy" id="badge-mine"><div class="trophy-icon">⛏️</div><div class="trophy-name">MINER</div></div><div class="trophy" id="badge-rich"><div class="trophy-icon">💰</div><div class="trophy-name">TYCOON</div></div><div class="trophy" id="badge-god"><div class="trophy-icon">⚡</div><div class="trophy-name">GOD MODE</div></div><div class="trophy" id="badge-agent"><div class="trophy-icon">🕵️</div><div class="trophy-name">COMMANDER</div></div><div class="trophy" id="badge-trade"><div class="trophy-icon">⚖️</div><div class="trophy-name">TRADER</div></div><div class="trophy" id="badge-grid"><div class="trophy-icon">🏭</div><div class="trophy-name">GRID MASTER</div></div><div class="trophy" id="badge-ceo"><div class="trophy-icon">👔</div><div class="trophy-name">CEO</div></div></div><button class="btn-full" onclick="toggleModal('trophy-overlay')">CLOSE</button></div></div>
+    <div id="trophy-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ACHIEVEMENTS</h2><div class="trophy-grid"><div class="trophy" id="badge-breach"><div class="trophy-icon">🛡️</div><div class="trophy-name">SURVIVOR</div></div><div class="trophy" id="badge-hack"><div class="trophy-icon">📡</div><div class="trophy-name">HACKER</div></div><div class="trophy" id="badge-mine"><div class="trophy-icon">⛏️</div><div class="trophy-name">MINER</div></div><div class="trophy" id="badge-rich"><div class="trophy-icon">💰</div><div class="trophy-name">TYCOON</div></div><div class="trophy" id="badge-god"><div class="trophy-icon">⚡</div><div class="trophy-name">GOD MODE</div></div><div class="trophy" id="badge-agent"><div class="trophy-icon">🕵️</div><div class="trophy-name">COMMANDER</div></div><div class="trophy" id="badge-trade"><div class="trophy-icon">⚖️</div><div class="trophy-name">TRADER</div></div><div class="trophy" id="badge-grid"><div class="trophy-icon">🏭</div><div class="trophy-name">GRID MASTER</div></div><div class="trophy" id="badge-ceo"><div class="trophy-icon">👔</div><div class="trophy-name">CEO</div></div><div class="trophy" id="badge-war"><div class="trophy-icon">⚔️</div><div class="trophy-name">WARLORD</div></div></div><button class="btn-full" onclick="toggleModal('trophy-overlay')">CLOSE</button></div></div>
     <div id="hack-overlay" class="modal-overlay"><div class="modal-card" style="border-color:red;"><h2 style="margin: 0 0 10px 0; color:red;">SATELLITE UPLINK</h2><div class="hack-bar-container"><div class="hack-zone"></div><div class="hack-cursor cursor-moving" id="hack-cursor"></div></div><div style="font-family:monospace; color:#fff; font-size:12px; margin:20px 0;" id="hack-log">WAITING FOR SIGNAL...</div><button class="btn-full" style="background:red;" onclick="lockSignal()">LOCK SIGNAL</button><button class="btn-full" style="background:#222; border:1px solid #333; color:#fff;" onclick="toggleModal('hack-overlay')">ABORT</button></div></div>
-    <div id="market-overlay" class="modal-overlay"><div class="modal-card" style="border-color:#0f0;"><h2 style="color:#0f0;">BLACK MARKET</h2><div style="background:#000; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #333;">LJN BALANCE: <span id="market-bal" style="color:#0f0; font-weight:bold;">0.00</span></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">GHOST VPN</div></div><button class="market-btn" onclick="buyItem('vpn', 2.5)">2.5 LJN</button></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">NEURAL HALO</div></div><button class="market-btn" onclick="buyItem('halo', 5.0)">5.0 LJN</button></div><button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('market-overlay')">CLOSE</button></div></div>
+    <div id="market-overlay" class="modal-overlay"><div class="modal-card" style="border-color:#0f0;"><h2 style="color:#0f0;">BLACK MARKET</h2><div style="background:#000; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #333;">LJN BALANCE: <span id="market-bal" style="color:#0f0; font-weight:bold;">0.00</span></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">GHOST VPN</div></div><button class="market-btn" onclick="buyItem('vpn', 2.5)">2.5 LJN</button></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">NEURAL HALO</div></div><button class="market-btn" onclick="buyItem('halo', 5.0)">5.0 LJN</button></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">CYBER NUKE</div></div><button class="market-btn" onclick="buyItem('nuke', 5.0)">5.0 LJN</button></div><button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('market-overlay')">CLOSE</button></div></div>
     <div id="agent-overlay" class="modal-overlay"><div class="modal-card"><h2>DEPLOY AGENT</h2><div class="input-group"><label class="input-label">TARGET CITY</label><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>New York</option><option>Tokyo</option></select></div><p style="font-size:12px; color:var(--accent);">COST: ₦50,000</p><button class="btn-full" onclick="deployAgent()">AUTHORIZE DEPLOYMENT</button><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('agent-overlay')">CANCEL</button></div></div>
     <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>CONTROL CENTER</h2><div class="input-group"><label class="input-label">DISPLAY NAME</label><input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE"></div><div class="input-group"><label class="input-label">SYSTEM THEME</label><div style="display:flex; gap:10px;"><button class="btn" style="margin:0; flex:1;" onclick="toggleTheme('gold')">GOLD</button><button class="btn" style="margin:0; flex:1; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button></div></div><div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:10px; color:#888;">PANIC PROTOCOL</span><button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="activatePanic()">💀</button></div><button class="btn-full" onclick="saveSettings()">SAVE</button><button class="btn-outline" style="border-color:#ff4444; color:#ff4444;" onclick="hardReset()">HARD RESET</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
     <div id="scan-overlay" class="modal-overlay"><div class="modal-card"><h2>SCAN & PAY</h2><div class="camera-view"><div class="laser-beam"></div></div><p id="scan-status" style="color:var(--accent); font-size:12px; margin-top:15px; height:15px;"></p><button class="btn-full" onclick="toggleModal('scan-overlay')">CANCEL</button></div></div>
@@ -205,18 +203,21 @@
     <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--accent);">PASSPORT</h2><div style="width:60px; height:60px; background:#222; border:2px solid var(--accent); border-radius:50%; margin:10px auto; display:flex; align-items:center; justify-content:center; font-size:24px;" id="pass-avatar">SA</div><div class="pass-row"><span>NAME</span><span style="color:var(--accent);" id="pass-name">STEVEN</span></div><div class="pass-row"><span>CLEARANCE</span><span style="color:var(--accent); cursor:pointer;" id="pass-lvl" onclick="openTrophies()">LEVEL 5 (TAP)</span></div><div class="pass-row"><span>IP</span><span style="color:var(--accent);" id="pass-ip">102.88.xx</span></div><button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
     <div id="receipt-overlay" class="modal-overlay"><div class="modal-card receipt-card"><h2 id="rec-title">SUCCESS</h2><div class="dashed-line"></div><div style="display:flex; justify-content:space-between;"><span>AMT</span><span id="rec-amt">₦ 0</span></div><div style="display:flex; justify-content:space-between;"><span>TO</span><span id="rec-to">...</span></div><button class="btn-full" style="background:#000; color:#fff;" onclick="closeReceipt()">DOWNLOAD</button></div></div>
 
-    <div class="news-ticker"><div class="ticker-content" id="news-text">LIVENJET ENTERPRISE ONLINE ... GLOBAL MARKETS STABLE ... AGENTS DEPLOYED ... SYSTEM SECURE ...</div></div>
+    <div class="news-ticker"><div class="ticker-content" id="news-text">LIVENJET WAR ROOM ONLINE ... TERRITORY CONTROL ACTIVE ... DEFCON 5 ...</div></div>
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">PUPPET MASTER v36.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">WAR ROOM v37.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
     </div>
 
     <div id="app-interface">
-        <div class="ticker-wrap"><span onclick="restorePanic()">SYSTEM NODE: LOS-01</span> | 32°C ☀️ | <span id="clock"></span></div>
+        <div class="ticker-wrap">
+            <span style="font-weight:bold; color:var(--ice);" id="influence-score">INFLUENCE: 0%</span> | 
+            <span onclick="restorePanic()">SYSTEM NODE: LOS-01</span> | <span id="clock"></span>
+        </div>
         <div class="avatar-btn" onclick="toggleModal('passport-overlay')" id="main-avatar">SA</div>
         <div class="currency-btn" onclick="toggleCurrency()">₦ / $</div>
         <div class="settings-btn" onclick="toggleModal('settings-overlay')">⚙️</div>
@@ -255,13 +256,13 @@
 
         <div id="logi" class="pillar">
             <div class="intel-card tilt-card">
-                <h3>GLOBAL COMMODITIES</h3>
-                <div id="commodity-list" style="margin-top:10px;"></div>
-            </div>
-            <div class="intel-card tilt-card">
-                <h3>ACTIVE AGENTS</h3>
+                <h3>WAR ROOM / ACTIVE AGENTS</h3>
                 <div class="agent-list" id="agent-display"><div style="color:#666; font-size:10px; text-align:center; padding:10px;">NO AGENTS DEPLOYED</div></div>
                 <button class="btn" onclick="toggleModal('agent-overlay')" style="margin-top:10px; font-size:10px;">+ DEPLOY AGENT (₦50k)</button>
+            </div>
+            <div class="intel-card tilt-card">
+                <h3>GLOBAL COMMODITIES</h3>
+                <div id="commodity-list" style="margin-top:10px;"></div>
             </div>
             <button class="btn" onclick="openMap()">OPEN NEXUS MAP</button>
             <button class="btn" style="background:#000; border:1px solid red; color:red; margin-top:10px;" onclick="openHack()">OVERRIDE SATELLITE</button>
@@ -292,20 +293,20 @@
 
     <script>
         // --- DATA ---
-        let balance=50000; let ljnCrypto=0.00; let userName="STEVEN ADEWOLE"; let agents=[]; let badges={breach:false,hack:false,mine:false,rich:false,god:false,agent:false,trade:false,grid:false,ceo:false}; let transactions=[]; let inventory={gold:0,oil:0}; let infra = { solar: 0, nuke: 0 }; let ventures = [];
-        let ownedAssets = { island: false, yacht: false, jet: false, mansion: false }; // NEW
+        let balance=50000; let ljnCrypto=0.00; let userName="STEVEN ADEWOLE"; let agents=[]; let badges={breach:false,hack:false,mine:false,rich:false,god:false,agent:false,trade:false,grid:false,ceo:false,war:false}; let transactions=[]; let inventory={gold:0,oil:0}; let infra = { solar: 0, nuke: 0 }; let ventures = []; let ownedAssets = { island: false, yacht: false, jet: false, mansion: false };
+        let influence = 0; // Global Influence
 
         function loadData() {
-            if(localStorage.getItem('livenjet_data_v5')) {
-                const d = JSON.parse(localStorage.getItem('livenjet_data_v5'));
-                balance = d.balance||50000; ljnCrypto=d.ljnCrypto||0; userName=d.userName||"STEVEN ADEWOLE"; agents=d.agents||[]; badges=d.badges||badges; transactions=d.transactions||[]; inventory=d.inventory||{gold:0,oil:0}; infra=d.infra||{solar:0,nuke:0}; ventures=d.ventures||[]; ownedAssets=d.ownedAssets||{island:false,yacht:false,jet:false,mansion:false};
+            if(localStorage.getItem('livenjet_data_v6')) {
+                const d = JSON.parse(localStorage.getItem('livenjet_data_v6'));
+                balance = d.balance||50000; ljnCrypto=d.ljnCrypto||0; userName=d.userName||"STEVEN ADEWOLE"; agents=d.agents||[]; badges=d.badges||badges; transactions=d.transactions||[]; inventory=d.inventory||{gold:0,oil:0}; infra=d.infra||{solar:0,nuke:0}; ventures=d.ventures||[]; ownedAssets=d.ownedAssets||{island:false,yacht:false,jet:false,mansion:false}; influence=d.influence||0;
                 const l = document.getElementById('ledger-list'); l.innerHTML = "";
                 transactions.slice(0,5).forEach(tx=>{let c=tx.type==="credit"?"#0f0":"#ff4444"; let s=tx.type==="credit"?"+":"-"; let i=tx.type==="credit"?"🏦":"💸"; l.innerHTML+=`<div class="tx-row"><div class="tx-icon">${i}</div><div class="tx-details"><p class="tx-title">${tx.name}</p><p class="tx-date">Cached</p></div><div class="tx-amt" style="color:${c}">${s}₦${tx.amt.toLocaleString()}</div></div>`;});
                 updateDisplay(); updateAgentList(); updateVentureUI(); checkAchievements();
             }
         }
-        function saveData(){localStorage.setItem('livenjet_data_v5',JSON.stringify({balance,ljnCrypto,userName,agents,badges,transactions,inventory,infra,ventures,ownedAssets}));}
-        function hardReset(){if(confirm("WIPE ALL DATA?")){localStorage.removeItem('livenjet_data_v5');location.reload();}}
+        function saveData(){localStorage.setItem('livenjet_data_v6',JSON.stringify({balance,ljnCrypto,userName,agents,badges,transactions,inventory,infra,ventures,ownedAssets,influence}));}
+        function hardReset(){if(confirm("WIPE ALL DATA?")){localStorage.removeItem('livenjet_data_v6');location.reload();}}
 
         // --- CORE VARIABLES ---
         let isCardFrozen=false; let currency="NGN"; let rate=1500; let godModeCount=0; let isMining=false; let miningSpeed=0.5; let panicMode=false; let tempBalance=0; let btcPrice=98420; let defensePower=0; let commodities={gold:{price:85000,trend:1},oil:{price:12000,trend:-1}}; let gridHealth=100;
@@ -313,64 +314,129 @@
         window.onload=function(){
             loadData();
             const boot=document.getElementById('boot-screen');
-            const lines=["INITIALIZING KERNEL...", "LOADING USER DATA...", "CHECKING ASSETS...", "WELCOME TO LIVENJET."];
+            const lines=["INITIALIZING KERNEL...", "LOADING USER DATA...", "CHECKING HOSTILES...", "WELCOME TO LIVENJET."];
             let i=0; const interval=setInterval(()=>{if(i<lines.length){boot.innerHTML+=`<div class='boot-line'>${lines[i]}</div>`;i++;}else{clearInterval(interval);setTimeout(()=>{boot.style.display='none';document.getElementById('launchpad').style.display='flex';},800);}},300);
             updateCommodityUI();
         }
 
-        // --- ASSET LOGIC (NEW) ---
-        function openAssets() {
-            toggleModal('assets-overlay');
-            const list = document.getElementById('asset-list');
+        // --- CONFLICT LOGIC (NEW) ---
+        function deployAgent() {
+            const city = document.getElementById('agent-city').value;
+            if(balance >= 50000) {
+                balance -= 50000;
+                // Agent Object: { name, status: 'active' | 'hostile' }
+                agents.push({ name: city, status: 'active' });
+                influence += 5; // Influence Gain
+                updateDisplay();
+                addToLedger("Agent ("+city+")", 50000);
+                updateAgentList();
+                toggleModal('agent-overlay');
+                msg("AGENT DEPLOYED TO " + city.toUpperCase());
+                buzz([100,50,100]);
+                badges.agent = true;
+                checkAchievements();
+            } else { msg("INSUFFICIENT FUNDS"); }
+        }
+
+        function updateAgentList() {
+            const list = document.getElementById('agent-display');
             list.innerHTML = "";
-            const assetsDB = [
-                { id: 'island', name: 'PRIVATE ISLAND', cost: 100000000, icon: '🏝️', desc: 'Stops Cyber Breaches' },
-                { id: 'yacht', name: 'SUPER YACHT', cost: 20000000, icon: '🛳️', desc: 'Status Symbol' },
-                { id: 'jet', name: 'GULFSTREAM G650', cost: 50000000, icon: '✈️', desc: 'Fast Travel' },
-                { id: 'mansion', name: 'EKO ATLANTIC VILLA', cost: 10000000, icon: '🏰', desc: 'Base of Ops' }
-            ];
-            assetsDB.forEach(a => {
-                let cls = ownedAssets[a.id] ? 'asset-item owned' : 'asset-item';
-                let btn = ownedAssets[a.id] ? '<span style="color:#0f0; font-size:10px;">OWNED</span>' : `<button class="btn" style="margin:0; padding:5px; font-size:9px;" onclick="buyAsset('${a.id}', ${a.cost})">BUY ₦${(a.cost/1000000).toFixed(0)}M</button>`;
-                list.innerHTML += `<div class="${cls}"><div class="asset-icon">${a.icon}</div><div class="asset-name">${a.name}</div><div class="asset-cost">${a.desc}</div>${btn}</div>`;
+            if(agents.length === 0) { list.innerHTML = "<div style='color:#666; font-size:10px; text-align:center; padding:10px;'>NO AGENTS DEPLOYED</div>"; return; }
+            
+            agents.forEach((agent, index) => {
+                let statusClass = agent.status === 'hostile' ? 'agent-item hostile' : 'agent-item';
+                let badgeClass = agent.status === 'hostile' ? 'status-badge alert' : 'status-badge';
+                let statusText = agent.status === 'hostile' ? 'UNDER ATTACK' : 'SECURE';
+                let actionsDisplay = agent.status === 'hostile' ? 'flex' : 'none';
+                
+                list.innerHTML += `
+                    <div class="${statusClass}">
+                        <div>
+                            <span style="font-weight:bold; color:#fff;">AGENT 00${index+1}</span>
+                            <span class="agent-loc" style="margin-left:5px;">${agent.name.toUpperCase()}</span>
+                        </div>
+                        <span class="${badgeClass}">${statusText}</span>
+                    </div>
+                    <div class="war-actions" style="display:${actionsDisplay}" id="war-actions-${index}">
+                        <button class="war-btn" onclick="resolveConflict(${index}, 'drone')">DRONE (₦10k)</button>
+                        <button class="war-btn" onclick="resolveConflict(${index}, 'bribe')">BRIBE (₦50k)</button>
+                    </div>
+                `;
             });
         }
 
-        function buyAsset(id, cost) {
+        function resolveConflict(index, method) {
+            let cost = method === 'drone' ? 10000 : 50000;
             if(balance >= cost) {
                 balance -= cost;
-                ownedAssets[id] = true;
+                // Drone has 60% chance, Bribe has 100%
+                let success = method === 'bribe' ? true : Math.random() > 0.4;
+                
+                if(success) {
+                    agents[index].status = 'active';
+                    msg("HOSTILES NEUTRALIZED");
+                    speak("Territory secured.");
+                    badges.war = true;
+                } else {
+                    msg("DRONE FAILED. TRY AGAIN.");
+                    buzz(200);
+                }
                 updateDisplay();
-                openAssets(); // Refresh UI
-                msg("ASSET ACQUIRED: " + id.toUpperCase());
-                buzz([100, 100, 100]);
-                speak("Asset acquired. Portfolio updated.");
+                updateAgentList();
             } else { msg("INSUFFICIENT FUNDS"); }
         }
 
-        // --- NEWS RIGGER (NEW) ---
-        function rigNews() {
-            if(balance >= 50000) {
-                balance -= 50000;
+        function cyberNuke() {
+            // Clears all hostile agents instantly
+            let cleared = 0;
+            agents.forEach(a => { if(a.status === 'hostile') { a.status = 'active'; cleared++; } });
+            if(cleared > 0) {
+                msg(`CYBER NUKE: ${cleared} THREATS ELIMINATED`);
+                speak("All targets destroyed.");
+                updateAgentList();
+            } else { msg("NO TARGETS FOUND"); }
+        }
+
+        // CONFLICT LOOP
+        setInterval(() => {
+            // Passive Income (only from active agents)
+            let activeAgents = agents.filter(a => a.status === 'active').length;
+            if(activeAgents > 0) {
+                const earned = activeAgents * 5000;
+                balance += earned;
                 updateDisplay();
-                msg("INITIATING MEDIA OVERRIDE...");
-                buzz(50);
-                setTimeout(() => {
-                    const news = document.getElementById('news-text');
-                    news.innerText = "BREAKING: GOV ADOPTS BITCOIN! ... GOLD SHORTAGE REPORTED ... BUY NOW! ...";
-                    news.style.color = "#0f0";
-                    // Spike Prices
-                    btcPrice += 15000;
-                    commodities.gold.price += 10000;
-                    commodities.gold.trend = 1;
-                    updateCommodityUI();
-                    speak("Narrative controlled. Markets reacting.");
-                    buzz([50,50]);
-                }, 2000);
-            } else { msg("INSUFFICIENT FUNDS"); }
+                msg(`AGENTS TRIBUTE: ₦${earned.toLocaleString()}`);
+                buzz(20);
+            }
+            
+            // Random Attack Trigger
+            if(agents.length > 0 && Math.random() > 0.95) { // 5% chance every 30s
+                let targetIndex = Math.floor(Math.random() * agents.length);
+                if(agents[targetIndex].status === 'active') {
+                    agents[targetIndex].status = 'hostile';
+                    updateAgentList();
+                    msg(`⚠️ ALERT: AGENT IN ${agents[targetIndex].name.toUpperCase()} UNDER FIRE`);
+                    speak("Agent under attack.");
+                    buzz([500, 500]);
+                }
+            }
+        }, 30000);
+
+        // --- ASSET & MARKET LOGIC (From prev pillars) ---
+        function buyItem(i,c){
+            if(ljnCrypto>=c){
+                ljnCrypto-=c; msg("PURCHASE SUCCESSFUL"); document.getElementById('market-bal').innerText=ljnCrypto.toFixed(2); updateDisplay();
+                if(i==='halo'){document.getElementById('main-avatar').classList.add('avatar-glow');document.getElementById('pass-avatar').classList.add('avatar-glow');}
+                if(i==='vpn'){document.getElementById('pass-ip').innerText="192.168.GHOST";document.getElementById('pass-ip').style.color="#0f0";}
+                if(i==='lvl6'){document.getElementById('pass-lvl').innerText="LEVEL 6 (GOD)";document.getElementById('pass-lvl').style.color="#0f0";}
+                if(i==='nuke'){cyberNuke();} // NEW
+            } else { msg("INSUFFICIENT LJN"); }
         }
 
         // --- EXISTING FUNCTIONS (Optimized) ---
+        function openAssets() { toggleModal('assets-overlay'); const list = document.getElementById('asset-list'); list.innerHTML = ""; const assetsDB = [{ id: 'island', name: 'PRIVATE ISLAND', cost: 100000000, icon: '🏝️', desc: 'Stops Cyber Breaches' }, { id: 'yacht', name: 'SUPER YACHT', cost: 20000000, icon: '🛳️', desc: 'Status Symbol' }, { id: 'jet', name: 'GULFSTREAM G650', cost: 50000000, icon: '✈️', desc: 'Fast Travel' }, { id: 'mansion', name: 'EKO ATLANTIC VILLA', cost: 10000000, icon: '🏰', desc: 'Base of Ops' }]; assetsDB.forEach(a => { let cls = ownedAssets[a.id] ? 'asset-item owned' : 'asset-item'; let btn = ownedAssets[a.id] ? '<span style="color:#0f0; font-size:10px;">OWNED</span>' : `<button class="btn" style="margin:0; padding:5px; font-size:9px;" onclick="buyAsset('${a.id}', ${a.cost})">BUY ₦${(a.cost/1000000).toFixed(0)}M</button>`; list.innerHTML += `<div class="${cls}"><div class="asset-icon">${a.icon}</div><div class="asset-name">${a.name}</div><div class="asset-cost">${a.desc}</div>${btn}</div>`; }); }
+        function buyAsset(id, cost) { if(balance >= cost) { balance -= cost; ownedAssets[id] = true; updateDisplay(); openAssets(); msg("ASSET ACQUIRED: " + id.toUpperCase()); buzz([100, 100, 100]); speak("Asset acquired."); influence+=10; } else { msg("INSUFFICIENT FUNDS"); } }
+        function rigNews() { if(balance >= 50000) { balance -= 50000; updateDisplay(); msg("INITIATING MEDIA OVERRIDE..."); buzz(50); setTimeout(() => { const news = document.getElementById('news-text'); news.innerText = "BREAKING: GOV ADOPTS BITCOIN! ... GOLD SHORTAGE REPORTED ... BUY NOW! ..."; news.style.color = "#0f0"; btcPrice += 15000; commodities.gold.price += 10000; commodities.gold.trend = 1; updateCommodityUI(); speak("Narrative controlled. Markets reacting."); buzz([50,50]); }, 2000); } else { msg("INSUFFICIENT FUNDS"); } }
         function createBusiness() { const name = document.getElementById('biz-name').value; const type = document.getElementById('biz-type').value; const cost = 100000; if(balance >= cost && name) { balance -= cost; ventures.push({ name: name, type: type, level: 1, revenue: 0, progress: 0 }); updateDisplay(); updateVentureUI(); msg("VENTURE LAUNCHED: " + name); buzz([100,100]); toggleModal('ventures-overlay'); badges.ceo = true; checkAchievements(); } else { msg("INSUFFICIENT FUNDS OR INVALID NAME"); } }
         function updateVentureUI() { const container = document.getElementById('active-ventures'); if(ventures.length === 0) { container.innerHTML = "<p style='font-size:10px; color:#666;'>NO ACTIVE BUSINESSES</p>"; return; } container.innerHTML = ""; ventures.forEach((v, index) => { let typeName = v.type === 'retail' ? "RETAIL" : v.type === 'tech' ? "TECH" : "OIL"; container.innerHTML += `<div class="venture-card"><div class="venture-header"><span class="venture-title">${v.name.toUpperCase()} (${typeName})</span><span class="venture-profit">₦${v.revenue.toLocaleString()}</span></div><div class="venture-progress"><div class="venture-bar" id="bar-${index}" style="width:${v.progress}%"></div></div><div class="venture-actions"><button class="venture-btn" onclick="collectRevenue(${index})">COLLECT</button><button class="venture-btn" onclick="upgradeBusiness(${index})">UPGRADE (₦${(v.level*50000).toLocaleString()})</button></div></div>`; }); }
         setInterval(() => { ventures.forEach((v, index) => { if(v.progress < 100) { v.progress += 5 * v.level; if(v.progress > 100) v.progress = 100; const bar = document.getElementById(`bar-${index}`); if(bar) bar.style.width = v.progress + "%"; } else { let yieldAmt = 0; if(v.type === 'retail') yieldAmt = 2000 * v.level; if(v.type === 'tech') yieldAmt = 5000 * v.level; if(v.type === 'oil') yieldAmt = 15000 * v.level; v.revenue += yieldAmt; v.progress = 0; updateVentureUI(); } }); saveData(); }, 1000);
@@ -382,19 +448,15 @@
         function updateCommodityUI(){const l=document.getElementById('commodity-list');l.innerHTML="";for(const[k,d]of Object.entries(commodities)){let c=d.trend>0?"trend-up":"trend-down";let a=d.trend>0?"▲":"▼";l.innerHTML+=`<div class="trade-row"><div><div class="trade-name">${k.toUpperCase()} <span style="font-size:9px; color:#888;">(Owned: ${inventory[k]})</span></div><div class="trade-price ${c}">${a} ₦${d.price.toLocaleString()}</div></div><div class="trade-actions"><button class="trade-btn" onclick="trade('${k}','buy')">BUY</button><button class="trade-btn" onclick="trade('${k}','sell')">SELL</button></div></div>`;}}
         function trade(i,a){const p=commodities[i].price;if(a==='buy'){if(balance>=p){balance-=p;inventory[i]++;msg(`BOUGHT 1 ${i.toUpperCase()}`);buzz(50);}else{msg("INSUFFICIENT FUNDS");}}else{if(inventory[i]>0){balance+=p;inventory[i]--;msg(`SOLD 1 ${i.toUpperCase()}`);buzz(50);badges.trade=true;}else{msg(`NO ${i.toUpperCase()} TO SELL`);}}updateDisplay();updateCommodityUI();checkAchievements();}
         setInterval(()=>{for(const k in commodities){let c=Math.floor(Math.random()*2000)-1000;commodities[k].price+=c;if(commodities[k].price<5000)commodities[k].price=5000;commodities[k].trend=c>0?1:-1;}updateCommodityUI();if(Math.random()>0.98&&!panicMode&&document.getElementById('launchpad').style.display==='none'&&!ownedAssets.island)triggerBreach();const ch=Math.floor(Math.random()*200)-100;btcPrice+=ch;document.getElementById('btc-price').innerText="$"+btcPrice.toLocaleString();checkAchievements();},5000);
-        setInterval(()=>{if(agents.length>0){const e=agents.length*5000;balance+=e;updateDisplay();msg(`AGENTS TRIBUTE: ₦${e.toLocaleString()}`);buzz(20);} let inc=(infra.solar*1000)+(infra.nuke*5000); if(inc>0){balance+=inc;updateDisplay();} if(Math.random()>0.99&&gridHealth>50)triggerBlackout();},30000);
-        function checkAchievements(){if(balance>1000000&&!badges.rich){badges.rich=true;msg("TROPHY UNLOCKED: TYCOON");}if(ljnCrypto>5&&!badges.mine){badges.mine=true;msg("TROPHY UNLOCKED: MINER");}if(badges.trade)document.getElementById('badge-trade').classList.add('unlocked');if(badges.grid)document.getElementById('badge-grid').classList.add('unlocked');if(badges.ceo)document.getElementById('badge-ceo').classList.add('unlocked');for(const[k,v]of Object.entries(badges)){if(v)document.getElementById('badge-'+k).classList.add('unlocked');}saveData();}
+        setInterval(()=>{let inc=(infra.solar*1000)+(infra.nuke*5000); if(inc>0){balance+=inc;updateDisplay();} if(Math.random()>0.99&&gridHealth>50)triggerBlackout();},30000);
+        function checkAchievements(){if(balance>1000000&&!badges.rich){badges.rich=true;msg("TROPHY UNLOCKED: TYCOON");}if(ljnCrypto>5&&!badges.mine){badges.mine=true;msg("TROPHY UNLOCKED: MINER");}if(badges.trade)document.getElementById('badge-trade').classList.add('unlocked');if(badges.grid)document.getElementById('badge-grid').classList.add('unlocked');if(badges.ceo)document.getElementById('badge-ceo').classList.add('unlocked');if(badges.war)document.getElementById('badge-war').classList.add('unlocked');for(const[k,v]of Object.entries(badges)){if(v)document.getElementById('badge-'+k).classList.add('unlocked');}saveData();}
         function openTrophies(){toggleModal('passport-overlay');toggleModal('trophy-overlay');}
-        function updateDisplay(){let d=balance;let s="₦ ";if(currency==="USD"){d=balance/rate;s="$ ";}document.getElementById('wallet-bal').innerText=s+d.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});document.getElementById('pass-name').innerText=userName;let i=userName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();document.getElementById('main-avatar').innerText=i;document.getElementById('pass-avatar').innerText=i;document.getElementById('ljn-bal').innerText=ljnCrypto.toFixed(4)+" LJN"; 
-        const core = document.getElementById('neural-core'); if(balance > 10000000) core.style.background = "radial-gradient(circle, #00f2ff 0%, transparent 70%)"; else if(balance > 1000000) core.style.background = "radial-gradient(circle, #FFD700 0%, transparent 70%)"; else core.style.background = "radial-gradient(circle, #ff4444 0%, transparent 70%)";
-        saveData();}
+        function updateDisplay(){let d=balance;let s="₦ ";if(currency==="USD"){d=balance/rate;s="$ ";}document.getElementById('wallet-bal').innerText=s+d.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});document.getElementById('pass-name').innerText=userName;let i=userName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();document.getElementById('main-avatar').innerText=i;document.getElementById('pass-avatar').innerText=i;document.getElementById('ljn-bal').innerText=ljnCrypto.toFixed(4)+" LJN"; document.getElementById('influence-score').innerText="INFLUENCE: "+influence+"%"; const core = document.getElementById('neural-core'); if(balance > 10000000) core.style.background = "radial-gradient(circle, #00f2ff 0%, transparent 70%)"; else if(balance > 1000000) core.style.background = "radial-gradient(circle, #FFD700 0%, transparent 70%)"; else core.style.background = "radial-gradient(circle, #ff4444 0%, transparent 70%)"; saveData();}
         function addToLedger(n,a,t="debit"){transactions.unshift({name:n,amt:a,type:t});if(transactions.length>20)transactions.pop();const l=document.getElementById('ledger-list');const r=document.createElement('div');r.className='tx-row';let c=t==="credit"?"#0f0":"#ff4444";let s=t==="credit"?"+":"-";let i=t==="credit"?"🏦":"💸";r.innerHTML=`<div class="tx-icon">${i}</div><div class="tx-details"><p class="tx-title">${n}</p><p class="tx-date">Just Now</p></div><div class="tx-amt" style="color:${c}">${s}₦${a.toLocaleString()}</div>`;l.insertBefore(r,l.firstChild);saveData();}
-        function openMap(){toggleModal('map-overlay');const m=document.getElementById('nexus-map');m.innerHTML='<div class="nexus-grid"></div>';agents.forEach(c=>{let t=Math.random()*80+10;let l=Math.random()*80+10;m.innerHTML+=`<div class="map-node" style="top:${t}%; left:${l}%;"><div class="map-label">${c.toUpperCase()}</div></div>`;});if(document.getElementById('red-alert').style.display==='block'){m.innerHTML+=`<div class="map-node red" style="top:50%; left:50%;"><div class="map-label" style="color:red;">THREAT DETECTED</div></div>`;}}
+        function openMap(){toggleModal('map-overlay');const m=document.getElementById('nexus-map');m.innerHTML='<div class="nexus-grid"></div>';agents.forEach(a=>{let t=Math.random()*80+10;let l=Math.random()*80+10;let col=a.status==='hostile'?'red':'';m.innerHTML+=`<div class="map-node ${col}" style="top:${t}%; left:${l}%;"><div class="map-label">${a.name.toUpperCase()}</div></div>`;});if(document.getElementById('red-alert').style.display==='block'){m.innerHTML+=`<div class="map-node red" style="top:50%; left:50%;"><div class="map-label" style="color:red;">THREAT DETECTED</div></div>`;}}
         function triggerBreach(){buzz([500,200,500]);document.body.classList.add('shake');document.getElementById('red-alert').style.display="block";document.getElementById('breach-overlay').style.display="flex";defensePower=0;updateDefenseBar();speak("System Breach.");}
         function chargeFirewall(){defensePower+=10;buzz(50);updateDefenseBar();if(defensePower>=100){document.getElementById('breach-overlay').style.display="none";document.getElementById('red-alert').style.display="none";document.body.classList.remove('shake');balance+=10000;updateDisplay();msg("THREAT ELIMINATED. +₦10k");speak("Threat Neutralized.");badges.breach=true;}}
         function updateDefenseBar(){document.getElementById('defend-bar').style.width=defensePower+"%";}
-        function deployAgent(){const c=document.getElementById('agent-city').value;if(balance>=50000){balance-=50000;updateDisplay();addToLedger("Agent ("+c+")",50000);agents.push(c);updateAgentList();toggleModal('agent-overlay');msg("AGENT DEPLOYED");buzz([100,50,100]);badges.agent=true;}else{msg("INSUFFICIENT FUNDS");}}
-        function updateAgentList(){const l=document.getElementById('agent-display');l.innerHTML="";agents.forEach((c,i)=>{l.innerHTML+=`<div class="active-agent"><span>AGENT 00${i+1}</span><span class="agent-loc">${c.toUpperCase()}</span></div>`;});}
         function triggerBlackout(){gridHealth=0;document.body.style.filter="brightness(0.2)";document.getElementById('grid-text').innerText="GRID FAILURE";document.getElementById('grid-text').classList.add('grid-fail');document.getElementById('inject-btn').style.display="block";speak("Warning. Grid Collapse Detected.");buzz([500,500,500]);}
         function injectPower(){gridHealth+=20;buzz(50);if(gridHealth>=100){gridHealth=100;document.body.style.filter="brightness(1)";document.getElementById('grid-text').innerText="GRID: STABLE";document.getElementById('grid-text').classList.remove('grid-fail');document.getElementById('inject-btn').style.display="none";balance+=150000;updateDisplay();msg("GRID RESTORED. REWARD: ₦150k");speak("Power Systems Online.");badges.grid=true;checkAchievements();}}
         function buyInfra(t,c){if(balance>=c){balance-=c;infra[t]++;updateDisplay();msg("ASSET ACQUIRED: "+t.toUpperCase());buzz([100,50,100]);}else{msg("INSUFFICIENT FUNDS");}}
@@ -426,7 +488,6 @@
         function lockSignal(){const c=document.getElementById('hack-cursor');const r=c.getBoundingClientRect();const p=((r.left-c.parentElement.getBoundingClientRect().left)/c.parentElement.getBoundingClientRect().width)*100;c.classList.remove('cursor-moving');if(p>40&&p<60){document.getElementById('hack-log').innerText="UPLINK ESTABLISHED";miningSpeed=5.0;speak("Uplink Established.");badges.hack=true;setTimeout(()=>{toggleModal('hack-overlay');nav('fina');startMining()},1500);setTimeout(()=>{miningSpeed=0.5},60000);}else{document.getElementById('hack-log').innerText="SIGNAL LOST";buzz(300);setTimeout(()=>{c.classList.add('cursor-moving')},1000);}}
         function speak(t){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(t);u.rate=1;u.pitch=0.8;window.speechSynthesis.speak(u);}}
         function openMarket(){toggleModal('market-overlay');document.getElementById('market-bal').innerText=ljnCrypto.toFixed(2);}
-        function buyItem(i,c){if(ljnCrypto>=c){ljnCrypto-=c;msg("PURCHASE SUCCESSFUL");document.getElementById('market-bal').innerText=ljnCrypto.toFixed(2);updateDisplay();if(i==='halo'){document.getElementById('main-avatar').classList.add('avatar-glow');document.getElementById('pass-avatar').classList.add('avatar-glow');}if(i==='vpn'){document.getElementById('pass-ip').innerText="192.168.GHOST";document.getElementById('pass-ip').style.color="#0f0";}if(i==='lvl6'){document.getElementById('pass-lvl').innerText="LEVEL 6 (GOD)";document.getElementById('pass-lvl').style.color="#0f0";}}else{msg("INSUFFICIENT LJN");}}
         setTimeout(()=>{triggerCall();},40000);
         function triggerCall(){buzz([1000,500,1000]);document.getElementById('call-overlay').style.display='flex';}
         function endCall(){document.getElementById('call-overlay').style.display='none';}
