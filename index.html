@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Living World</title>
+    <title>LivenJet | Ghost Protocol</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; }
@@ -17,6 +17,14 @@
         @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
         .auth-btn { background: var(--accent); border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 30px; cursor: pointer; animation: pulse 2s infinite; }
 
+        /* --- CALL OVERLAY (NEW) --- */
+        #call-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .caller-icon { width: 100px; height: 100px; background: #222; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; animation: pulse 1s infinite; }
+        .call-actions { display: flex; gap: 40px; margin-top: 50px; }
+        .call-btn { width: 70px; height: 70px; border-radius: 50%; border: none; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .accept { background: #0f0; box-shadow: 0 0 20px #0f0; }
+        .decline { background: #f00; box-shadow: 0 0 20px #f00; }
+
         /* --- MODALS --- */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .modal-card { background: #111; border: 1px solid var(--accent); color: #fff; width: 85%; padding: 25px 20px; border-radius: 20px; position: relative; animation: slideUp 0.4s ease; text-align: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.15); }
@@ -25,11 +33,10 @@
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* --- DRONE & NEWS (NEW) --- */
+        /* --- DRONE & NEWS --- */
         #drone-layer { position: fixed; top: 20%; left: -100px; z-index: 6000; font-size: 40px; transition: 0.1s; pointer-events: none; }
         .fly-anim { animation: flyOver 3s linear forwards; }
         @keyframes flyOver { 0% { left: -100px; transform: rotate(10deg); } 50% { left: 50%; transform: rotate(0deg); } 100% { left: 120%; transform: rotate(-10deg); } }
-
         .news-ticker { position: fixed; bottom: 85px; width: 100%; background: #111; border-top: 1px solid #333; padding: 5px 0; overflow: hidden; white-space: nowrap; z-index: 900; }
         .ticker-content { display: inline-block; padding-left: 100%; animation: scroll 20s linear infinite; color: #888; font-size: 10px; font-family: monospace; }
         @keyframes scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
@@ -130,9 +137,20 @@
         .fab-chat { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
+
+    <div id="call-overlay">
+        <div class="caller-icon">👤</div>
+        <div style="font-size:20px; font-weight:bold; margin-bottom:5px;">UNKNOWN NUMBER</div>
+        <div style="font-size:12px; color:#888;">INCOMING SECURE CALL...</div>
+        <div class="call-actions">
+            <button class="call-btn decline" onclick="endCall()">✕</button>
+            <button class="call-btn accept" onclick="answerCall()">📞</button>
+        </div>
+    </div>
 
     <div id="drone-layer">🛸</div>
 
@@ -164,6 +182,10 @@
             <h2 style="margin: 0 0 20px 0;">CONTROL CENTER</h2>
             <div class="input-group"><label class="input-label">DISPLAY NAME</label><input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE"></div>
             <div class="input-group"><label class="input-label">SYSTEM THEME</label><div style="display:flex; gap:10px;"><button class="btn" style="margin:0; flex:1;" onclick="toggleTheme('gold')">GOLD</button><button class="btn" style="margin:0; flex:1; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button></div></div>
+            <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:10px; color:#888;">PANIC PROTOCOL</span>
+                <button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="activatePanic()">💀</button>
+            </div>
             <button class="btn-full" onclick="saveSettings()">SAVE CHANGES</button>
             <button class="btn-outline" style="border-color:#ff4444; color:#ff4444;" onclick="resetSystem()">FACTORY RESET</button>
             <button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button>
@@ -239,20 +261,20 @@
 
     <div class="news-ticker">
         <div class="ticker-content">
-            LIVENJET SATELLITE ONLINE ... BTC HITS $98,400 ... LAGOS TRAFFIC ALERT: LEKKI-EPE CLEAR ... NEW SECURITY PROTOCOLS ACTIVE ... WEATHER: 32°C ... SYSTEM UPDATE v26.0 READY ... 
+            LIVENJET SATELLITE ONLINE ... BTC HITS $98,400 ... LAGOS TRAFFIC ALERT: LEKKI-EPE CLEAR ... NEW SECURITY PROTOCOLS ACTIVE ... WEATHER: 32°C ... SYSTEM UPDATE v27.0 READY ... 
         </div>
     </div>
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">LIVING WORLD v26.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">GHOST PROTOCOL v27.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
     </div>
 
     <div id="app-interface">
-        <div class="ticker-wrap">SYSTEM NODE: LOS-NGA-01 | <span>32°C ☀️</span> | <span id="clock"></span></div>
+        <div class="ticker-wrap"><span onclick="restorePanic()" style="cursor:pointer;">SYSTEM NODE: LOS-NGA-01</span> | <span>32°C ☀️</span> | <span id="clock"></span></div>
         <div class="avatar-btn" onclick="toggleModal('passport-overlay')" id="main-avatar">SA</div>
         <div class="currency-btn" onclick="toggleCurrency()">₦ / $</div>
         <div class="settings-btn" onclick="toggleModal('settings-overlay')">⚙️</div>
@@ -340,12 +362,49 @@
         let godModeCount = 0;
         let isMining = false;
         let miningSpeed = 0.5;
+        let panicMode = false;
+        let tempBalance = 0;
         
+        // --- GHOST PROTOCOL (CALL) ---
+        setTimeout(() => { triggerCall(); }, 15000); // Call after 15s
+        function triggerCall() {
+            buzz([1000, 500, 1000]); // Ring pattern
+            document.getElementById('call-overlay').style.display = 'flex';
+        }
+        function endCall() { document.getElementById('call-overlay').style.display = 'none'; }
+        function answerCall() {
+            document.getElementById('call-overlay').style.display = 'none';
+            speak("Good day, Chief. The funds have been secured. Proceed with the operation.");
+            msg("ENCRYPTED MSG RECEIVED");
+        }
+
+        // --- PANIC MODE ---
+        function activatePanic() {
+            buzz([100, 50, 100, 50, 500]); // Alarm pattern
+            document.body.style.backgroundColor = "#200"; // Red Tint
+            toggleModal('settings-overlay'); // Close settings
+            tempBalance = balance;
+            balance = 0;
+            panicMode = true;
+            updateDisplay();
+            msg("⚠️ PANIC PROTOCOL ACTIVE");
+        }
+        function restorePanic() {
+            if(panicMode) {
+                buzz(50);
+                balance = tempBalance;
+                document.body.style.backgroundColor = "#000";
+                panicMode = false;
+                updateDisplay();
+                msg("SYSTEM RESTORED");
+            }
+        }
+
         // --- DRONE LOGIC ---
         function flyDrone() {
             const drone = document.getElementById('drone-layer');
             drone.classList.remove('fly-anim');
-            void drone.offsetWidth; // Trigger reflow
+            void drone.offsetWidth;
             drone.classList.add('fly-anim');
             buzz(100);
         }
@@ -412,7 +471,7 @@
             if(isCardFrozen) { msg("CARD IS FROZEN ❄️"); buzz([50,50,50]); return; } 
             if(balance < amount) { msg("INSUFFICIENT FUNDS"); return; } 
             buzz(50); balance -= amount; updateDisplay(); addToLedger(name, amount); 
-            if(isUtility) flyDrone(); // TRIGGER DRONE
+            if(isUtility) flyDrone(); 
             toggleModal('receipt-overlay'); document.getElementById('rec-title').innerText = "SUCCESS"; let displayAmt = amount; let symbol = "₦ "; if(currency === "USD") { displayAmt = amount / rate; symbol = "$ "; } document.getElementById('rec-amt').innerText = symbol + displayAmt.toLocaleString(undefined, {minimumFractionDigits: 2}); document.getElementById('rec-to').innerText = name; 
         }
         function saveSettings() { const newName = document.getElementById('set-name').value; if(newName) { userName = newName.toUpperCase(); updateDisplay(); msg("PROFILE UPDATED"); toggleModal('settings-overlay'); } }
@@ -430,7 +489,11 @@
         let isStealth=false;
         function toggleStealth() { buzz(20); const b=document.getElementById('wallet-bal'); if(isStealth){ updateDisplay(); isStealth=false; } else { b.innerText=currency==="USD"?"$ ****":"₦ ****"; isStealth=true; } }
         function msg(t) { const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
+        
+        // TIME GREETING
+        function setGreeting() { const h = new Date().getHours(); let g = h < 12 ? "Good Morning" : h < 18 ? "Good Afternoon" : "Good Evening"; msg(g + ", Chief."); }
         setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString()},1000);
+        setTimeout(setGreeting, 1500); 
     </script>
 </body>
 </html>
