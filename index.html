@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Commerce Engine</title>
+    <title>LivenJet | Transfer Network</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; }
-        body { background-color: #000; color: var(--gold); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; }
+        body { background-color: #000; color: var(--gold); font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; user-select: none; }
         
         /* --- BIOMETRIC LOCK --- */
         #launchpad { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s ease-in-out; }
@@ -17,14 +17,19 @@
         @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
         .auth-btn { background: var(--gold); border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 30px; cursor: pointer; animation: pulse 2s infinite; }
 
-        /* --- RECEIPT MODAL (NEW) --- */
+        /* --- RECEIPT MODAL --- */
         #receipt-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .receipt-card { background: #fff; color: #000; width: 80%; padding: 30px 20px; border-radius: 15px; position: relative; animation: slideUp 0.5s ease; text-align: center; }
         .receipt-card::before { content: ""; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; background: #0f0; border-radius: 50%; box-shadow: 0 0 15px #0f0; z-index: 2; }
-        .receipt-card::after { content: "✔"; position: absolute; top: -5px; left: 50%; transform: translateX(-50%); color: #000; font-weight: bold; z-index: 3; font-size: 20px; }
-        
         .dashed-line { border-bottom: 2px dashed #ccc; margin: 20px 0; }
         .receipt-btn { background: #000; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* --- TRANSFER AVATARS --- */
+        .transfer-row { display: flex; justify-content: space-between; margin-top: 15px; gap: 10px; }
+        .agent { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .agent-img { width: 45px; height: 45px; background: #222; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: #fff; transition: 0.2s; }
+        .agent-img:active { transform: scale(0.9); background: var(--gold); color: #000; }
+        .agent-name { font-size: 9px; margin-top: 5px; color: #888; }
 
         /* --- MAIN APP --- */
         #app-interface { display: none; opacity: 0; transition: 1s; padding-bottom: 120px; overflow-y: scroll; height: 100vh; }
@@ -41,10 +46,11 @@
 
         .intel-card { background: rgba(15,15,15,0.9); border: 1px solid #222; border-bottom: 2px solid var(--gold); border-radius: 16px; padding: 20px; margin: 15px auto; max-width: 340px; text-align: left; }
         .btn { background: var(--gold); border: none; padding: 15px; width: 100%; border-radius: 12px; margin-top: 10px; font-weight: bold; cursor: pointer; }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
 
         /* --- DOCK --- */
         .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(10,10,10,0.95); border: 1px solid #332; border-radius: 25px; display: flex; justify-content: space-around; padding: 18px 0; z-index: 1000; backdrop-filter: blur(10px); }
-        .dock-item { font-size: 24px; opacity: 0.3; transition: 0.3s; }
+        .dock-item { font-size: 24px; opacity: 0.3; transition: 0.3s; cursor: pointer; }
         .active-icon { opacity: 1; color: var(--gold); transform: translateY(-5px); }
     </style>
 </head>
@@ -53,15 +59,15 @@
     <div id="receipt-overlay">
         <div class="receipt-card">
             <h2 style="margin: 10px 0;">PAYMENT SUCCESS</h2>
-            <p style="color: #666; font-size: 12px;">Transaction Completed</p>
+            <p style="color: #666; font-size: 12px;">Funds Transferred</p>
             <div class="dashed-line"></div>
             <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px;">
                 <span>AMOUNT</span>
                 <span style="font-weight: bold;" id="rec-amt">₦ 0.00</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 14px;">
-                <span>REF ID</span>
-                <span style="font-family: monospace;" id="rec-id">#LJ-000</span>
+                <span>BENEFICIARY</span>
+                <span style="font-family: monospace;" id="rec-to">Unknown</span>
             </div>
             <div class="dashed-line"></div>
             <button class="receipt-btn" onclick="closeReceipt()">CLOSE RECEIPT</button>
@@ -70,7 +76,7 @@
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">SECURE GATEWAY</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">HAPTIC INTERFACE v9.1</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -85,9 +91,16 @@
             <div class="intel-card">
                 <p style="font-size: 10px; color: #666; margin: 0;">GLOBAL LIQUIDITY</p>
                 <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New';" id="wallet-bal">₦ 50,000.00</h2>
-                <p style="font-size: 9px; color: #0f0;">● ENCRYPTED CONNECTION</p>
+                
+                <p style="font-size: 9px; color: #666; margin-top: 20px;">QUICK TRANSFER</p>
+                <div class="transfer-row">
+                    <div class="agent" onclick="pay(5000, 'Agent Sarah')"><div class="agent-img">SA</div><span class="agent-name">Sarah</span></div>
+                    <div class="agent" onclick="pay(2500, 'Pilot Mike')"><div class="agent-img">PM</div><span class="agent-name">Mike</span></div>
+                    <div class="agent" onclick="pay(10000, 'HQ Vault')"><div class="agent-img">HQ</div><span class="agent-name">HQ</span></div>
+                    <div class="agent" onclick="pay(1500, 'Logistics')"><div class="agent-img">LG</div><span class="agent-name">Logs</span></div>
+                </div>
             </div>
-            <button class="btn" onclick="pay(5000, 'Adding Liquidity')">DEPOSIT FUNDS</button>
+            <button class="btn" onclick="msg('Syncing Global Accounts...')">SYNC NETWORK</button>
         </div>
 
         <div id="util" class="pillar">
@@ -107,31 +120,41 @@
     </div>
 
     <script>
+        // HAPTIC ENGINE
+        function buzz(duration) {
+            if (navigator.vibrate) navigator.vibrate(duration);
+        }
+
         // PAYMENT LOGIC
-        function pay(amount, desc) {
+        function pay(amount, name) {
+            buzz(50); // Small vibration on click
             const ai = document.getElementById('ai-msg');
-            ai.innerText = "PROCESSING TRANSACTION...";
+            ai.innerText = "SENDING TO " + name.toUpperCase() + "...";
             ai.style.color = "#FFD700";
 
             setTimeout(() => {
+                buzz(200); // Long vibration on success
                 document.getElementById('receipt-overlay').style.display = 'flex';
                 document.getElementById('rec-amt').innerText = "₦ " + amount.toLocaleString();
-                document.getElementById('rec-id').innerText = "#LJ-" + Math.floor(Math.random() * 9000 + 1000);
+                document.getElementById('rec-to').innerText = name;
             }, 1500);
         }
 
         function closeReceipt() {
+            buzz(50);
             document.getElementById('receipt-overlay').style.display = 'none';
             msg("Transaction Sealed.");
         }
 
         // BIOMETRICS
         function authenticate() {
+            buzz(100);
             const status = document.getElementById('auth-status');
             document.querySelector('.auth-btn').style.display = 'none';
             status.innerText = "SCANNING...";
             status.style.color = "#FFD700";
             setTimeout(() => {
+                buzz([100, 50, 100]); // Success pattern vibration
                 status.innerText = "ACCESS GRANTED";
                 status.style.color = "#0f0";
                 setTimeout(() => {
@@ -143,6 +166,7 @@
         }
 
         function nav(id) {
+            buzz(30);
             document.querySelectorAll('.pillar').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active-icon'));
             document.getElementById(id).classList.add('active');
