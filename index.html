@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | Neural Memory</title>
+    <title>LivenJet | Trade Syndicate</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; }
@@ -30,6 +30,15 @@
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
+        /* --- TRADING TERMINAL (NEW) --- */
+        .trade-row { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #333; }
+        .trade-name { font-size: 12px; font-weight: bold; color: #fff; }
+        .trade-price { font-size: 12px; font-family: monospace; color: var(--gold); }
+        .trade-actions { display: flex; gap: 5px; }
+        .trade-btn { background: #333; border: 1px solid #555; color: #fff; font-size: 9px; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
+        .trade-btn:active { background: var(--accent); color: #000; }
+        .trend-up { color: #0f0; } .trend-down { color: #f00; }
+
         /* --- WIDGETS --- */
         .camera-view { width: 100%; height: 250px; background: #222; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #444; }
         .laser-beam { width: 100%; height: 2px; background: red; position: absolute; top: 0; box-shadow: 0 0 10px red; animation: scan 1.5s linear infinite; }
@@ -39,7 +48,6 @@
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
         .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
-        select.app-input { appearance: none; }
         .action-grid { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
         .action-btn { flex: 1; background: #1a1a1a; border-radius: 12px; padding: 15px 5px; cursor: pointer; border: 1px solid #333; transition: 0.2s; }
         .action-btn:active { background: #333; transform: scale(0.95); }
@@ -51,7 +59,6 @@
         .chart-bar { width: 12%; background: #333; border-radius: 4px 4px 0 0; transition: 0.5s; animation: growBar 1s ease-out; }
         .chart-bar.active { background: var(--green); }
         
-        /* --- SPECIAL MODULES --- */
         .miner-box { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-top: 15px; text-align: left; font-family: monospace; font-size: 10px; color: #0f0; height: 80px; overflow: hidden; display: none; }
         .hash-line { margin: 2px 0; }
         .market-item { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding:15px 0; }
@@ -62,6 +69,8 @@
         .hack-cursor { width: 4px; height: 100%; background: #fff; position: absolute; left: 0; box-shadow: 0 0 10px #fff; }
         .cursor-moving { animation: moveCursor 1s linear infinite alternate; }
         @keyframes moveCursor { 0% { left: 0%; } 100% { left: 98%; } }
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         
         /* --- CHAT --- */
         .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; }
@@ -130,6 +139,8 @@
         .news-ticker { position: fixed; bottom: 85px; width: 100%; background: #111; border-top: 1px solid #333; padding: 5px 0; overflow: hidden; white-space: nowrap; z-index: 900; }
         .ticker-content { display: inline-block; padding-left: 100%; animation: scroll 20s linear infinite; color: #888; font-size: 10px; font-family: monospace; }
         @keyframes scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        .receipt-card { background: #fff; color: #000; border: none; }
+        .dashed-line { border-bottom: 2px dashed #ccc; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -142,11 +153,11 @@
     <div id="drone-layer">🛸</div>
     <div id="breach-overlay"><div class="breach-box"><h1 style="color:var(--red); font-size:24px; margin:0;">⚠️ SYSTEM BREACH</h1><p style="color:#fff; font-size:12px;">HACKER DETECTED! FUNDS AT RISK!</p><div class="defend-bar-bg"><div class="defend-bar-fill" id="defend-bar"></div></div><button class="defend-btn" onclick="chargeFirewall()">DEPLOY FIREWALL</button></div></div>
 
-    <div id="trophy-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ACHIEVEMENTS</h2><div class="trophy-grid"><div class="trophy" id="badge-breach"><div class="trophy-icon">🛡️</div><div class="trophy-name">SURVIVOR</div></div><div class="trophy" id="badge-hack"><div class="trophy-icon">📡</div><div class="trophy-name">HACKER</div></div><div class="trophy" id="badge-mine"><div class="trophy-icon">⛏️</div><div class="trophy-name">MINER</div></div><div class="trophy" id="badge-rich"><div class="trophy-icon">💰</div><div class="trophy-name">TYCOON</div></div><div class="trophy" id="badge-god"><div class="trophy-icon">⚡</div><div class="trophy-name">GOD MODE</div></div><div class="trophy" id="badge-agent"><div class="trophy-icon">🕵️</div><div class="trophy-name">COMMANDER</div></div></div><button class="btn-full" onclick="toggleModal('trophy-overlay')">CLOSE</button></div></div>
+    <div id="trophy-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--gold);">ACHIEVEMENTS</h2><div class="trophy-grid"><div class="trophy" id="badge-breach"><div class="trophy-icon">🛡️</div><div class="trophy-name">SURVIVOR</div></div><div class="trophy" id="badge-hack"><div class="trophy-icon">📡</div><div class="trophy-name">HACKER</div></div><div class="trophy" id="badge-mine"><div class="trophy-icon">⛏️</div><div class="trophy-name">MINER</div></div><div class="trophy" id="badge-rich"><div class="trophy-icon">💰</div><div class="trophy-name">TYCOON</div></div><div class="trophy" id="badge-god"><div class="trophy-icon">⚡</div><div class="trophy-name">GOD MODE</div></div><div class="trophy" id="badge-agent"><div class="trophy-icon">🕵️</div><div class="trophy-name">COMMANDER</div></div><div class="trophy" id="badge-trade"><div class="trophy-icon">⚖️</div><div class="trophy-name">TRADER</div></div></div><button class="btn-full" onclick="toggleModal('trophy-overlay')">CLOSE</button></div></div>
     <div id="hack-overlay" class="modal-overlay"><div class="modal-card" style="border-color:red;"><h2 style="margin: 0 0 10px 0; color:red;">SATELLITE UPLINK</h2><div class="hack-bar-container"><div class="hack-zone"></div><div class="hack-cursor cursor-moving" id="hack-cursor"></div></div><div style="font-family:monospace; color:#fff; font-size:12px; margin:20px 0;" id="hack-log">WAITING FOR SIGNAL...</div><button class="btn-full" style="background:red;" onclick="lockSignal()">LOCK SIGNAL</button><button class="btn-full" style="background:#222; border:1px solid #333; color:#fff;" onclick="toggleModal('hack-overlay')">ABORT</button></div></div>
     <div id="market-overlay" class="modal-overlay"><div class="modal-card" style="border-color:#0f0;"><h2 style="color:#0f0;">BLACK MARKET</h2><div style="background:#000; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #333;">LJN BALANCE: <span id="market-bal" style="color:#0f0; font-weight:bold;">0.00</span></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">GHOST VPN</div></div><button class="market-btn" onclick="buyItem('vpn', 2.5)">2.5 LJN</button></div><div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">NEURAL HALO</div></div><button class="market-btn" onclick="buyItem('halo', 5.0)">5.0 LJN</button></div><button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('market-overlay')">CLOSE</button></div></div>
     <div id="agent-overlay" class="modal-overlay"><div class="modal-card"><h2>DEPLOY AGENT</h2><div class="input-group"><label class="input-label">TARGET CITY</label><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>New York</option><option>Tokyo</option></select></div><p style="font-size:12px; color:var(--accent);">COST: ₦50,000</p><button class="btn-full" onclick="deployAgent()">AUTHORIZE DEPLOYMENT</button><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('agent-overlay')">CANCEL</button></div></div>
-    <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>CONTROL CENTER</h2><div class="input-group"><label class="input-label">DISPLAY NAME</label><input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE"></div><div class="input-group"><label class="input-label">SYSTEM THEME</label><div style="display:flex; gap:10px;"><button class="btn" style="margin:0; flex:1;" onclick="toggleTheme('gold')">GOLD</button><button class="btn" style="margin:0; flex:1; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button></div></div><div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:10px; color:#888;">PANIC PROTOCOL</span><button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="activatePanic()">💀</button></div><button class="btn-full" onclick="saveSettings()">SAVE</button><button class="btn-outline" style="border-color:#ff4444; color:#ff4444;" onclick="hardReset()">HARD RESET (WIPE DATA)</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
+    <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>CONTROL CENTER</h2><div class="input-group"><label class="input-label">DISPLAY NAME</label><input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE"></div><div class="input-group"><label class="input-label">SYSTEM THEME</label><div style="display:flex; gap:10px;"><button class="btn" style="margin:0; flex:1;" onclick="toggleTheme('gold')">GOLD</button><button class="btn" style="margin:0; flex:1; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button></div></div><div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:10px; color:#888;">PANIC PROTOCOL</span><button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="activatePanic()">💀</button></div><button class="btn-full" onclick="saveSettings()">SAVE</button><button class="btn-outline" style="border-color:#ff4444; color:#ff4444;" onclick="hardReset()">HARD RESET</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
     <div id="scan-overlay" class="modal-overlay"><div class="modal-card"><h2>SCAN & PAY</h2><div class="camera-view"><div class="laser-beam"></div></div><p id="scan-status" style="color:var(--accent); font-size:12px; margin-top:15px; height:15px;"></p><button class="btn-full" onclick="toggleModal('scan-overlay')">CANCEL</button></div></div>
     <div id="loan-overlay" class="modal-overlay"><div class="modal-card"><h2>CREDIT SCAN</h2><div id="credit-scanner" style="display:block;"><p style="font-size:10px; color:#888;">SCANNING...</p><div style="width:100%; height:4px; background:#222; margin:20px 0;"><div style="width:100%; height:100%; background:var(--accent); animation:growBar 2s;"></div></div></div><div id="credit-result" style="display:none;"><div class="credit-meter"><div class="credit-score">780</div></div><h1 style="margin:0; font-size:30px; color:var(--green);">₦ 500,000</h1><button class="btn-full" onclick="disburseLoan()">ACCEPT</button></div></div></div>
     <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>SEND MONEY</h2><div class="input-group"><label class="input-label">ACCOUNT</label><input type="number" class="app-input" id="send-acc" oninput="verifyAccount()"></div><div id="verify-box" style="display:none; background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:10px;"><p id="verified-name" style="color:var(--green); font-weight:bold; margin:0;">...</p></div><div class="input-group"><label class="input-label">AMOUNT</label><input type="number" class="app-input" id="send-amt"></div><button class="btn-full" onclick="processTransfer()">CONFIRM</button><button class="btn-full" style="background:#222; color:#fff;" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
@@ -155,11 +166,11 @@
     <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2 style="color:var(--accent);">PASSPORT</h2><div style="width:60px; height:60px; background:#222; border:2px solid var(--accent); border-radius:50%; margin:10px auto; display:flex; align-items:center; justify-content:center; font-size:24px;" id="pass-avatar">SA</div><div class="pass-row"><span>NAME</span><span style="color:var(--accent);" id="pass-name">STEVEN</span></div><div class="pass-row"><span>CLEARANCE</span><span style="color:var(--accent); cursor:pointer;" id="pass-lvl" onclick="openTrophies()">LEVEL 5 (TAP)</span></div><div class="pass-row"><span>IP</span><span style="color:var(--accent);" id="pass-ip">102.88.xx</span></div><button class="btn-full" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
     <div id="receipt-overlay" class="modal-overlay"><div class="modal-card receipt-card"><h2 id="rec-title">SUCCESS</h2><div class="dashed-line"></div><div style="display:flex; justify-content:space-between;"><span>AMT</span><span id="rec-amt">₦ 0</span></div><div style="display:flex; justify-content:space-between;"><span>TO</span><span id="rec-to">...</span></div><button class="btn-full" style="background:#000; color:#fff;" onclick="closeReceipt()">DOWNLOAD</button></div></div>
 
-    <div class="news-ticker"><div class="ticker-content">LIVENJET NEURAL MEMORY ONLINE ... DATA PERSISTENCE ACTIVE ... BTC HITS $99,200 ... SYSTEM OPTIMAL ...</div></div>
+    <div class="news-ticker"><div class="ticker-content">LIVENJET SYNDICATE ACTIVE ... GOLD PRICE RISING ... AGENTS DEPLOYED ... SYSTEM SECURE ...</div></div>
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">MEMORY OS v31.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">SYNDICATE OS v32.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -196,13 +207,13 @@
 
         <div id="logi" class="pillar">
             <div class="intel-card tilt-card">
-                <h3>JET-TRACK</h3>
-                <div style="background:#222; height:6px; border-radius:5px; margin:15px 0;"><div style="width:80%; height:100%; background:var(--accent);"></div></div>
-                <p style="font-size:10px; text-align:right; color:var(--accent);">ARRIVING SOON</p>
-                <div style="margin-top:20px; border-top:1px solid #333; padding-top:10px;">
-                    <div style="display:flex; justify-content:space-between;"><span style="font-size:12px; font-weight:bold;">ACTIVE AGENTS</span><span style="font-size:10px; color:#0f0; cursor:pointer;" onclick="toggleModal('agent-overlay')">+ DEPLOY</span></div>
-                    <div class="agent-list" id="agent-display"><div style="color:#666; font-size:10px; text-align:center; padding:10px;">NO AGENTS DEPLOYED</div></div>
-                </div>
+                <h3>GLOBAL COMMODITIES</h3>
+                <div id="commodity-list" style="margin-top:10px;"></div>
+            </div>
+            <div class="intel-card tilt-card">
+                <h3>ACTIVE AGENTS</h3>
+                <div class="agent-list" id="agent-display"><div style="color:#666; font-size:10px; text-align:center; padding:10px;">NO AGENTS DEPLOYED</div></div>
+                <button class="btn" onclick="toggleModal('agent-overlay')" style="margin-top:10px; font-size:10px;">+ DEPLOY AGENT (₦50k)</button>
             </div>
             <button class="btn" onclick="toggleModal('map-overlay')">LIVE MAP</button>
             <button class="btn" style="background:#000; border:1px solid red; color:red; margin-top:10px;" onclick="openHack()">OVERRIDE SATELLITE</button>
@@ -236,20 +247,21 @@
         let ljnCrypto = 0.00;
         let userName = "STEVEN ADEWOLE";
         let agents = [];
-        let badges = { breach: false, hack: false, mine: false, rich: false, god: false, agent: false };
+        let badges = { breach: false, hack: false, mine: false, rich: false, god: false, agent: false, trade: false };
         let transactions = [];
+        let inventory = { gold: 0, oil: 0 };
 
         function loadData() {
-            if(localStorage.getItem('livenjet_data')) {
-                const data = JSON.parse(localStorage.getItem('livenjet_data'));
+            if(localStorage.getItem('livenjet_data_v2')) {
+                const data = JSON.parse(localStorage.getItem('livenjet_data_v2'));
                 balance = data.balance || 50000;
                 ljnCrypto = data.ljnCrypto || 0.00;
                 userName = data.userName || "STEVEN ADEWOLE";
                 agents = data.agents || [];
                 badges = data.badges || badges;
                 transactions = data.transactions || [];
+                inventory = data.inventory || { gold: 0, oil: 0 };
                 
-                // Rebuild Ledger
                 const l = document.getElementById('ledger-list');
                 l.innerHTML = "";
                 transactions.slice(0, 5).forEach(tx => {
@@ -265,30 +277,23 @@
         }
 
         function saveData() {
-            const data = { balance, ljnCrypto, userName, agents, badges, transactions };
-            localStorage.setItem('livenjet_data', JSON.stringify(data));
+            const data = { balance, ljnCrypto, userName, agents, badges, transactions, inventory };
+            localStorage.setItem('livenjet_data_v2', JSON.stringify(data));
         }
 
-        function hardReset() {
-            if(confirm("WIPE ALL DATA AND RESET?")) {
-                localStorage.removeItem('livenjet_data');
-                location.reload();
-            }
-        }
+        function hardReset() { if(confirm("WIPE ALL DATA?")) { localStorage.removeItem('livenjet_data_v2'); location.reload(); } }
 
         // --- CORE VARIABLES & BOOT ---
-        let isCardFrozen = false;
-        let currency = "NGN"; let rate = 1500;
-        let godModeCount = 0;
-        let isMining = false;
-        let miningSpeed = 0.5;
-        let panicMode = false;
-        let tempBalance = 0;
-        let btcPrice = 98420;
-        let defensePower = 0;
+        let isCardFrozen = false; let currency = "NGN"; let rate = 1500;
+        let godModeCount = 0; let isMining = false; let miningSpeed = 0.5;
+        let panicMode = false; let tempBalance = 0; let btcPrice = 98420; let defensePower = 0;
+        let commodities = {
+            gold: { price: 85000, trend: 1 },
+            oil: { price: 12000, trend: -1 }
+        };
 
         window.onload = function() {
-            loadData(); // LOAD SAVED DATA
+            loadData();
             const boot = document.getElementById('boot-screen');
             const lines = ["INITIALIZING KERNEL...", "LOADING USER DATA...", "DECRYPTING LEDGER...", "CONNECTING TO SATELLITE...", "WELCOME TO LIVENJET."];
             let i = 0;
@@ -296,61 +301,92 @@
                 if(i < lines.length) { boot.innerHTML += `<div class='boot-line'>${lines[i]}</div>`; i++; } 
                 else { clearInterval(interval); setTimeout(() => { boot.style.display = 'none'; document.getElementById('launchpad').style.display = 'flex'; }, 800); }
             }, 300);
+            updateCommodityUI();
         }
 
         // --- CORE FUNCTIONS ---
         function buzz(d) { if(navigator.vibrate) navigator.vibrate(d); }
         function toggleModal(id) { buzz(30); const e = document.getElementById(id); e.style.display = (e.style.display==='flex')?'none':'flex'; }
-        
-        // --- 3D TILT EFFECT ---
-        document.addEventListener('mousemove', (e) => {
-            const cards = document.querySelectorAll('.tilt-card');
-            const x = (window.innerWidth / 2 - e.pageX) / 25;
-            const y = (window.innerHeight / 2 - e.pageY) / 25;
-            cards.forEach(card => { card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`; });
-        });
+        document.addEventListener('mousemove', (e) => { const cards = document.querySelectorAll('.tilt-card'); const x = (window.innerWidth / 2 - e.pageX) / 25; const y = (window.innerHeight / 2 - e.pageY) / 25; cards.forEach(card => { card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`; }); });
 
-        // --- CHAT COMMAND TERMINAL ---
-        function sendMsg() {
-            const i=document.getElementById('user-input');
-            const val = i.value.trim();
-            const box = document.getElementById('chat-box');
-            
-            if(val === "") return;
-            
-            // Add user message
-            box.innerHTML += `<div class="msg msg-user">${val}</div>`;
-            i.value = "";
-            box.scrollTop = box.scrollHeight;
-
-            // COMMAND LOGIC
-            setTimeout(() => {
-                let reply = "Command not recognized.";
-                if(val.toLowerCase() === "/help") reply = "COMMANDS: /hack, /weather, /clear, /reboot, /matrix";
-                else if(val.toLowerCase() === "/hack") { reply = "Initiating Hack..."; openHack(); }
-                else if(val.toLowerCase() === "/clear") { box.innerHTML = ""; reply = "Terminal Cleared."; }
-                else if(val.toLowerCase() === "/weather") { reply = "Current Weather: 32°C (Lagos)"; }
-                else if(val.toLowerCase() === "/reboot") { location.reload(); }
-                else if(val.toLowerCase() === "/matrix") { toggleTheme('matrix'); reply = "Matrix Theme Loaded."; }
-                else reply = "Request received. Processing...";
-                
-                box.innerHTML += `<div class="msg msg-ai">${reply}</div>`;
-                box.scrollTop = box.scrollHeight;
-                buzz(50);
-            }, 1000);
+        // --- TRADING SYSTEM ---
+        function updateCommodityUI() {
+            const list = document.getElementById('commodity-list');
+            list.innerHTML = "";
+            for (const [key, data] of Object.entries(commodities)) {
+                let color = data.trend > 0 ? "trend-up" : "trend-down";
+                let arrow = data.trend > 0 ? "▲" : "▼";
+                list.innerHTML += `
+                    <div class="trade-row">
+                        <div>
+                            <div class="trade-name">${key.toUpperCase()} <span style="font-size:9px; color:#888;">(Owned: ${inventory[key]})</span></div>
+                            <div class="trade-price ${color}">${arrow} ₦${data.price.toLocaleString()}</div>
+                        </div>
+                        <div class="trade-actions">
+                            <button class="trade-btn" onclick="trade('${key}', 'buy')">BUY</button>
+                            <button class="trade-btn" onclick="trade('${key}', 'sell')">SELL</button>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
-        // --- ACHIEVEMENTS & DISPLAY ---
+        function trade(item, action) {
+            const price = commodities[item].price;
+            if(action === 'buy') {
+                if(balance >= price) {
+                    balance -= price;
+                    inventory[item]++;
+                    msg(`BOUGHT 1 ${item.toUpperCase()}`);
+                    buzz(50);
+                } else {
+                    msg("INSUFFICIENT FUNDS");
+                }
+            } else {
+                if(inventory[item] > 0) {
+                    balance += price;
+                    inventory[item]--;
+                    msg(`SOLD 1 ${item.toUpperCase()}`);
+                    buzz(50);
+                    badges.trade = true;
+                } else {
+                    msg(`NO ${item.toUpperCase()} TO SELL`);
+                }
+            }
+            updateDisplay();
+            updateCommodityUI();
+            checkAchievements();
+        }
+
+        // --- LOOPS ---
+        setInterval(() => {
+            // Market fluctuations
+            for (const key in commodities) {
+                let change = Math.floor(Math.random() * 2000) - 1000;
+                commodities[key].price += change;
+                if(commodities[key].price < 5000) commodities[key].price = 5000; // Floor
+                commodities[key].trend = change > 0 ? 1 : -1;
+            }
+            updateCommodityUI();
+            
+            // Random Breach
+            if(Math.random() > 0.98 && !panicMode && document.getElementById('launchpad').style.display === 'none') triggerBreach();
+            const change = Math.floor(Math.random() * 200) - 100; btcPrice += change;
+            document.getElementById('btc-price').innerText = "$" + btcPrice.toLocaleString();
+            checkAchievements();
+        }, 5000); // Every 5s prices update
+
+        setInterval(() => { if(agents.length > 0) { const earned = agents.length * 5000; balance += earned; updateDisplay(); msg(`AGENTS TRIBUTE: ₦${earned.toLocaleString()}`); buzz(20); } }, 30000);
+
+        // --- LOGIC ---
         function checkAchievements() {
             if(balance > 1000000 && !badges.rich) { badges.rich = true; msg("TROPHY UNLOCKED: TYCOON"); }
             if(ljnCrypto > 5 && !badges.mine) { badges.mine = true; msg("TROPHY UNLOCKED: MINER"); }
-            for(const [key, val] of Object.entries(badges)) {
-                if(val) document.getElementById('badge-'+key).classList.add('unlocked');
-            }
+            if(badges.trade) document.getElementById('badge-trade').classList.add('unlocked');
+            for(const [key, val] of Object.entries(badges)) { if(val) document.getElementById('badge-'+key).classList.add('unlocked'); }
             saveData();
         }
         function openTrophies() { toggleModal('passport-overlay'); toggleModal('trophy-overlay'); }
-
         function updateDisplay() {
             let displayBal = balance; let symbol = "₦ "; if(currency === "USD") { displayBal = balance / rate; symbol = "$ "; }
             document.getElementById('wallet-bal').innerText = symbol + displayBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -358,33 +394,18 @@
             let initials = userName.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
             document.getElementById('main-avatar').innerText = initials; document.getElementById('pass-avatar').innerText = initials;
             document.getElementById('ljn-bal').innerText = ljnCrypto.toFixed(4) + " LJN";
-            saveData(); // AUTO SAVE ON DISPLAY UPDATE
+            saveData();
         }
-
         function addToLedger(name, amt, type="debit") {
             const list = document.getElementById('ledger-list');
-            // Save to memory
             transactions.unshift({name, amt, type});
-            if(transactions.length > 20) transactions.pop(); // Keep last 20
-            
+            if(transactions.length > 20) transactions.pop();
             const row = document.createElement('div'); row.className = 'tx-row';
             let color = type === "credit" ? "#0f0" : "#ff4444"; let sign = type === "credit" ? "+" : "-"; let icon = type === "credit" ? "🏦" : "💸";
             row.innerHTML = `<div class="tx-icon">${icon}</div><div class="tx-details"><p class="tx-title">${name}</p><p class="tx-date">Just Now</p></div><div class="tx-amt" style="color:${color}">${sign}₦${amt.toLocaleString()}</div>`;
             list.insertBefore(row, list.firstChild);
             saveData();
         }
-
-        // --- GAME LOOPS ---
-        setInterval(() => {
-            if(Math.random() > 0.98 && !panicMode && document.getElementById('launchpad').style.display === 'none') triggerBreach();
-            const change = Math.floor(Math.random() * 200) - 100; btcPrice += change;
-            document.getElementById('btc-price').innerText = "$" + btcPrice.toLocaleString();
-            checkAchievements();
-        }, 15000);
-
-        setInterval(() => { if(agents.length > 0) { const earned = agents.length * 5000; balance += earned; updateDisplay(); msg(`AGENTS TRIBUTE: ₦${earned.toLocaleString()}`); buzz(20); } }, 30000);
-
-        // --- ACTIONS ---
         function triggerBreach() { buzz([500, 200, 500]); document.body.classList.add('shake'); document.getElementById('red-alert').style.display = "block"; document.getElementById('breach-overlay').style.display = "flex"; defensePower = 0; updateDefenseBar(); speak("System Breach."); }
         function chargeFirewall() { defensePower += 10; buzz(50); updateDefenseBar(); if(defensePower >= 100) { document.getElementById('breach-overlay').style.display = "none"; document.getElementById('red-alert').style.display = "none"; document.body.classList.remove('shake'); balance += 10000; updateDisplay(); msg("THREAT ELIMINATED. +₦10k"); speak("Threat Neutralized."); badges.breach = true; } }
         function updateDefenseBar() { document.getElementById('defend-bar').style.width = defensePower + "%"; }
@@ -399,7 +420,6 @@
         function toggleFreeze() { const c=document.getElementById('credit-card-ui'); const s=document.getElementById('card-status'); const n=document.getElementById('card-num'); buzz(100); if(isCardFrozen){isCardFrozen=false; c.classList.remove('frozen'); s.innerText="ACTIVE"; s.classList.remove('frozen-text'); n.innerText="**** 8820"; msg("CARD UNLOCKED");}else{isCardFrozen=true; c.classList.add('frozen'); s.innerText="FROZEN ❄️"; s.classList.add('frozen-text'); n.innerText="❄️❄️❄️ ❄️❄️❄️"; msg("CARD FROZEN");} }
         function bookFlight() { if(isCardFrozen){msg("CARD FROZEN");return;} pay(150000,"Private Jet"); }
         function saveSettings() { const n=document.getElementById('set-name').value; if(n){userName=n.toUpperCase(); updateDisplay(); msg("PROFILE UPDATED"); toggleModal('settings-overlay');} }
-        function resetSystem() { if(confirm("RESET ALL DATA?")) location.reload(); }
         function toggleTheme(t) { const r=document.querySelector(':root'); if(t==='matrix')r.style.setProperty('--accent','#00ff00'); else r.style.setProperty('--accent','#FFD700'); buzz(50); }
         function closeReceipt() { const b=document.querySelector('#receipt-overlay .btn-full'); b.innerText="DOWNLOADING..."; buzz(50); setTimeout(()=>{b.innerText="SAVED TO FILES"; setTimeout(()=>{toggleModal('receipt-overlay'); b.innerText="DOWNLOAD PDF";},1000);},1500); }
         function openScanner() { toggleModal('scan-overlay'); document.getElementById('scan-status').innerText="SEARCHING..."; setTimeout(()=>{buzz(50); document.getElementById('scan-status').innerText="SHOPRITE IKEJA"; setTimeout(()=>{toggleModal('scan-overlay'); pay(3500,"Shoprite (QR)");},1500);},3000); }
@@ -407,6 +427,7 @@
         function disburseLoan() { toggleModal('loan-overlay'); balance+=500000; updateDisplay(); addToLedger("Loan",500000,"credit"); }
         function verifyAccount() { const a=document.getElementById('send-acc').value; if(a.length===10){document.getElementById('verify-box').style.display='block'; document.getElementById('verified-name').innerText="VERIFYING..."; setTimeout(()=>{buzz(50); document.getElementById('verified-name').innerText="EMMANUEL CHIBUZOR";},1000);} else {document.getElementById('verify-box').style.display='none';} }
         function processTransfer() { const a=parseInt(document.getElementById('send-amt').value); const n=document.getElementById('verified-name').innerText; const b=document.getElementById('send-bank').value; if(!a||a<=0){msg("ENTER AMOUNT");return;} toggleModal('send-overlay'); pay(a,n+" ("+b+")"); }
+        function sendMsg() { const i=document.getElementById('user-input'); const val=i.value.trim(); const box=document.getElementById('chat-box'); if(val===""){return;} box.innerHTML+=`<div class="msg msg-user">${val}</div>`; i.value=""; box.scrollTop=box.scrollHeight; setTimeout(()=>{let reply="Command not recognized."; if(val.toLowerCase()==="/help")reply="COMMANDS: /hack, /weather, /clear, /reboot, /matrix"; else if(val.toLowerCase()==="/hack"){reply="Initiating Hack..."; openHack();} else if(val.toLowerCase()==="/clear"){box.innerHTML=""; reply="Terminal Cleared.";} else if(val.toLowerCase()==="/weather"){reply="Current Weather: 32°C (Lagos)";} else if(val.toLowerCase()==="/reboot"){location.reload();} else if(val.toLowerCase()==="/matrix"){toggleTheme('matrix'); reply="Matrix Theme Loaded.";} else reply="Request received. Processing..."; box.innerHTML+=`<div class="msg msg-ai">${reply}</div>`; box.scrollTop=box.scrollHeight; buzz(50);},1000); }
         function authenticate() { buzz(100); document.getElementById('auth-status').innerText="SCANNING..."; setTimeout(()=>{buzz([100,50,100]); speak("Access Granted."); document.getElementById('launchpad').style.top="-100%"; document.getElementById('app-interface').style.display="block"; setTimeout(()=>{document.getElementById('app-interface').style.opacity="1"},100);},1000); }
         function nav(id) { buzz(30); document.querySelectorAll('.pillar').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.dock-item').forEach(d=>d.classList.remove('active-icon')); document.getElementById(id).classList.add('active'); document.getElementById('n-'+id).classList.add('active-icon'); }
         function toggleStealth() { buzz(20); const b=document.getElementById('wallet-bal'); if(isStealth){ updateDisplay(); isStealth=false; } else { b.innerText=currency==="USD"?"$ ****":"₦ ****"; isStealth=true; } }
