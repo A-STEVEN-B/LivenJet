@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LivenJet | The Black Market</title>
+    <title>LivenJet | Orbital Uplink</title>
     <style>
         /* --- CORE STYLES --- */
         :root { --gold: #FFD700; --dark: #050505; --accent: #FFD700; --green: #00ff00; --red: #ff4444; --ice: #00f2ff; }
@@ -25,7 +25,14 @@
         .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* --- QR SCANNER & MAP --- */
+        /* --- HACK GAME (NEW) --- */
+        .hack-bar-container { width: 100%; height: 30px; background: #222; border: 1px solid #444; border-radius: 15px; position: relative; overflow: hidden; margin: 30px 0; }
+        .hack-zone { width: 40px; height: 100%; background: rgba(0, 255, 0, 0.3); border-left: 1px solid #0f0; border-right: 1px solid #0f0; position: absolute; left: 50%; transform: translateX(-50%); }
+        .hack-cursor { width: 4px; height: 100%; background: #fff; position: absolute; left: 0; box-shadow: 0 0 10px #fff; }
+        .cursor-moving { animation: moveCursor 1s linear infinite alternate; }
+        @keyframes moveCursor { 0% { left: 0%; } 100% { left: 98%; } }
+        
+        /* --- QR & MAP --- */
         .camera-view { width: 100%; height: 250px; background: #222; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #444; }
         .laser-beam { width: 100%; height: 2px; background: red; position: absolute; top: 0; box-shadow: 0 0 10px red; animation: scan 1.5s linear infinite; }
         .map-grid { width: 100%; height: 200px; background: radial-gradient(circle, #222 10%, #000 90%); border: 1px solid #333; margin-bottom: 15px; position: relative; overflow: hidden; border-radius: 10px; }
@@ -34,7 +41,7 @@
         @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
         @keyframes blink { 50% { opacity: 0.5; } }
 
-        /* --- FORM INPUTS --- */
+        /* --- INPUTS --- */
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-label { font-size: 10px; color: #888; margin-bottom: 5px; display: block; }
         .app-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; }
@@ -59,17 +66,7 @@
         .chart-bar.active { background: var(--green); }
         @keyframes growBar { from { height: 0; } }
 
-        /* --- CHAT --- */
-        .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; }
-        .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; }
-        .chat-input-area { padding: 10px; background: #222; display: flex; gap: 10px; }
-        .chat-input { flex: 1; padding: 10px; border-radius: 20px; border: none; background: #333; color: #fff; outline: none; }
-        .msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; font-size: 12px; max-width: 70%; }
-        .msg-ai { background: #333; color: #fff; border-top-left-radius: 0; }
-        .msg-user { background: var(--accent); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
-        .fab-chat { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; }
-
-        /* --- MINING & BLACK MARKET (NEW) --- */
+        /* --- MINING & MARKET --- */
         .miner-box { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-top: 15px; text-align: left; font-family: monospace; font-size: 10px; color: #0f0; height: 80px; overflow: hidden; display: none; }
         .hash-line { margin: 2px 0; }
         .market-item { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding:15px 0; }
@@ -101,7 +98,6 @@
         
         .pass-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 12px; border-bottom: 1px solid #333; padding-bottom: 5px; }
         
-        /* LEDGER */
         .ledger-box { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; padding-right: 5px; }
         .tx-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; animation: fadeIn 0.5s; }
         .tx-icon { width: 30px; height: 30px; background: #222; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 10px; }
@@ -111,47 +107,49 @@
         .tx-amt { font-size: 12px; font-weight: bold; color: #ff4444; }
         .tx-amt.credit { color: #00ff00; }
 
-        /* FROZEN CARD STYLE */
         .frozen { border-color: var(--ice) !important; background: linear-gradient(145deg, #002, #000) !important; box-shadow: 0 0 20px var(--ice) !important; }
         .frozen-text { color: var(--ice) !important; text-shadow: 0 0 10px var(--ice); }
+
+        /* CHAT STYLES */
+        .chat-card { height: 70vh; display: flex; flex-direction: column; justify-content: space-between; padding: 0; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; }
+        .chat-input-area { padding: 10px; background: #222; display: flex; gap: 10px; }
+        .chat-input { flex: 1; padding: 10px; border-radius: 20px; border: none; background: #333; color: #fff; outline: none; }
+        .msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; font-size: 12px; max-width: 70%; }
+        .msg-ai { background: #333; color: #fff; border-top-left-radius: 0; }
+        .msg-user { background: var(--accent); color: #000; margin-left: auto; border-bottom-right-radius: 0; }
+        .fab-chat { position: fixed; bottom: 100px; right: 20px; width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(255,215,0,0.4); z-index: 4000; cursor: pointer; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
 
+    <div id="hack-overlay" class="modal-overlay">
+        <div class="modal-card" style="border-color:red;">
+            <h2 style="margin: 0 0 10px 0; color:red;">SATELLITE UPLINK</h2>
+            <p style="font-size:10px; color:#888;">BYPASS SECURITY TO BOOST MINING</p>
+            
+            <div class="hack-bar-container">
+                <div class="hack-zone"></div>
+                <div class="hack-cursor cursor-moving" id="hack-cursor"></div>
+            </div>
+            
+            <div style="font-family:monospace; color:#fff; font-size:12px; margin:20px 0;" id="hack-log">WAITING FOR SIGNAL...</div>
+            
+            <button class="btn-full" style="background:red;" onclick="lockSignal()">LOCK SIGNAL</button>
+            <button class="btn-full" style="background:#222; border:1px solid #333; color:#fff;" onclick="toggleModal('hack-overlay')">ABORT</button>
+        </div>
+    </div>
+
     <div id="market-overlay" class="modal-overlay">
         <div class="modal-card" style="border-color:#0f0;">
             <h2 style="margin: 0 0 10px 0; color:#0f0;">LJN BLACK MARKET</h2>
             <p style="font-size:10px; color:#888;">SPEND CRYPTO. UPGRADE SYSTEM.</p>
-            <div style="background:#000; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #333;">
-                LJN BALANCE: <span id="market-bal" style="color:#0f0; font-weight:bold;">0.00</span>
-            </div>
-            
-            <div class="market-item">
-                <div style="text-align:left;">
-                    <div style="color:#fff; font-weight:bold; font-size:12px;">GHOST VPN</div>
-                    <div style="color:#666; font-size:10px;">Masks IP Address</div>
-                </div>
-                <button class="market-btn" onclick="buyItem('vpn', 2.5)">BUY 2.5 LJN</button>
-            </div>
-            
-            <div class="market-item">
-                <div style="text-align:left;">
-                    <div style="color:#fff; font-weight:bold; font-size:12px;">NEURAL HALO</div>
-                    <div style="color:#666; font-size:10px;">Gold Avatar Glow</div>
-                </div>
-                <button class="market-btn" onclick="buyItem('halo', 5.0)">BUY 5.0 LJN</button>
-            </div>
-
-            <div class="market-item">
-                <div style="text-align:left;">
-                    <div style="color:#fff; font-weight:bold; font-size:12px;">LEVEL 6 ACCESS</div>
-                    <div style="color:#666; font-size:10px;">Upgrade Clearance</div>
-                </div>
-                <button class="market-btn" onclick="buyItem('lvl6', 50.0)">BUY 50.0 LJN</button>
-            </div>
-
+            <div style="background:#000; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #333;">LJN BALANCE: <span id="market-bal" style="color:#0f0; font-weight:bold;">0.00</span></div>
+            <div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">GHOST VPN</div><div style="color:#666; font-size:10px;">Masks IP Address</div></div><button class="market-btn" onclick="buyItem('vpn', 2.5)">BUY 2.5 LJN</button></div>
+            <div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">NEURAL HALO</div><div style="color:#666; font-size:10px;">Gold Avatar Glow</div></div><button class="market-btn" onclick="buyItem('halo', 5.0)">BUY 5.0 LJN</button></div>
+            <div class="market-item"><div><div style="color:#fff; font-weight:bold; font-size:12px;">LEVEL 6 ACCESS</div><div style="color:#666; font-size:10px;">Upgrade Clearance</div></div><button class="market-btn" onclick="buyItem('lvl6', 50.0)">BUY 50.0 LJN</button></div>
             <button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('market-overlay')">LEAVE MARKET</button>
         </div>
     </div>
@@ -159,17 +157,8 @@
     <div id="settings-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2 style="margin: 0 0 20px 0;">CONTROL CENTER</h2>
-            <div class="input-group">
-                <label class="input-label">DISPLAY NAME</label>
-                <input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE">
-            </div>
-            <div class="input-group">
-                <label class="input-label">SYSTEM THEME</label>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn" style="margin:0; flex:1;" onclick="toggleTheme('gold')">GOLD</button>
-                    <button class="btn" style="margin:0; flex:1; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button>
-                </div>
-            </div>
+            <div class="input-group"><label class="input-label">DISPLAY NAME</label><input type="text" class="app-input" id="set-name" value="STEVEN ADEWOLE"></div>
+            <div class="input-group"><label class="input-label">SYSTEM THEME</label><div style="display:flex; gap:10px;"><button class="btn" style="margin:0; flex:1;" onclick="toggleTheme('gold')">GOLD</button><button class="btn" style="margin:0; flex:1; background:#0f0; color:#000;" onclick="toggleTheme('matrix')">MATRIX</button></div></div>
             <button class="btn-full" onclick="saveSettings()">SAVE CHANGES</button>
             <button class="btn-outline" style="border-color:#ff4444; color:#ff4444;" onclick="resetSystem()">FACTORY RESET</button>
             <button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button>
@@ -179,10 +168,7 @@
     <div id="scan-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2 style="margin: 0 0 20px 0;">SCAN & PAY</h2>
-            <div class="camera-view">
-                <div class="laser-beam"></div>
-                <p style="margin-top:130px; font-size:10px; color:#888;">ALIGN QR CODE</p>
-            </div>
+            <div class="camera-view"><div class="laser-beam"></div><p style="margin-top:130px; font-size:10px; color:#888;">ALIGN QR CODE</p></div>
             <p id="scan-status" style="color:var(--accent); font-size:12px; margin-top:15px; height:15px;"></p>
             <button class="btn-full" onclick="toggleModal('scan-overlay')">CANCEL</button>
         </div>
@@ -191,59 +177,26 @@
     <div id="loan-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2 style="margin: 0 0 20px 0;">CREDIT SCAN</h2>
-            <div id="credit-scanner" style="display:block;">
-                <p style="font-size:10px; color:#888;">ANALYZING FINANCIAL HISTORY...</p>
-                <div style="width:100%; height:4px; background:#222; margin:20px 0;"><div style="width:100%; height:100%; background:var(--accent); animation:growBar 2s;"></div></div>
-            </div>
-            <div id="credit-result" style="display:none;">
-                <div class="credit-meter">
-                    <div class="credit-score">780</div>
-                    <div class="credit-label">EXCELLENT</div>
-                </div>
-                <p style="font-size:12px; color:#fff;">APPROVED LIMIT</p>
-                <h1 style="margin:0; font-size:30px; color:var(--green);">₦ 500,000</h1>
-                <button class="btn-full" onclick="disburseLoan()">ACCEPT OFFER</button>
-            </div>
+            <div id="credit-scanner" style="display:block;"><p style="font-size:10px; color:#888;">ANALYZING FINANCIAL HISTORY...</p><div style="width:100%; height:4px; background:#222; margin:20px 0;"><div style="width:100%; height:100%; background:var(--accent); animation:growBar 2s;"></div></div></div>
+            <div id="credit-result" style="display:none;"><div class="credit-meter"><div class="credit-score">780</div><div class="credit-label">EXCELLENT</div></div><p style="font-size:12px; color:#fff;">APPROVED LIMIT</p><h1 style="margin:0; font-size:30px; color:var(--green);">₦ 500,000</h1><button class="btn-full" onclick="disburseLoan()">ACCEPT OFFER</button></div>
         </div>
     </div>
 
     <div id="send-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2 style="margin: 0 0 20px 0;">SEND MONEY</h2>
-            <div class="input-group">
-                <label class="input-label">BANK NAME</label>
-                <select class="app-input" id="send-bank">
-                    <option>OPay Digital Services</option>
-                    <option>GTBank</option>
-                    <option>Zenith Bank</option>
-                    <option>Access Bank</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label class="input-label">ACCOUNT NUMBER</label>
-                <input type="number" class="app-input" id="send-acc" placeholder="10-digit number" oninput="verifyAccount()">
-            </div>
-            <div id="verify-box" style="display:none; margin-bottom:15px; background:#1a1a1a; padding:10px; border-radius:8px;">
-                <p style="font-size:10px; color:#888; margin:0;">VERIFIED NAME</p>
-                <p style="font-weight:bold; color:var(--green); margin:5px 0;" id="verified-name">LOADING...</p>
-            </div>
-            <div class="input-group">
-                <label class="input-label">AMOUNT</label>
-                <input type="number" class="app-input" id="send-amt" placeholder="0.00">
-            </div>
-            <button class="btn-full" onclick="processTransfer()">CONFIRM TRANSFER</button>
-            <button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('send-overlay')">CANCEL</button>
+            <div class="input-group"><label class="input-label">BANK NAME</label><select class="app-input" id="send-bank"><option>OPay Digital Services</option><option>GTBank</option><option>Zenith Bank</option><option>Access Bank</option></select></div>
+            <div class="input-group"><label class="input-label">ACCOUNT NUMBER</label><input type="number" class="app-input" id="send-acc" placeholder="10-digit number" oninput="verifyAccount()"></div>
+            <div id="verify-box" style="display:none; margin-bottom:15px; background:#1a1a1a; padding:10px; border-radius:8px;"><p style="font-size:10px; color:#888; margin:0;">VERIFIED NAME</p><p style="font-weight:bold; color:var(--green); margin:5px 0;" id="verified-name">LOADING...</p></div>
+            <div class="input-group"><label class="input-label">AMOUNT</label><input type="number" class="app-input" id="send-amt" placeholder="0.00"></div>
+            <button class="btn-full" onclick="processTransfer()">CONFIRM TRANSFER</button><button class="btn-full" style="background:#222; color:#fff; border:1px solid #333;" onclick="toggleModal('send-overlay')">CANCEL</button>
         </div>
     </div>
 
     <div id="map-overlay" class="modal-overlay">
         <div class="modal-card">
             <h2 style="margin: 0 0 10px 0;">SATELLITE VIEW</h2>
-            <div class="map-grid">
-                <div class="radar-scan"></div>
-                <div class="map-dot" style="top: 40%; left: 30%;"></div>
-                <div class="map-dot" style="top: 60%; left: 70%; animation-delay: 0.5s;"></div>
-            </div>
+            <div class="map-grid"><div class="radar-scan"></div><div class="map-dot" style="top: 40%; left: 30%;"></div><div class="map-dot" style="top: 60%; left: 70%; animation-delay: 0.5s;"></div></div>
             <p style="font-size: 10px; color: #aaa;">TRACKING FLIGHT #LJ-992</p>
             <button class="btn-full" onclick="toggleModal('map-overlay')">CLOSE RADAR</button>
         </div>
@@ -251,15 +204,9 @@
 
     <div id="chat-overlay" class="modal-overlay">
         <div class="modal-card chat-card">
-            <div style="padding: 10px; background: #222; display: flex; justify-content: space-between;">
-                <span style="font-weight:bold;">HQ SUPPORT</span>
-                <span onclick="toggleModal('chat-overlay')" style="cursor:pointer;">✕</span>
-            </div>
+            <div style="padding: 10px; background: #222; display: flex; justify-content: space-between;"><span style="font-weight:bold;">HQ SUPPORT</span><span onclick="toggleModal('chat-overlay')" style="cursor:pointer;">✕</span></div>
             <div class="chat-body" id="chat-box"><div class="msg msg-ai">Hello Chief. Systems online.</div></div>
-            <div class="chat-input-area">
-                <input type="text" class="chat-input" id="user-input" placeholder="Type request...">
-                <button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button>
-            </div>
+            <div class="chat-input-area"><input type="text" class="chat-input" id="user-input" placeholder="Type request..."><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div>
         </div>
     </div>
 
@@ -279,21 +226,15 @@
             <h2 style="margin: 10px 0;" id="rec-title">SUCCESS</h2>
             <p style="color: #666; font-size: 12px;">Transaction Completed</p>
             <div class="dashed-line"></div>
-            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px;">
-                <span>AMOUNT</span>
-                <span style="font-weight: bold;" id="rec-amt">₦ 0.00</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 14px;">
-                <span>DETAILS</span>
-                <span style="font-family: monospace;" id="rec-to">Unknown</span>
-            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px;"><span>AMOUNT</span><span style="font-weight: bold;" id="rec-amt">₦ 0.00</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px;"><span>DETAILS</span><span style="font-family: monospace;" id="rec-to">Unknown</span></div>
             <button class="btn-full" style="background:#000; color:#fff;" onclick="closeReceipt()">DOWNLOAD PDF</button>
         </div>
     </div>
 
     <div id="launchpad">
         <h1 style="letter-spacing: 5px; font-size: 24px; cursor: pointer;">LIVENJET</h1>
-        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">VOICE OS v24.0</p>
+        <p style="color: #666; font-size: 10px; margin-bottom: 40px;">UPLINK OS v25.0</p>
         <div class="scanner-box"><div class="scan-line"></div><div class="fingerprint">🖐</div></div>
         <button class="auth-btn" onclick="authenticate()">SCAN IDENTITY</button>
         <p id="auth-status" style="margin-top: 20px; font-family: monospace; font-size: 10px; color: #444;">WAITING FOR INPUT...</p>
@@ -314,22 +255,10 @@
                 <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal" onclick="toggleStealth()">₦ 50,000.00</h2>
                 
                 <div class="action-grid">
-                    <div class="action-btn" onclick="toggleModal('send-overlay')">
-                        <div class="action-icon">💸</div>
-                        <div class="action-text">SEND</div>
-                    </div>
-                    <div class="action-btn" onclick="openScanner()">
-                        <div class="action-icon" style="color:#0f0;">📸</div>
-                        <div class="action-text">SCAN</div>
-                    </div>
-                    <div class="action-btn" onclick="startLoanProcess()">
-                        <div class="action-icon">🏦</div>
-                        <div class="action-text">LOANS</div>
-                    </div>
-                    <div class="action-btn" onclick="msg('Deposit via USSD *991#')">
-                        <div class="action-icon">➕</div>
-                        <div class="action-text">ADD</div>
-                    </div>
+                    <div class="action-btn" onclick="toggleModal('send-overlay')"><div class="action-icon">💸</div><div class="action-text">SEND</div></div>
+                    <div class="action-btn" onclick="openScanner()"><div class="action-icon" style="color:#0f0;">📸</div><div class="action-text">SCAN</div></div>
+                    <div class="action-btn" onclick="startLoanProcess()"><div class="action-icon">🏦</div><div class="action-text">LOANS</div></div>
+                    <div class="action-btn" onclick="msg('Deposit via USSD *991#')"><div class="action-icon">➕</div><div class="action-text">ADD</div></div>
                 </div>
 
                 <p style="font-size: 9px; color: #666; margin-top: 20px;">RECENT ACTIVITY</p>
@@ -354,13 +283,12 @@
             <div class="intel-card">
                 <h3>JET-TRACK</h3>
                 <p style="font-size: 12px; color: #888;">#LJ-992 ✈ LHR</p>
-                <div style="background: #222; height: 6px; border-radius: 5px; margin: 15px 0;">
-                    <div style="width: 80%; height: 100%; background: var(--accent);"></div>
-                </div>
+                <div style="background: #222; height: 6px; border-radius: 5px; margin: 15px 0;"><div style="width: 80%; height: 100%; background: var(--accent);"></div></div>
                 <p style="font-size: 10px; text-align: right; color: var(--accent);">ARRIVING SOON</p>
             </div>
             <button class="btn" onclick="toggleModal('map-overlay')">LIVE MAP</button>
             <button class="btn" style="background:#222; color:#fff; border:1px solid #444;" onclick="bookFlight()">BOOK PRIVATE JET (150k)</button>
+            <button class="btn" style="background:#000; border:1px solid red; color:red; margin-top:10px;" onclick="openHack()">OVERRIDE SATELLITE</button>
         </div>
 
         <div id="fina" class="pillar">
@@ -371,24 +299,10 @@
             </div>
 
             <div class="intel-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3 style="margin:0;">PORTFOLIO</h3>
-                    <span style="font-size:10px; color:#0f0;">+12.5%</span>
-                </div>
-                
+                <div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0;">PORTFOLIO</h3><span style="font-size:10px; color:#0f0;">+12.5%</span></div>
                 <div class="miner-box" id="miner-display">INITIALIZING...</div>
-                
-                <div class="asset-row">
-                    <div class="asset-info"><div class="asset-name">Bitcoin (BTC)</div><div class="asset-price">$98,420</div></div>
-                    <div style="text-align:right;"><button class="buy-btn" onclick="pay(5000, 'Bitcoin Inv')">BUY 5k</button></div>
-                </div>
-                <div class="asset-row">
-                    <div class="asset-info"><div class="asset-name">LivenJet (LJN)</div><div class="asset-price" id="ljn-bal">0.00 LJN</div></div>
-                    <div style="text-align:right;">
-                        <button class="buy-btn" onclick="startMining()" id="mine-btn">START MINING</button>
-                        <button class="buy-btn" style="background:#0f0; color:#000; margin-top:5px;" onclick="openMarket()">MARKET</button>
-                    </div>
-                </div>
+                <div class="asset-row"><div class="asset-info"><div class="asset-name">Bitcoin (BTC)</div><div class="asset-price">$98,420</div></div><div style="text-align:right;"><button class="buy-btn" onclick="pay(5000, 'Bitcoin Inv')">BUY 5k</button></div></div>
+                <div class="asset-row"><div class="asset-info"><div class="asset-name">LivenJet (LJN)</div><div class="asset-price" id="ljn-bal">0.00 LJN</div></div><div style="text-align:right;"><button class="buy-btn" onclick="startMining()" id="mine-btn">START MINING</button><button class="buy-btn" style="background:#0f0; color:#000; margin-top:5px;" onclick="openMarket()">MARKET</button></div></div>
             </div>
         </div>
 
@@ -411,11 +325,50 @@
         let ljnCrypto = 0.00;
         let userName = "STEVEN ADEWOLE";
         let isCardFrozen = false;
-        let currency = "NGN"; // NGN or USD
-        let rate = 1500; // 1 USD = 1500 NGN
+        let currency = "NGN"; let rate = 1500;
         let godModeCount = 0;
         let isMining = false;
+        let miningSpeed = 0.5;
         
+        // --- HACK GAME LOGIC ---
+        function openHack() {
+            toggleModal('hack-overlay');
+            document.getElementById('hack-log').innerText = "WAITING FOR SIGNAL...";
+            document.getElementById('hack-log').style.color = "#fff";
+            document.getElementById('hack-cursor').classList.add('cursor-moving');
+        }
+
+        function lockSignal() {
+            const cursor = document.getElementById('hack-cursor');
+            const log = document.getElementById('hack-log');
+            const rect = cursor.getBoundingClientRect();
+            const container = cursor.parentElement.getBoundingClientRect();
+            const relativeX = rect.left - container.left;
+            const percent = (relativeX / container.width) * 100;
+
+            cursor.classList.remove('cursor-moving'); // Stop animation
+            
+            // Green zone is roughly 40% to 60% (center 20%)
+            if (percent > 40 && percent < 60) {
+                log.innerText = "ACCESS GRANTED. UPLINK ESTABLISHED.";
+                log.style.color = "#0f0";
+                miningSpeed = 5.0; // Boost speed
+                buzz([100, 100, 100]);
+                speak("Uplink Established. Mining boosted.");
+                setTimeout(() => {
+                    toggleModal('hack-overlay');
+                    nav('fina'); // Go to finance to see result
+                    startMining();
+                }, 1500);
+                setTimeout(() => { miningSpeed = 0.5; msg("UPLINK DISCONNECTED"); }, 60000); // Reset after 60s
+            } else {
+                log.innerText = "SIGNAL LOST. TRY AGAIN.";
+                log.style.color = "red";
+                buzz(300);
+                setTimeout(() => { cursor.classList.add('cursor-moving'); log.innerText="WAITING..."; log.style.color="#fff"; }, 1000);
+            }
+        }
+
         // --- TTS VOICE ---
         function speak(text) {
             if ('speechSynthesis' in window) {
@@ -426,61 +379,36 @@
         }
 
         // --- BLACK MARKET ---
-        function openMarket() {
-            toggleModal('market-overlay');
-            document.getElementById('market-bal').innerText = ljnCrypto.toFixed(2);
-        }
-
+        function openMarket() { toggleModal('market-overlay'); document.getElementById('market-bal').innerText = ljnCrypto.toFixed(2); }
         function buyItem(item, cost) {
             if(ljnCrypto >= cost) {
-                ljnCrypto -= cost;
-                buzz([100,50,100]);
-                msg("PURCHASE SUCCESSFUL");
-                document.getElementById('market-bal').innerText = ljnCrypto.toFixed(2);
-                updateDisplay();
-                
-                if(item === 'halo') {
-                    document.getElementById('main-avatar').classList.add('avatar-glow');
-                    document.getElementById('pass-avatar').classList.add('avatar-glow');
-                }
-                if(item === 'vpn') {
-                    document.getElementById('pass-ip').innerText = "192.168.GHOST (SECURE)";
-                    document.getElementById('pass-ip').style.color = "#0f0";
-                }
-                if(item === 'lvl6') {
-                    document.getElementById('pass-lvl').innerText = "LEVEL 6 (GOD)";
-                    document.getElementById('pass-lvl').style.color = "#0f0";
-                }
-            } else {
-                msg("INSUFFICIENT LJN CRYPTO");
-                buzz(200);
-            }
+                ljnCrypto -= cost; buzz([100,50,100]); msg("PURCHASE SUCCESSFUL"); document.getElementById('market-bal').innerText = ljnCrypto.toFixed(2); updateDisplay();
+                if(item === 'halo') { document.getElementById('main-avatar').classList.add('avatar-glow'); document.getElementById('pass-avatar').classList.add('avatar-glow'); }
+                if(item === 'vpn') { document.getElementById('pass-ip').innerText = "192.168.GHOST (SECURE)"; document.getElementById('pass-ip').style.color = "#0f0"; }
+                if(item === 'lvl6') { document.getElementById('pass-lvl').innerText = "LEVEL 6 (GOD)"; document.getElementById('pass-lvl').style.color = "#0f0"; }
+            } else { msg("INSUFFICIENT LJN CRYPTO"); buzz(200); }
         }
 
         function updateDisplay() {
-            let displayBal = balance;
-            let symbol = "₦ ";
-            if(currency === "USD") { displayBal = balance / rate; symbol = "$ "; }
+            let displayBal = balance; let symbol = "₦ "; if(currency === "USD") { displayBal = balance / rate; symbol = "$ "; }
             document.getElementById('wallet-bal').innerText = symbol + displayBal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('pass-name').innerText = userName;
             let initials = userName.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-            document.getElementById('main-avatar').innerText = initials;
-            document.getElementById('pass-avatar').innerText = initials;
+            document.getElementById('main-avatar').innerText = initials; document.getElementById('pass-avatar').innerText = initials;
             document.getElementById('ljn-bal').innerText = ljnCrypto.toFixed(4) + " LJN";
         }
 
         // --- MINING ---
         function startMining() {
             if(isMining) return; isMining = true;
-            const btn = document.getElementById('mine-btn');
-            const box = document.getElementById('miner-display');
+            const btn = document.getElementById('mine-btn'); const box = document.getElementById('miner-display');
             btn.innerText = "MINING..."; box.style.display = "block"; buzz(50);
             let hashes = 0;
             const interval = setInterval(() => {
                 hashes++; const hash = Math.random().toString(36).substring(2, 15);
                 box.innerHTML = `<div class="hash-line">> HASH: ${hash}...</div>` + box.innerHTML;
-                if(hashes % 5 === 0) { let reward = Math.random() * 0.5; ljnCrypto += reward; updateDisplay(); buzz(20); }
-                if(hashes > 20) { clearInterval(interval); isMining = false; btn.innerText = "START MINING"; box.style.display = "none"; box.innerHTML = "INITIALIZING..."; msg("MINING COMPLETE. LJN ADDED."); buzz([100,50,100]); }
+                if(hashes % 5 === 0) { let reward = Math.random() * miningSpeed; ljnCrypto += reward; updateDisplay(); buzz(20); }
+                if(hashes > 20) { clearInterval(interval); isMining = false; btn.innerText = "START MINING"; box.style.display = "none"; box.innerHTML = "INITIALIZING..."; msg("MINING COMPLETE."); buzz([100,50,100]); }
             }, 300);
         }
 
