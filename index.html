@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>LivenJet | Omega OS</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>LivenJet | Crisis Patch</title>
     <style>
         /* --- CORE VISUALS --- */
         :root { 
@@ -15,7 +17,6 @@
             --red: #ff4444; 
             --ice: #00f2ff; 
             --purple: #d000ff; 
-            --omega: #ffffff;
         }
         
         ::-webkit-scrollbar { display: none; }
@@ -24,7 +25,7 @@
         body { 
             background-color: #050505; 
             color: var(--accent); 
-            font-family: 'Segoe UI', Roboto, monospace; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             text-align: center; 
             margin: 0; 
             overflow: hidden; 
@@ -32,7 +33,7 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+            background-image: radial-gradient(#151515 1px, transparent 1px);
             background-size: 30px 30px;
         }
 
@@ -45,7 +46,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 80px rgba(0,0,0,0.8);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
         @media (min-width: 768px) {
@@ -53,90 +54,115 @@
                 width: 400px; 
                 height: 85vh; 
                 max-height: 900px;
-                border-radius: 40px;
-                border: 8px solid #222;
-                box-shadow: 0 40px 100px rgba(0,0,0,0.9), 0 0 30px var(--accent);
+                border-radius: 35px;
+                border: 6px solid #222;
+                box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 20px var(--accent);
             }
         }
 
-        /* --- OMEGA MODE (ASCENDED) --- */
-        #device-frame.omega { --accent: var(--omega); --green: var(--omega); border-color: #444; box-shadow: 0 0 60px rgba(255,255,255,0.2); }
-        #device-frame.omega .neural-core { background: radial-gradient(circle, #fff 0%, transparent 60%); animation: pulseFast 0.5s infinite; }
-
-        /* --- VISUAL FX --- */
-        .scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 3px; pointer-events: none; z-index: 9000; opacity: 0.4; }
-        @keyframes pulseFast { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- FX LAYERS --- */
+        .scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 3px; pointer-events: none; z-index: 9000; opacity: 0.6; }
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+        
+        /* SINGULARITY MODE */
+        #device-frame.singularity { --accent: var(--purple); --green: var(--ice); border-color: var(--purple); box-shadow: 0 0 50px var(--purple); }
+        #device-frame.singularity .neural-core { box-shadow: 0 0 40px var(--purple); animation: pulseFast 0.5s infinite; }
+        @keyframes pulseFast { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         /* --- SCREENS --- */
-        /* BOOT */
-        #boot-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 30px; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; display: flex; flex-direction: column; justify-content: flex-end; }
-        
-        /* LOCK SCREEN */
-        #launchpad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease; }
-        .pin-display { font-size: 30px; letter-spacing: 15px; color: var(--accent); margin-bottom: 40px; font-family: monospace; text-shadow: 0 0 15px var(--accent); }
+        #boot-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; padding: 20px; text-align: left; font-family: monospace; color: var(--green); font-size: 12px; display: flex; flex-direction: column; justify-content: flex-end; }
+        .boot-line { margin: 2px 0; }
+
+        #launchpad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
+        .pin-display { font-size: 30px; letter-spacing: 15px; color: var(--accent); margin-bottom: 40px; height: 40px; font-family: monospace; text-shadow: 0 0 15px var(--accent); }
         .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 240px; }
-        .pin-btn { width: 65px; height: 65px; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 50%; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s; backdrop-filter: blur(5px); }
-        .pin-btn:active { background: var(--accent); color: #000; transform: scale(0.9); }
-
-        /* APP INTERFACE */
-        #app-interface { display: none; opacity: 0; transition: opacity 1s; padding-bottom: 140px; overflow-y: auto; height: 100%; flex: 1; -webkit-overflow-scrolling: touch; padding-left:15px; padding-right:15px; padding-top: 130px; }
+        .pin-btn { width: 65px; height: 65px; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 50%; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s; }
+        .pin-btn:active { background: var(--accent); color: #000; transform: scale(0.95); }
         
-        /* HEADER */
-        .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 100px; z-index: 2000; padding-top: max(20px, env(safe-area-inset-top)); background: linear-gradient(to bottom, #000 80%, transparent); display: flex; justify-content: space-between; align-items: center; padding-left: 20px; padding-right: 20px; pointer-events: none; }
-        .icon-btn { pointer-events: auto; width: 40px; height: 40px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: #fff; transition: 0.2s; backdrop-filter: blur(10px); }
+        #app-interface { display: none; opacity: 0; transition: opacity 0.5s; padding-bottom: 140px; overflow-y: auto; height: 100%; flex: 1; -webkit-overflow-scrolling: touch; padding-left:15px; padding-right:15px; padding-top: 130px; } 
+        
+        /* --- HEADER & NAV --- */
+        .header-bar { position: absolute; top: 0; left: 0; width: 100%; height: 90px; z-index: 2000; padding-top: max(20px, env(safe-area-inset-top)); background: linear-gradient(to bottom, #000 80%, transparent); display: flex; justify-content: space-between; align-items: center; padding-left: 20px; padding-right: 20px; }
+        .icon-btn { width: 40px; height: 40px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: #fff; transition: 0.2s; }
         .icon-btn:active { transform: scale(0.9); border-color: var(--accent); }
-        .ticker-wrap { width: 100%; position: absolute; top: 95px; z-index: 1999; font-family: monospace; font-size: 10px; color: #666; pointer-events: none; text-shadow: 0 2px 4px #000; text-align: center; letter-spacing: 1px; }
-
-        /* NEURAL CORE */
-        .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 0 auto 20px; position: relative; animation: core-pulse 4s infinite; cursor: pointer; transition: 0.5s; z-index: 500; }
-        .core-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40%; height: 40%; background: #fff; border-radius: 50%; box-shadow: 0 0 30px var(--accent); }
-        @keyframes core-pulse { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } }
-
-        /* UI ELEMENTS */
-        .intel-card { background: rgba(20,20,20,0.9); border: 1px solid #333; border-bottom: 2px solid var(--accent); border-radius: 20px; padding: 25px; margin: 15px auto; text-align: left; position: relative; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .btn-full { background: var(--accent); color: #000; border: none; padding: 14px; width: 100%; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; font-size: 14px; letter-spacing: 0.5px; }
-        .btn-outline { background: transparent; border: 1px solid #444; color: #fff; padding: 12px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
-        .action-btn { background: #151515; border-radius: 14px; padding: 15px 5px; cursor: pointer; border: 1px solid #222; transition: 0.1s; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70px; }
-        .action-btn:active { background: #222; border-color: var(--accent); }
-        .action-text { font-size: 9px; font-weight: bold; margin-top: 5px; color: #888; }
-
-        /* MODULES */
-        .venture-card { background: #111; border: 1px solid #333; padding: 15px; border-radius: 14px; margin-bottom: 10px; text-align: left; position: relative; }
-        .venture-bar-bg { height: 4px; background: #222; margin: 10px 0; border-radius: 2px; }
-        .venture-bar { height: 100%; background: var(--green); width: 0%; border-radius: 2px; transition: width 1s linear; box-shadow: 0 0 10px var(--green); }
+        .avatar-box { font-weight: 900; background: var(--accent); color: #000; }
         
-        .agent-item { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 3px solid var(--green); }
-        .agent-item.hostile { border-left-color: var(--red); background: rgba(50, 0, 0, 0.3); }
-        
-        .grid-monitor { height: 80px; background: #000; border: 1px solid #333; margin-top: 15px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-        .sine-wave { position: absolute; width: 200%; height: 100%; background: repeating-linear-gradient(90deg, transparent 0, transparent 20px, var(--accent) 20px, var(--accent) 22px); opacity: 0.2; animation: wave 2s linear infinite; }
-        @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
-        
-        .crypto-chart-container { width: 100%; height: 100px; background: #080808; border: 1px solid #333; border-radius: 12px; margin-top: 15px; position: relative; overflow: hidden; }
-        canvas { width: 100%; height: 100%; }
+        .ticker-wrap { width: 100%; position: absolute; top: 90px; z-index: 1999; font-family: monospace; font-size: 10px; color: #666; pointer-events: none; text-shadow: 0 2px 2px #000; text-align: center; }
 
-        /* DOCK */
-        .dock { position: absolute; bottom: calc(25px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: 90%; background: rgba(15,15,15,0.9); border: 1px solid #333; border-radius: 35px; display: flex; justify-content: space-around; padding: 18px 0; z-index: 2000; backdrop-filter: blur(10px); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        /* --- DOCK --- */
+        .dock { position: absolute; bottom: calc(20px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: 90%; background: rgba(15,15,15,0.95); border: 1px solid #333; border-radius: 30px; display: flex; justify-content: space-around; padding: 15px 0; z-index: 2000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .dock-item { font-size: 24px; opacity: 0.4; transition: 0.2s; cursor: pointer; }
         .active-icon { opacity: 1; color: var(--accent); transform: translateY(-3px); text-shadow: 0 0 15px var(--accent); }
 
-        /* MODALS */
-        .modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-card { background: #111; border: 1px solid var(--accent); color: #fff; width: 88%; padding: 30px 20px; border-radius: 25px; text-align: center; max-height: 80vh; overflow-y: auto; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        /* --- WIDGETS --- */
+        .neural-core { width: 70px; height: 70px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); border-radius: 50%; margin: 0 auto 20px; position: relative; animation: core-pulse 3s infinite; cursor: pointer; transition: 0.5s; z-index: 500; }
+        .core-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40%; height: 40%; background: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--accent); }
+        @keyframes core-pulse { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } }
+
+        .pillar { display: none; animation: slideIn 0.3s ease; }
+        .active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+
+        .intel-card { background: rgba(20,20,20,0.9); border: 1px solid #333; border-bottom: 2px solid var(--accent); border-radius: 18px; padding: 20px; margin: 15px auto; text-align: left; }
+        .btn-full { background: var(--accent); color: #000; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 13px; }
+        .btn-outline { background: transparent; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .app-input { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; font-size: 16px; outline: none; }
+        .btn { background: var(--accent); border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; color: #000; font-size: 10px; }
+        
+        .action-grid { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; }
+        .action-btn { flex: 1; background: #151515; border-radius: 12px; padding: 15px 5px; cursor: pointer; border: 1px solid #222; transition: 0.1s; }
+        .action-btn:active { background: #333; transform: scale(0.95); }
+
+        .ledger-box { margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        .tx-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; font-size: 12px; }
+        
+        .venture-card { background: #151515; border: 1px solid #333; padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: left; position: relative; }
+        .venture-bar-bg { height: 4px; background: #333; margin: 8px 0; border-radius: 2px; }
+        .venture-bar { height: 100%; background: var(--green); width: 0%; border-radius: 2px; transition: width 1s linear; }
+        
+        .agent-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 3px solid var(--green); }
+        .agent-item.hostile { border-left: 3px solid var(--red); background: #2a0000; }
+        
+        /* --- GRID MONITOR (FIXED RED FAILURE) --- */
+        .grid-monitor { height: 80px; background: #000; border: 1px solid #333; margin-top: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-radius: 12px; transition: 0.3s; }
+        .sine-wave { position: absolute; width: 200%; height: 100%; background: repeating-linear-gradient(90deg, transparent 0, transparent 20px, var(--accent) 20px, var(--accent) 22px); opacity: 0.2; animation: wave 2s linear infinite; }
+        /* FAILURE STATES */
+        .grid-monitor.critical { border-color: var(--red); box-shadow: 0 0 15px var(--red); }
+        .grid-monitor.critical .sine-wave { background: repeating-linear-gradient(90deg, transparent 0, transparent 20px, var(--red) 20px, var(--red) 22px); opacity: 0.5; }
+        .grid-monitor.critical .grid-status-text { color: var(--red); text-shadow: 0 0 10px var(--red); animation: blinkRed 0.5s infinite; }
+        
+        @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
+        .grid-status-text { z-index: 2; font-family: monospace; font-size: 24px; font-weight: bold; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+        @keyframes blinkRed { 50% { opacity: 0.5; } }
+
+        .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .asset-item { background: #151515; border: 1px solid #333; border-radius: 12px; padding: 15px; opacity: 0.5; }
+        .asset-item.owned { opacity: 1; border-color: var(--gold); box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.1); }
+
+        /* --- MODALS --- */
+        .modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 5000; align-items: center; justify-content: center; }
+        .modal-card { background: #111; border: 1px solid var(--accent); color: #fff; width: 85%; padding: 25px 20px; border-radius: 25px; text-align: center; max-height: 80vh; overflow-y: auto; }
         
         /* CHAT */
-        .fab-chat { position: absolute; bottom: 120px; right: 20px; width: 55px; height: 55px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 4000; cursor: pointer; box-shadow: 0 0 20px rgba(255,215,0,0.3); color: #000; }
-        .chat-card { height: 70vh; display: flex; flex-direction: column; }
-        .chat-body { flex: 1; padding: 20px; overflow-y: auto; text-align: left; background: #050505; font-family: monospace; font-size: 12px; }
+        .fab-chat { position: absolute; bottom: 110px; right: 20px; width: 55px; height: 55px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; z-index: 4000; cursor: pointer; box-shadow: 0 0 20px rgba(255,215,0,0.3); color: #000; }
+        .chat-card { height: 75vh; display: flex; flex-direction: column; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; text-align: left; background: #000; font-family: monospace; font-size: 12px; }
         
         /* ALERTS */
-        #red-alert { display:none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.2); z-index: 7000; pointer-events: none; mix-blend-mode: overlay; animation: blinkRed 1s infinite; }
-        @keyframes blinkRed { 50% { opacity: 0.5; } }
-        
-        /* LEGACY UI */
-        .legacy-badge { position: absolute; top: 10px; right: 20px; background: #fff; color: #000; font-weight: bold; font-size: 10px; padding: 2px 6px; border-radius: 4px; display: none; }
+        #red-alert { display:none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,0,0,0.2); z-index: 7000; pointer-events: none; }
+        #breach-overlay, #call-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; flex-direction: column; align-items: center; justify-content: center; }
+        .breach-box { border: 2px solid var(--red); padding: 20px; border-radius: 15px; width: 80%; background: #100; text-align: center; }
+        .defend-bar-bg { width: 100%; height: 20px; background: #300; margin: 20px 0; border: 1px solid var(--red); }
+        .defend-bar-fill { width: 0%; height: 100%; background: var(--red); transition: 0.1s; }
+        .caller-icon { width: 100px; height: 100px; background: #222; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; animation: pulse 1s infinite; }
+        .call-actions { display: flex; gap: 40px; margin-top: 50px; }
+        .data-box { background: #111; border: 1px dashed #444; color: var(--green); padding: 10px; font-family: monospace; font-size: 10px; word-break: break-all; margin: 10px 0; max-height: 60px; overflow-y: auto; user-select: text; }
+        .crypto-chart-container { width: 100%; height: 100px; background: #0a0a0a; border: 1px solid #333; border-radius: 10px; position: relative; overflow: hidden; margin-top: 15px; }
+        canvas { display: block; width: 100%; height: 100%; }
+        .nexus-map { width: 100%; height: 300px; background: #001; border: 1px solid #333; border-radius: 10px; position: relative; overflow: hidden; background-image: radial-gradient(#222 1px, transparent 1px); background-size: 20px 20px; }
+        .map-node { width: 8px; height: 8px; background: var(--green); border-radius: 50%; position: absolute; box-shadow: 0 0 10px var(--green); animation: pulse 1s infinite; }
     </style>
 </head>
 <body>
@@ -144,7 +170,6 @@
     <div id="device-frame">
         <div class="scanlines"></div>
         <div id="red-alert"></div>
-        <div class="legacy-badge" id="legacy-badge">LEGACY ACTIVE</div>
 
         <div class="header-bar" id="header-ui" style="display:none;">
             <div class="icon-btn" style="background:var(--accent); color:#000; font-weight:900;" onclick="toggleModal('passport-overlay')" id="main-avatar">SA</div>
@@ -153,7 +178,7 @@
         </div>
 
         <div id="launchpad">
-            <h1 style="letter-spacing: 8px; font-size: 28px; margin-bottom: 60px; color: #fff; text-shadow: 0 0 10px #fff;">LIVENJET</h1>
+            <h1 style="letter-spacing: 5px; font-size: 24px; margin-bottom: 50px;">LIVENJET</h1>
             <div class="pin-display" id="pin-display">****</div>
             <div class="pin-grid">
                 <div class="pin-btn" onclick="enterPin(1)">1</div><div class="pin-btn" onclick="enterPin(2)">2</div><div class="pin-btn" onclick="enterPin(3)">3</div>
@@ -163,7 +188,7 @@
                 <div class="pin-btn" onclick="enterPin(0)">0</div>
                 <div class="pin-btn" style="color:var(--green); border-color:var(--green);" onclick="checkPin()">></div>
             </div>
-            <p id="auth-status" style="margin-top: 40px; font-family: monospace; font-size: 11px; color: #666; letter-spacing: 1px;">OMEGA PROTOCOL v50.0</p>
+            <p id="auth-status" style="margin-top: 30px; font-family: monospace; font-size: 10px; color: #666;">PIN: 8820</p>
         </div>
 
         <div id="boot-screen"></div>
@@ -171,46 +196,47 @@
         <div id="app-interface">
             <div class="ticker-wrap">
                 <span style="font-weight:bold; color:var(--ice);" id="influence-score">INF: 0%</span> | 
-                <span id="lp-score" style="color:var(--purple); display:none;">LP: 0</span> |
                 <span id="clock">00:00</span>
             </div>
             
             <div class="neural-core" onclick="handleCoreClick()" id="neural-core"><div class="core-inner"></div></div>
-            <div style="font-family: monospace; font-size: 10px; color: #888; height: 20px; letter-spacing: 1px;" id="ai-msg">SYSTEM ONLINE.</div>
+            <div style="font-family: monospace; font-size: 10px; color: #888; height: 20px;" id="ai-msg">SYSTEM ONLINE.</div>
 
             <div id="home" class="pillar active">
                 <div class="intel-card">
-                    <p style="font-size: 10px; color: #666; margin: 0; font-weight: bold; letter-spacing: 1px;">NET WORTH</p>
-                    <h2 style="margin: 10px 0; font-size: 38px; font-family: 'Courier New'; font-weight: 600; letter-spacing: -1px; cursor: pointer;" id="wallet-bal">₦ 50,000.00</h2>
+                    <p style="font-size: 10px; color: #666; margin: 0;">LIQUIDITY</p>
+                    <h2 style="margin: 5px 0; font-size: 36px; font-family: 'Courier New'; cursor: pointer;" id="wallet-bal">₦ 50,000.00</h2>
                     <div class="action-grid">
-                        <div class="action-btn" onclick="toggleModal('send-overlay')"><div style="font-size:24px;">💸</div><div class="action-text">SEND</div></div>
-                        <div class="action-btn" onclick="toggleModal('ventures-overlay')"><div style="font-size:24px; color:var(--ice);">🏢</div><div class="action-text">BIZ</div></div>
-                        <div class="action-btn" onclick="openAssets()"><div style="font-size:24px; color:var(--gold);">🏛️</div><div class="action-text">ASSET</div></div>
-                        <div class="action-btn" onclick="msg('USSD *991#')"><div style="font-size:24px;">➕</div><div class="action-text">ADD</div></div>
+                        <div class="action-btn" onclick="toggleModal('send-overlay')"><div style="font-size:20px;">💸</div><div class="action-text">SEND</div></div>
+                        <div class="action-btn" onclick="toggleModal('ventures-overlay')"><div style="font-size:20px; color:var(--ice);">🏢</div><div class="action-text">BIZ</div></div>
+                        <div class="action-btn" onclick="openAssets()"><div style="font-size:20px; color:var(--gold);">🏛️</div><div class="action-text">ASSET</div></div>
+                        <div class="action-btn" onclick="msg('USSD *991#')"><div style="font-size:20px;">➕</div><div class="action-text">ADD</div></div>
                     </div>
-                    <div class="ledger-box" id="ledger-list" style="margin-top:20px; max-height:150px; overflow-y:auto;"></div>
+                    <div class="ledger-box" id="ledger-list"></div>
                 </div>
             </div>
 
             <div id="util" class="pillar">
                 <div class="intel-card">
                     <h3>GRID COMMAND</h3>
-                    <div class="grid-monitor"><div class="sine-wave"></div><div class="grid-status-text" id="grid-text">STABLE</div></div>
-                    <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                        <button class="btn-outline" style="margin:0; font-size:12px;" onclick="buyInfra('solar', 200000)">SOLAR<br><span style="color:var(--green)">₦200k</span></button>
-                        <button class="btn-outline" style="margin:0; font-size:12px;" onclick="buyInfra('nuke', 500000)">NUCLEAR<br><span style="color:var(--green)">₦500k</span></button>
+                    <div class="grid-monitor" id="grid-monitor-box">
+                        <div class="sine-wave"></div>
+                        <div class="grid-status-text" id="grid-text">STABLE</div>
                     </div>
-                    <button class="btn-full" style="background:var(--red); display:none;" id="inject-btn" onclick="injectPower()">⚡ INJECT POWER</button>
+                    <div style="margin-top:15px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <button class="btn" style="background:#222; color:#fff;" onclick="buyInfra('solar', 200000)">SOLAR<br>₦200k</button>
+                        <button class="btn" style="background:#222; color:#fff;" onclick="buyInfra('nuke', 500000)">NUCLEAR<br>₦500k</button>
+                    </div>
+                    <button class="btn" style="margin-top:10px; background:var(--red); display:none;" id="inject-btn" onclick="injectPower()">⚡ INJECT POWER</button>
+                    <div style="height:20px; width:20px; opacity:0; position:absolute; bottom:0; right:0;" onclick="triggerBlackout()"></div>
                 </div>
             </div>
 
             <div id="logi" class="pillar">
                 <div class="intel-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h3>WAR ROOM</h3>
-                        <button class="btn" style="width:auto; margin:0; padding:5px 10px; font-size:10px; background:#333; color:#fff;" onclick="toggleModal('agent-overlay')">+ DEPLOY</button>
-                    </div>
-                    <div id="agent-display" style="margin:15px 0;"></div>
+                    <h3>WAR ROOM</h3>
+                    <div id="agent-display" style="margin:10px 0;"></div>
+                    <button class="btn" onclick="toggleModal('agent-overlay')">+ DEPLOY AGENT (₦50k)</button>
                 </div>
                 <button class="btn-outline" onclick="openMap()">OPEN NEXUS MAP</button>
             </div>
@@ -219,13 +245,13 @@
                 <div class="intel-card">
                     <div style="display:flex; justify-content:space-between;"><h3>PORTFOLIO</h3><span style="color:#0f0;">+12%</span></div>
                     <div class="crypto-chart-container"><canvas id="priceChart"></canvas></div>
-                    <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px;">
-                        <div><div style="font-weight:bold;">BTC</div><div style="font-size:11px; color:#666;" id="btc-price">$98,000</div></div>
-                        <button class="btn" style="width:auto; padding:8px 15px; background:#222; color:#fff;" onclick="pay(5000, 'BTC Inv')">BUY</button>
+                    <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:5px;">
+                        <div><div style="font-weight:bold;">BTC</div><div style="font-size:10px; color:#666;" id="btc-price">$98,000</div></div>
+                        <button class="btn" style="width:auto;" onclick="pay(5000, 'BTC Inv')">BUY</button>
                     </div>
-                    <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
-                        <div><div style="font-weight:bold;">LJN</div><div style="font-size:11px; color:var(--accent);" id="ljn-bal">0.00</div></div>
-                        <button class="btn" style="width:auto; padding:8px 15px; background:#222; color:#fff;" onclick="startMining()" id="mine-btn">MINE</button>
+                    <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <div><div style="font-weight:bold;">LJN</div><div style="font-size:10px; color:var(--accent);" id="ljn-bal">0.00</div></div>
+                        <button class="btn" style="width:auto;" onclick="startMining()" id="mine-btn">MINE</button>
                     </div>
                 </div>
             </div>
@@ -240,32 +266,29 @@
             <div class="fab-chat" onclick="toggleModal('chat-overlay')">💬</div>
         </div>
 
-        <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2>BUSINESS EMPIRE</h2><div id="active-ventures"></div><button class="btn-full" onclick="createBusiness()">NEW VENTURE (₦100k)</button><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
-        <div id="assets-overlay" class="modal-overlay"><div class="modal-card"><h2>ASSET VAULT</h2><div class="asset-grid" id="asset-list"></div><button class="btn-outline" onclick="toggleModal('assets-overlay')">CLOSE</button></div></div>
-        <div id="agent-overlay" class="modal-overlay"><div class="modal-card"><h2>DEPLOY AGENT</h2><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>New York</option><option>Tokyo</option><option>Lagos</option></select><button class="btn-full" onclick="deployAgent()">CONFIRM (₦50k)</button><button class="btn-outline" onclick="toggleModal('agent-overlay')">CANCEL</button></div></div>
-        <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>TRANSFER FUNDS</h2><input type="number" class="app-input" id="send-amt" placeholder="Enter Amount"><button class="btn-full" onclick="processTransfer()">SEND SECURELY</button><button class="btn-outline" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
-        <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:15px; background:#151515; border-bottom:1px solid #333;">SECURE TERMINAL <span onclick="toggleModal('chat-overlay')" style="float:right; cursor:pointer;">✕</span></div><div class="chat-body" id="chat-box"><div class="msg msg-ai">System Online. Awaiting input...</div></div><div class="chat-input-area" style="padding:15px; background:#111; display:flex; gap:10px;"><input type="text" class="app-input" id="user-input" placeholder="Type command..." style="flex:1; padding:12px; margin:0;"><button class="btn" style="width:auto; margin:0; padding:0 20px;" onclick="sendMsg()">➤</button></div></div></div>
-        <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>GLOBAL NEXUS</h2><div class="nexus-map" id="nexus-map"></div><button class="btn-outline" onclick="toggleModal('map-overlay')">CLOSE LINK</button></div></div>
-        <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>SYSTEM CONFIG</h2><input type="text" class="app-input" id="set-name" placeholder="User Alias"><button class="btn-full" onclick="saveSettings()">SAVE PROFILE</button><div style="margin-top:30px; border-top:1px dashed #333; padding-top:15px;"><button class="btn-outline" onclick="exportData()">EXPORT SAVE</button><input type="text" class="app-input" id="import-code" placeholder="Paste Code" style="margin-top:10px;"><button class="btn-full" onclick="importData()">RESTORE DATA</button></div><button class="btn-outline" onclick="hardReset()" style="color:var(--red); border-color:var(--red); margin-top:30px;">FACTORY RESET</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
-        <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2>OPERATIVE ID</h2><div style="width:80px; height:80px; background:#222; border-radius:50%; margin:20px auto; display:flex; align-items:center; justify-content:center; font-size:30px; border:2px solid var(--accent);" id="pass-avatar">SA</div><h3 id="pass-name-display" style="color:var(--accent);">USER</h3><p style="color:#666;">SECURITY LEVEL 5</p><button class="btn-outline" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
-        <div id="receipt-overlay" class="modal-overlay"><div class="modal-card"><h2>TRANSACTION</h2><div style="border-bottom:1px dashed #444; margin:15px 0;"></div><h1 id="rec-amt" style="color:var(--green); margin:30px 0;"></h1><button class="btn-full" onclick="toggleModal('receipt-overlay')">CONFIRM</button></div></div>
+        <div id="ventures-overlay" class="modal-overlay"><div class="modal-card"><h2>BUSINESS</h2><div id="active-ventures"></div><button class="btn-full" onclick="createBusiness()">NEW VENTURE (₦100k)</button><button class="btn-outline" onclick="toggleModal('ventures-overlay')">CLOSE</button></div></div>
+        <div id="assets-overlay" class="modal-overlay"><div class="modal-card"><h2>ASSETS</h2><div class="asset-grid" id="asset-list"></div><button class="btn-outline" onclick="toggleModal('assets-overlay')">CLOSE</button></div></div>
+        <div id="agent-overlay" class="modal-overlay"><div class="modal-card"><h2>DEPLOY</h2><select class="app-input" id="agent-city"><option>Dubai</option><option>London</option><option>Tokyo</option></select><button class="btn-full" onclick="deployAgent()">CONFIRM (₦50k)</button><button class="btn-outline" onclick="toggleModal('agent-overlay')">CANCEL</button></div></div>
+        <div id="send-overlay" class="modal-overlay"><div class="modal-card"><h2>SEND</h2><input type="number" class="app-input" id="send-amt" placeholder="Amount"><button class="btn-full" onclick="processTransfer()">SEND</button><button class="btn-outline" onclick="toggleModal('send-overlay')">CANCEL</button></div></div>
+        <div id="chat-overlay" class="modal-overlay"><div class="modal-card chat-card"><div style="padding:10px; background:#222;">TERMINAL <span onclick="toggleModal('chat-overlay')" style="float:right;">✕</span></div><div class="chat-body" id="chat-box"></div><div class="chat-input-area"><input type="text" class="chat-input" id="user-input" placeholder="..."><button class="btn" style="width:auto; margin:0;" onclick="sendMsg()">➤</button></div></div></div>
+        <div id="map-overlay" class="modal-overlay"><div class="modal-card"><h2>NEXUS</h2><div class="nexus-map" id="nexus-map"></div><button class="btn-outline" onclick="toggleModal('map-overlay')">CLOSE</button></div></div>
+        <div id="settings-overlay" class="modal-overlay"><div class="modal-card"><h2>SETTINGS</h2><input type="text" class="app-input" id="set-name" placeholder="User Name"><button class="btn-full" onclick="saveSettings()">SAVE</button><div style="margin-top:20px; border-top:1px dashed #333; padding-top:10px;"><p style="font-size:10px; color:#888;">BACKUP</p><button class="btn-outline" onclick="exportData()">GET CODE</button><input type="text" class="app-input" id="import-code" placeholder="Paste Code" style="margin-top:5px;"><button class="btn-full" onclick="importData()">RESTORE</button></div><button class="btn-outline" onclick="hardReset()" style="color:red; border-color:red;">RESET</button><button class="btn-outline" onclick="toggleModal('settings-overlay')">CLOSE</button></div></div>
+        <div id="passport-overlay" class="modal-overlay"><div class="modal-card"><h2>ID CARD</h2><div style="font-size:40px;">👤</div><h3 id="pass-name-display">USER</h3><p>LEVEL 5</p><button class="btn-outline" onclick="toggleModal('passport-overlay')">CLOSE</button></div></div>
+        <div id="receipt-overlay" class="modal-overlay"><div class="modal-card"><h2>SUCCESS</h2><h1 id="rec-amt" style="color:var(--green);"></h1><button class="btn-full" onclick="toggleModal('receipt-overlay')">OK</button></div></div>
         <div id="transfer-modal" class="modal-overlay"><div class="modal-card"><h2>BACKUP CODE</h2><div class="data-box" id="export-text"></div><button class="btn-full" onclick="toggleModal('transfer-modal')">DONE</button></div></div>
         
-        <div id="ascend-modal" class="modal-overlay"><div class="modal-card" style="border-color:var(--omega);"><h2>ASCENSION</h2><p style="color:#ccc; font-size:12px; margin:20px 0;">Reset simulation to gain LEGACY POINTS.</p><h1 id="lp-gain" style="color:var(--purple); font-size:40px;">+1 LP</h1><button class="btn-full" style="background:var(--purple); color:#fff;" onclick="confirmAscend()">TRANSCEND</button><button class="btn-outline" onclick="toggleModal('ascend-modal')">CANCEL</button></div></div>
-
-        <div id="call-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:8000; flex-direction:column; align-items:center; justify-content:center;"><div class="caller-icon">👤</div><div style="font-size:24px; font-weight:bold; margin-bottom:10px;">UNKNOWN</div><div style="font-size:14px; color:#888;">INCOMING ENCRYPTED CALL...</div><div class="call-actions"><button class="call-btn" style="background:#f00; color:#fff;" onclick="endCall()">✕</button><button class="call-btn" style="background:#0f0; color:#fff;" onclick="answerCall()">📞</button></div></div>
-        <div id="breach-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:8000; flex-direction:column; align-items:center; justify-content:center;"><div class="breach-box"><h1 style="color:var(--red); font-size:28px; margin:0;">⚠️ SYSTEM BREACH</h1><div class="defend-bar-bg"><div class="defend-bar-fill" id="defend-bar"></div></div><button class="defend-btn" onclick="chargeFirewall()">DEPLOY COUNTERMEASURES</button></div></div>
+        <div id="call-overlay"><div class="caller-icon">👤</div><div style="font-size:20px; font-weight:bold; margin-bottom:5px;">UNKNOWN</div><div style="font-size:12px; color:#888;">INCOMING CALL...</div><div class="call-actions"><button class="btn" style="background:#f00; width:60px;" onclick="endCall()">✕</button><button class="btn" style="background:#0f0; width:60px;" onclick="answerCall()">📞</button></div></div>
+        <div id="breach-overlay"><div class="breach-box"><h1 style="color:var(--red); font-size:24px; margin:0;">⚠️ BREACH</h1><div class="defend-bar-bg"><div class="defend-bar-fill" id="defend-bar"></div></div><button class="defend-btn" style="background:var(--red); color:#fff; padding:15px; width:100%; border:none; font-weight:bold;" onclick="chargeFirewall()">FIREWALL</button></div></div>
 
     </div>
 
     <script>
-        // --- MASTER DATA ENGINE ---
+        // --- DATA ENGINE ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let balance=50000, ljnCrypto=0.00, userName="STEVEN", agents=[], ventures=[], transactions=[], ownedAssets={}, influence=0, singularity=false, inventory={gold:0,oil:0}, infra={solar:0,nuke:0};
-        let legacyPoints=0; // NEW: Prestige Currency
-        let pin="8820", inputPin="", currency="NGN", rate=1500, godModeCount=0, defensePower=0, gridHealth=100;
+        let pin="8820", inputPin="", currency="NGN", rate=1500, godModeCount=0, isMining=false, defensePower=0, gridHealth=100;
         
-        // --- SOUND & VOICE ---
+        // --- SOUND FX ---
         function sfx(type) {
             if(audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
@@ -278,45 +301,45 @@
         }
         function speak(text) { if('speechSynthesis' in window){ const u=new SpeechSynthesisUtterance(text); u.rate=1.1; u.pitch=0.8; window.speechSynthesis.speak(u); } }
 
-        // --- BOOT SEQUENCE ---
+        // --- INIT & CHART ---
         window.onload = function() {
             loadData();
             requestAnimationFrame(drawChart);
             const boot = document.getElementById('boot-screen');
-            let i=0; const lines=["INITIALIZING CORE...", "LOADING NEURAL NET...", "ESTABLISHING UPLINK...", "WELCOME, OPERATOR."];
+            let i=0; const lines=["INITIALIZING KERNEL...", "LOADING ASSETS...", "SECURE."];
             const int = setInterval(()=>{
                 if(i<lines.length){ boot.innerHTML+=`<div class='boot-line'>${lines[i]}</div>`; i++; }
                 else{ clearInterval(int); setTimeout(()=>{ boot.style.display='none'; },500); }
             }, 300);
         };
 
-        // --- AUTH & SAVE SYSTEM ---
+        // --- AUTH & DATA ---
         function loadData() {
-            if(localStorage.getItem('livenjet_omega_v1')) {
-                let d = JSON.parse(localStorage.getItem('livenjet_omega_v1'));
-                balance=d.b; ljnCrypto=d.c; userName=d.u; agents=d.a; ventures=d.v; transactions=d.t; ownedAssets=d.o; influence=d.i; singularity=d.s; inventory=d.inv; infra=d.inf; legacyPoints=d.lp || 0;
+            if(localStorage.getItem('livenjet_master_v12')) {
+                let d = JSON.parse(localStorage.getItem('livenjet_master_v12'));
+                balance=d.b; ljnCrypto=d.c; userName=d.u; agents=d.a; ventures=d.v; transactions=d.t; ownedAssets=d.o; influence=d.i; singularity=d.s; inventory=d.inv; infra=d.inf;
             }
             renderUI();
         }
         function saveData() {
-            let data = { b:balance, c:ljnCrypto, u:userName, a:agents, v:ventures, t:transactions, o:ownedAssets, i:influence, s:singularity, inv:inventory, inf:infra, lp:legacyPoints };
-            localStorage.setItem('livenjet_omega_v1', JSON.stringify(data));
+            let data = { b:balance, c:ljnCrypto, u:userName, a:agents, v:ventures, t:transactions, o:ownedAssets, i:influence, s:singularity, inv:inventory, inf:infra };
+            localStorage.setItem('livenjet_master_v12', JSON.stringify(data));
         }
-        function hardReset() { if(confirm("FULL WIPE?")) { localStorage.removeItem('livenjet_omega_v1'); location.reload(); } }
         function exportData() {
-            document.getElementById('export-text').innerText = btoa(JSON.stringify(localStorage.getItem('livenjet_omega_v1')));
+            document.getElementById('export-text').innerText = btoa(JSON.stringify(localStorage.getItem('livenjet_master_v12')));
             toggleModal('transfer-modal');
         }
         function importData() {
             try {
                 let d = JSON.parse(atob(document.getElementById('import-code').value));
                 let p = JSON.parse(d);
-                balance=p.b; ljnCrypto=p.c; userName=p.u; agents=p.a; ventures=p.v; transactions=p.t; ownedAssets=p.o; influence=p.i; singularity=p.s; inventory=p.inv; infra=p.inf; legacyPoints=p.lp||0;
+                balance=p.b; ljnCrypto=p.c; userName=p.u; agents=p.a; ventures=p.v; transactions=p.t; ownedAssets=p.o; influence=p.i; singularity=p.s; inventory=p.inv; infra=p.inf;
                 saveData(); renderUI(); msg("RESTORED"); toggleModal('settings-overlay');
             } catch(e) { msg("INVALID CODE"); }
         }
+        function hardReset() { if(confirm("WIPE DATA?")) { localStorage.removeItem('livenjet_master_v12'); location.reload(); } }
 
-        // --- PIN SECURITY ---
+        // --- PIN PAD ---
         function enterPin(n) { if(inputPin.length<4){ inputPin+=n; document.getElementById('pin-display').innerText=inputPin.padEnd(4,'*').replace(/\d/g,'*'); sfx('click'); } }
         function clearPin() { inputPin=""; document.getElementById('pin-display').innerText="****"; sfx('click'); }
         function checkPin() {
@@ -330,7 +353,7 @@
                     setTimeout(()=>{document.getElementById('app-interface').style.opacity=1;},100);
                 },500);
             } else {
-                sfx('error'); document.getElementById('auth-status').innerText="ACCESS DENIED"; document.getElementById('auth-status').style.color="var(--red)";
+                sfx('error'); document.getElementById('auth-status').innerText="INVALID PIN"; document.getElementById('auth-status').style.color="red";
                 inputPin=""; document.getElementById('pin-display').innerText="****";
             }
         }
@@ -342,18 +365,23 @@
             }
         });
 
-        // --- ASCENSION (PRESTIGE) ---
-        function checkAscension() {
-            if(balance >= 1000000000) { // 1 Billion
-                const core = document.querySelector('.neural-core');
-                core.style.background = "radial-gradient(circle, var(--omega) 0%, transparent 60%)";
-                core.style.animationDuration = "0.5s";
+        // --- CHART ENGINE ---
+        let chartData = Array(50).fill(100);
+        function drawChart() {
+            const canvas = document.getElementById('priceChart');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.parentElement.offsetWidth;
+            const h = canvas.height = canvas.parentElement.offsetHeight;
+            chartData.shift(); chartData.push(chartData[chartData.length-1] + (Math.random()-0.5)*5);
+            ctx.clearRect(0,0,w,h); ctx.beginPath();
+            for(let i=0; i<chartData.length; i++) {
+                let x = (i / (chartData.length-1)) * w;
+                let y = h - ((chartData[i] - 50) / 100) * h;
+                if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
-        }
-        function confirmAscend() {
-            legacyPoints += Math.floor(balance / 1000000000);
-            balance = 50000; agents=[]; ventures=[]; ownedAssets={}; influence=0; singularity=true;
-            saveData(); location.reload();
+            ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.fillStyle = 'rgba(0,255,0,0.1)'; ctx.fill();
+            setTimeout(() => requestAnimationFrame(drawChart), 100);
         }
 
         // --- CORE UI ---
@@ -366,18 +394,11 @@
             document.getElementById('influence-score').innerText = "INF: "+influence+"%";
             document.getElementById('ljn-bal').innerText = ljnCrypto.toFixed(2);
             
-            if(legacyPoints > 0) {
-                document.getElementById('lp-score').style.display = 'inline';
-                document.getElementById('lp-score').innerText = "LP: " + legacyPoints;
-                document.getElementById('device-frame').classList.add('omega');
-                document.getElementById('legacy-badge').style.display = 'block';
-            }
-
             const l = document.getElementById('ledger-list'); l.innerHTML="";
-            if(transactions.length===0) l.innerHTML="<div style='color:#444; font-size:10px; margin-top:10px;'>NO DATA</div>";
+            if(transactions.length===0) l.innerHTML="<div style='color:#444; font-size:10px;'>NO DATA</div>";
             else transactions.slice(0,5).forEach(t=>{ l.innerHTML+=`<div class="tx-row"><span>${t.desc}</span><span style="color:${t.amt>0?'#0f0':'#f44'}">${t.amt>0?'+':''}₦${Math.abs(t.amt).toLocaleString()}</span></div>`; });
 
-            updateAgentList(); updateVentureUI(); checkAscension();
+            updateAgentList(); updateVentureUI();
             if(singularity) document.getElementById('device-frame').classList.add('singularity');
         }
 
@@ -389,74 +410,84 @@
             sfx('click');
         }
 
-        // --- FEATURES ---
-        function pay(amt, desc) { if(balance>=amt) { balance-=amt; transactions.unshift({desc:desc, amt:-amt}); saveData(); renderUI(); sfx('success'); } else { msg("INSUFFICIENT FUNDS"); sfx('error'); } }
-        function startMining() { const b = document.getElementById('mine-btn'); b.innerText="..."; setTimeout(()=>{ ljnCrypto+=0.5 * (legacyPoints+1); b.innerText="MINE"; saveData(); renderUI(); msg("MINED LJN"); sfx('success'); }, 1000); }
+        // --- GAME FEATURES ---
+        function pay(amt, desc) {
+            if(balance>=amt) { balance-=amt; transactions.unshift({desc:desc, amt:-amt}); saveData(); renderUI(); sfx('success'); } 
+            else { msg("FUNDS?"); sfx('error'); }
+        }
+        function startMining() {
+            const b = document.getElementById('mine-btn'); b.innerText="...";
+            setTimeout(()=>{ ljnCrypto+=0.5; b.innerText="MINE"; saveData(); renderUI(); msg("MINED 0.5 LJN"); sfx('success'); }, 1000);
+        }
         
-        function createBusiness() { if(balance>=100000) { balance-=100000; ventures.push({name:"STARTUP", rev:0, prog:0, lvl:1, auto:false}); saveData(); renderUI(); toggleModal('ventures-overlay'); sfx('success'); } else msg("NEED ₦100k"); }
+        function createBusiness() {
+            if(balance>=100000) { balance-=100000; ventures.push({name:"STARTUP", rev:0, prog:0, lvl:1, auto:false}); saveData(); renderUI(); toggleModal('ventures-overlay'); sfx('success'); } 
+            else { msg("NEED ₦100k"); sfx('error'); }
+        }
         function updateVentureUI() {
             const c = document.getElementById('active-ventures'); c.innerHTML="";
-            if(ventures.length===0) c.innerHTML="<p style='color:#666; font-size:10px;'>NO VENTURES ACTIVE</p>";
+            if(ventures.length===0) c.innerHTML="<p style='color:#666; font-size:10px;'>NONE</p>";
             ventures.forEach((v,i)=>{
-                let autoBtn = v.auto ? '<span class="auto-badge">AI</span>' : `<button class="btn" style="padding:5px; margin-left:5px;" onclick="buyAuto(${i})">AI (₦500k)</button>`;
+                let autoBtn = v.auto ? '<span style="font-size:9px; background:var(--ice); color:#000; padding:2px 5px; border-radius:4px;">AUTO</span>' : `<button class="btn" style="padding:5px; margin-left:5px;" onclick="buyAuto(${i})">AI (₦500k)</button>`;
                 c.innerHTML+=`<div class="venture-card"><div><span style="color:#fff;">${v.name}</span> <span style="color:#0f0;">₦${v.rev.toLocaleString()}</span> ${autoBtn}</div><div class="venture-bar-bg"><div class="venture-bar" id="bar-${i}" style="width:${v.prog}%"></div></div><button class="btn" style="padding:5px;" onclick="collect(${i})">COLLECT</button></div>`;
             });
         }
         function collect(i) { if(ventures[i].rev > 0) { balance+=ventures[i].rev; ventures[i].rev=0; saveData(); renderUI(); sfx('success'); } }
-        function buyAuto(i) { if(balance>=500000) { balance-=500000; ventures[i].auto=true; saveData(); renderUI(); msg("AI INSTALLED"); sfx('success'); } else msg("NEED ₦500k"); }
+        function buyAuto(i) { if(balance>=500000) { balance-=500000; ventures[i].auto=true; saveData(); renderUI(); msg("INSTALLED"); sfx('success'); } else msg("NEED ₦500k"); }
 
         function deployAgent() { let c = document.getElementById('agent-city').value; if(balance>=50000) { balance-=50000; agents.push({city:c, status:'active'}); influence+=5; saveData(); renderUI(); toggleModal('agent-overlay'); sfx('success'); } else msg("FUNDS?"); }
-        function updateAgentList() { const l = document.getElementById('agent-display'); l.innerHTML=""; if(agents.length===0) l.innerHTML="<div style='color:#666; font-size:10px; text-align:center;'>NO AGENTS DEPLOYED</div>"; else agents.forEach(a=>{ let s=a.status==='hostile'?'color:red':'color:#0f0'; l.innerHTML+=`<div class="agent-item"><span>${a.city}</span><span style="${s}">${a.status.toUpperCase()}</span></div>`; }); }
+        function updateAgentList() { const l = document.getElementById('agent-display'); l.innerHTML=""; if(agents.length===0) l.innerHTML="<div style='color:#666; font-size:10px; text-align:center;'>NO AGENTS</div>"; else agents.forEach(a=>{ let s=a.status==='hostile'?'color:red':'color:#0f0'; l.innerHTML+=`<div class="agent-item ${a.status==='hostile'?'hostile':''}"><span>${a.city}</span><span style="${s}">${a.status.toUpperCase()}</span></div>`; }); }
         
-        function openAssets() { toggleModal('assets-overlay'); const l = document.getElementById('asset-list'); l.innerHTML=""; [{id:'island',n:'ISLAND',c:100000000},{id:'jet',n:'JET',c:50000000}].forEach(a=>{ let btn=ownedAssets[a.id]?"<span style='color:#0f0; font-size:10px;'>OWNED</span>":`<button class="btn" onclick="buyAsset('${a.id}',${a.c})">BUY</button>`; l.innerHTML+=`<div class="asset-item"><div style="font-size:24px;">🏛️</div><div class="asset-name">${a.n}</div><div class="asset-cost">₦${(a.c/1000000).toFixed(0)}M</div>${btn}</div>`; }); }
-        function buyAsset(id,c) { if(balance>=c){balance-=c; ownedAssets[id]=true; influence+=20; saveData(); renderUI(); openAssets(); sfx('success');} else msg("INSUFFICIENT FUNDS"); }
-        function buyInfra(t,c){ if(balance>=c){balance-=c; infra[t]++; saveData(); renderUI(); msg("ACQUIRED "+t.toUpperCase()); sfx('success');} else msg("INSUFFICIENT FUNDS"); }
+        function openAssets() { toggleModal('assets-overlay'); const l = document.getElementById('asset-list'); l.innerHTML=""; [{id:'island',n:'ISLAND',c:100000000},{id:'jet',n:'JET',c:50000000}].forEach(a=>{ let btn=ownedAssets[a.id]?"<span style='color:#0f0; font-size:10px;'>OWNED</span>":`<button class="btn" onclick="buyAsset('${a.id}',${a.c})">BUY</button>`; l.innerHTML+=`<div class="asset-item"><div style="font-size:20px;">🏛️</div><div class="asset-name">${a.n}</div><div class="asset-cost">₦${(a.c/1000000).toFixed(0)}M</div>${btn}</div>`; }); }
+        function buyAsset(id,c) { if(balance>=c){balance-=c; ownedAssets[id]=true; influence+=20; saveData(); renderUI(); openAssets(); sfx('success');} else msg("FUNDS?"); }
+        function buyInfra(t,c){ if(balance>=c){balance-=c; infra[t]++; saveData(); renderUI(); msg("ACQUIRED "+t.toUpperCase()); sfx('success');} else msg("FUNDS?"); }
 
-        // --- GLOBAL LOOPS ---
+        // --- LOOPS & ALERTS ---
         setInterval(()=>{
-            let mult = 1 + legacyPoints; // Legacy Multiplier
             ventures.forEach((v,i)=>{
                 if(v.prog < 100) { v.prog+=10; const b=document.getElementById(`bar-${i}`); if(b) b.style.width=v.prog+"%"; }
-                else { v.rev += 2000*v.lvl*mult; v.prog=0; if(v.auto) { balance+=v.rev; v.rev=0; } updateVentureUI(); }
+                else { v.rev += 2000*v.lvl; v.prog=0; if(v.auto) { balance+=v.rev; v.rev=0; } updateVentureUI(); }
             });
-            if(agents.length>0) { balance+=agents.length*100*mult; renderUI(); }
+            if(agents.length>0) { 
+                balance+=agents.length*100; renderUI(); 
+                if(Math.random()>0.95) { 
+                    let t = Math.floor(Math.random()*agents.length);
+                    if(agents[t].status==='active') { agents[t].status = 'hostile'; updateAgentList(); msg("ATTACK DETECTED"); sfx('error'); }
+                }
+            }
             if(Math.random()>0.98 && gridHealth>0) triggerBlackout();
         }, 1000);
 
-        // --- EVENTS ---
-        function triggerBlackout(){ gridHealth=0; document.getElementById('grid-text').innerText="FAILURE"; document.getElementById('grid-text').classList.add('grid-fail'); document.getElementById('inject-btn').style.display="block"; sfx('error'); speak("Grid Failure."); }
-        function injectPower(){ gridHealth+=20; if(gridHealth>=100){ document.getElementById('grid-text').innerText="STABLE"; document.getElementById('grid-text').classList.remove('grid-fail'); document.getElementById('inject-btn').style.display="none"; balance+=150000; msg("GRID RESTORED"); saveData(); renderUI(); sfx('success'); speak("Online."); } }
-        function chargeFirewall(){ defensePower+=20; document.getElementById('defend-bar').style.width=defensePower+"%"; if(defensePower>=100){ document.getElementById('breach-overlay').style.display='none'; defensePower=0; msg("THREAT ELIMINATED"); sfx('success'); } }
-        
-        // --- CHART ---
-        let chartData = Array(50).fill(100);
-        function drawChart() {
-            const canvas = document.getElementById('priceChart');
-            const ctx = canvas.getContext('2d');
-            const w = canvas.width = canvas.parentElement.offsetWidth;
-            const h = canvas.height = canvas.parentElement.offsetHeight;
-            chartData.shift(); chartData.push(chartData[chartData.length-1] + (Math.random()-0.5)*5);
-            ctx.clearRect(0,0,w,h); ctx.beginPath();
-            for(let i=0; i<chartData.length; i++) { let x = (i/(chartData.length-1))*w; let y = h-((chartData[i]-50)/100)*h; if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
-            ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 2; ctx.stroke();
-            ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.fillStyle = 'rgba(0,255,0,0.1)'; ctx.fill();
-            setTimeout(() => requestAnimationFrame(drawChart), 100);
+        function triggerBlackout(){ 
+            gridHealth=0; 
+            document.getElementById('grid-text').innerText="FAILURE"; 
+            document.getElementById('grid-text').classList.add('grid-fail'); 
+            document.getElementById('grid-monitor-box').classList.add('critical'); // ADDED RED BORDER/WAVE
+            document.getElementById('inject-btn').style.display="block"; 
+            sfx('error'); speak("Grid Failure."); 
         }
-
+        function injectPower(){ 
+            gridHealth+=20; 
+            if(gridHealth>=100){ 
+                document.getElementById('grid-text').innerText="STABLE"; 
+                document.getElementById('grid-text').classList.remove('grid-fail'); 
+                document.getElementById('grid-monitor-box').classList.remove('critical'); // REMOVE RED
+                document.getElementById('inject-btn').style.display="none"; 
+                balance+=150000; msg("RESTORED"); saveData(); renderUI(); sfx('success'); 
+            } 
+        }
+        function chargeFirewall(){ defensePower+=20; document.getElementById('defend-bar').style.width=defensePower+"%"; if(defensePower>=100){ document.getElementById('breach-overlay').style.display='none'; defensePower=0; agents.forEach(a=>a.status='active'); updateAgentList(); msg("SECURED"); sfx('success'); } }
+        
         // --- UTILS ---
         function toggleModal(id){ sfx('click'); const e=document.getElementById(id); e.style.display=(e.style.display==='flex')?'none':'flex'; }
         function msg(t){ const a=document.getElementById('ai-msg'); a.innerText=t; a.style.color="#fff"; setTimeout(()=>{a.style.color="#888"},2000); }
         function toggleCurrency(){ currency=currency==="NGN"?"USD":"NGN"; renderUI(); sfx('click'); }
         function saveSettings(){ userName=document.getElementById('set-name').value; saveData(); renderUI(); toggleModal('settings-overlay'); }
         function processTransfer(){ pay(document.getElementById('send-amt').value, 'Transfer'); toggleModal('send-overlay'); }
-        function handleCoreClick(){ 
-            godModeCount++; 
-            if(balance >= 1000000000) toggleModal('ascend-modal'); // Trigger Ascension
-            else if(godModeCount===5){ balance+=10000000; renderUI(); msg("GOD MODE ENABLED"); sfx('success'); godModeCount=0; } 
-        }
+        function handleCoreClick(){ godModeCount++; if(godModeCount===5){ balance+=10000000; renderUI(); msg("GOD MODE"); sfx('success'); godModeCount=0; } }
         function openMap(){ toggleModal('map-overlay'); document.getElementById('nexus-map').innerHTML="<div class='nexus-grid'></div>"; agents.forEach(a=>{document.getElementById('nexus-map').innerHTML+=`<div class='map-node' style='top:${Math.random()*80+10}%; left:${Math.random()*80+10}%;'></div>`}); }
         function endCall(){document.getElementById('call-overlay').style.display='none'; sfx('click');}
-        function answerCall(){document.getElementById('call-overlay').style.display='none';speak("Funds secured.");msg("ENCRYPTED MSG RECEIVED"); sfx('success');}
+        function answerCall(){document.getElementById('call-overlay').style.display='none';speak("Funds secured.");msg("ENCRYPTED MSG"); sfx('success');}
         function sendMsg(){ const i=document.getElementById('user-input'); if(i.value){ document.getElementById('chat-box').innerHTML+=`<div class="msg msg-user">${i.value}</div><div class="msg msg-ai">Command Received.</div>`; i.value=""; sfx('click'); } }
 
         setInterval(()=>{document.getElementById('clock').innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})},1000);
